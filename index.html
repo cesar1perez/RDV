@@ -28,7 +28,7 @@ body[data-accent="cyan"]{--accent:var(--cyan);--accent2:var(--cyan2)}
 .mono{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}
 .display{font-family:'Archivo',sans-serif}
 a{color:inherit}
- 
+
 /* topbar */
 .topbar{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:linear-gradient(180deg,rgba(7,20,46,.94),rgba(7,20,46,.7));border-bottom:1px solid var(--line)}
 .topbar-in{max-width:1320px;margin:0 auto;padding:12px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
@@ -47,13 +47,13 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .icon-btn svg{width:18px;height:18px}
 .icon-btn.spin svg{animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
- 
+
 .crumbs{max-width:1320px;margin:0 auto;padding:14px 22px 0;display:flex;align-items:center;gap:8px;font-size:13px;flex-wrap:wrap}
 .crumb{color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:6px;transition:.15s;padding:4px 2px}
 .crumb:hover{color:var(--txt)}
 .crumb.cur{color:var(--accent);font-weight:700;cursor:default}
 .crumb-sep{color:var(--muted2)}
- 
+
 .wrap{max-width:1320px;margin:0 auto;padding:20px 22px 90px}
 .screen{display:none;animation:fadeUp .4s cubic-bezier(.22,.9,.3,1) both}
 .screen.active{display:block}
@@ -64,7 +64,7 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .sub{color:var(--muted);font-size:14.5px;margin-top:8px;max-width:760px}
 .sub b{color:var(--accent)}
 .sec-head{margin-bottom:22px}
- 
+
 /* home */
 .div-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:20px;margin-top:26px}
 .div-card{position:relative;border-radius:var(--radius);padding:28px;cursor:pointer;overflow:hidden;border:1px solid var(--line);background:linear-gradient(160deg,var(--panel),var(--bg2));box-shadow:var(--shadow);transition:.35s cubic-bezier(.22,.9,.3,1)}
@@ -82,7 +82,7 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .div-cta{margin-top:22px;display:flex;align-items:center;gap:8px;font-weight:800;font-size:14px;color:var(--c)}
 .div-cta svg{width:18px;height:18px;transition:.3s}
 .div-card:hover .div-cta svg{transform:translateX(5px)}
- 
+
 /* botones secundarios */
 .btn{display:inline-flex;align-items:center;gap:9px;background:var(--panel);border:1px solid var(--line2);color:var(--txt);font-weight:700;font-size:13.5px;padding:11px 17px;border-radius:11px;cursor:pointer;transition:.2s;font-family:'Manrope'}
 .btn:hover{border-color:var(--accent);transform:translateY(-2px)}
@@ -93,13 +93,13 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .back-btn svg{width:16px;height:16px}
 .head-row{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:22px}
 .head-row .sec-head{margin-bottom:0;flex:1;min-width:240px}
- 
+
 /* pace banner */
 .pace{display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,.03);border:1px solid var(--line2);border-radius:11px;padding:9px 14px;font-size:12.5px;color:var(--muted);margin-top:14px}
 .pace b{font-family:'IBM Plex Mono';color:var(--accent);font-size:15px}
 .pace .pbar{width:90px;height:6px;border-radius:6px;background:rgba(255,255,255,.08);position:relative;overflow:hidden}
 .pace .pbar>i{position:absolute;inset:0 auto 0 0;background:var(--accent);border-radius:6px}
- 
+
 /* línea compacta reutilizable */
 .ln-list{display:flex;flex-direction:column}
 .ln-row{display:grid;grid-template-columns:104px minmax(96px,1fr) 1.4fr 52px;gap:11px;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.045);grid-template-areas:"nm or bar pc"}
@@ -120,7 +120,7 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .low>i{background:linear-gradient(90deg,#d24f4f,var(--low))}.t-low{color:var(--low)}
 .na>i{background:var(--line2)}.t-na{color:var(--muted2)}
 .so-flag{font-size:8.5px;font-weight:800;color:var(--cyan);letter-spacing:.4px;text-transform:uppercase}
- 
+
 /* vendedores */
 .vend-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:18px}
 .vend-card{border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(165deg,var(--panel),var(--bg2));padding:20px;cursor:pointer;transition:.28s cubic-bezier(.22,.9,.3,1)}
@@ -146,7 +146,7 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
   .vend-card .ln-pc{font-size:12px}
   .vend-card .ln-bar .bar{height:5px}
 }
- 
+
 /* clientes toolbar */
 .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap}
 .search{flex:1;min-width:200px;position:relative}
@@ -154,7 +154,7 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .search input:focus{outline:none;border-color:var(--accent)}
 .search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted2)}
 .count-pill{font-size:12px;color:var(--muted);background:var(--panel);border:1px solid var(--line);padding:10px 13px;border-radius:11px;font-weight:600;white-space:nowrap}
- 
+
 /* tarjeta cliente (vista general) */
 .cli-list{display:flex;flex-direction:column;gap:20px}
 .cli-card{border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(165deg,var(--panel),var(--bg2));padding:17px 19px 17px 54px;cursor:pointer;transition:.2s;position:relative;overflow:hidden;box-shadow:0 2px 0 rgba(0,0,0,.18)}
@@ -184,7 +184,7 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .cli-ring{text-align:right;padding-left:4px}
 .cli-ring .big{font-family:'IBM Plex Mono';font-weight:700;font-size:25px;letter-spacing:-1px;line-height:1}
 .cli-ring .lbl{font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin-top:3px}
- 
+
 /* franja contable */
 .acct-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
 .acct{background:rgba(255,255,255,.025);border:1px solid var(--line);border-radius:12px;padding:13px 14px}
@@ -206,6 +206,14 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .cco-row.ger .cco-lbl{color:var(--cyan)}
 .cco-row.ger.sininfo{border-left-color:var(--line2);background:rgba(255,255,255,.02)}
 .cco-row.ger.sininfo .cco-lbl{color:var(--muted)}
+.cco-edit{display:flex;flex-direction:column;gap:8px}
+.cco-ta{width:100%;background:var(--bg);border:1px solid var(--line2);border-radius:9px;color:var(--txt);font-family:'Manrope';font-size:14px;padding:10px 12px;resize:vertical;min-height:46px;line-height:1.45;transition:.2s}
+.cco-ta:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,210,30,.12)}
+.cco-save{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:#07142e;border:none;border-radius:9px;font-family:'Manrope';font-weight:800;font-size:12.5px;padding:8px 16px;cursor:pointer;transition:.18s}
+.cco-save:hover{filter:brightness(1.06)}
+.cco-save:disabled{opacity:.7;cursor:default}
+.cco-save.ok{background:var(--good);color:#06210f}
+.cco-row.edit{align-items:stretch}
 @media(max-width:560px){
   .cco-row{grid-template-columns:1fr;gap:3px;padding:8px 11px}
   .cco-txt{font-size:14px}
@@ -354,7 +362,7 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
   body.print-ficha #fichaPrint .rd-tblwrap{overflow:visible!important}
   body.print-ficha .ficha-bar,body.print-ficha .topbar,body.print-ficha .crumbs,body.print-ficha .footnote{display:none!important}
 }
- 
+
 /* vista por línea (ranking) */
 .sec-divider{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:6px 0 4px;padding:14px 4px 10px;border-bottom:1px solid var(--line)}
 .sec-divider b{font-family:'Archivo';font-weight:800;font-size:15px;color:var(--txt)}
@@ -372,7 +380,7 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .lr-coment{font-size:12px;line-height:1.5;color:var(--txt);background:rgba(255,255,255,.03);border-radius:9px;padding:9px 11px;max-height:120px;overflow:auto}
 .lr-coment.empty{color:var(--muted2);font-style:italic;background:none}
 .lr-coment .cm-lbl{font-weight:800;color:var(--accent);font-size:9.5px;text-transform:uppercase;letter-spacing:.4px}
- 
+
 /* ficha */
 .ficha-head{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;margin-bottom:18px}
 .card{border:1px solid var(--line);border-left:4px solid var(--sc,var(--line2));border-radius:var(--radius);background:linear-gradient(165deg,var(--panel),var(--bg2));padding:21px;box-shadow:var(--shadow)}
@@ -415,7 +423,7 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .coment{font-size:13.5px;line-height:1.6;background:rgba(255,255,255,.025);border-left:3px solid var(--accent);padding:13px 15px;border-radius:0 10px 10px 0}
 .coment.empty{color:var(--muted2);font-style:italic;border-color:var(--line2)}
 .coment.ger{border-left-color:var(--cyan);background:rgba(34,211,238,.06)}
- 
+
 /* reportes */
 .rep-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px}
 .rep-bar .btn.act{border-color:var(--accent);background:rgba(255,210,30,.10)}
@@ -475,7 +483,7 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .cc-money{display:flex;justify-content:space-between;gap:6px;font-size:10px;color:var(--muted2);border-top:1px solid var(--line);padding-top:8px}
 .cc-money b{font-family:'IBM Plex Mono';font-weight:700}
 .cc-money .hot{color:var(--accent)} .cc-money .pos{color:var(--good)} .cc-money .neg{color:var(--low)}
- 
+
 /* estados */
 .state{text-align:center;padding:70px 20px;color:var(--muted)}
 .state .ring{width:52px;height:52px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--accent);margin:0 auto 20px;animation:spin .9s linear infinite}
@@ -484,7 +492,7 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .err-detail{font-family:'IBM Plex Mono';font-size:11.5px;color:var(--low);margin-top:14px;word-break:break-all;background:rgba(255,93,98,.08);padding:10px;border-radius:8px;text-align:left}
 .empty-state{text-align:center;padding:50px 20px;color:var(--muted2)}
 .footnote{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);font-size:11px;color:var(--muted2);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
- 
+
 /* ===== PORTADA / LOGIN ===== */
 .welcome{max-width:920px;margin:10px auto 0;text-align:center}
 .wl-mark{width:84px;height:84px;border-radius:22px;margin:0 auto 22px;display:grid;place-items:center;font-family:'Archivo';font-weight:900;font-size:30px;color:#07142e;background:linear-gradient(135deg,var(--amber),var(--amber2));box-shadow:0 16px 40px -14px var(--amber)}
@@ -521,7 +529,7 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .lock-tag{font-size:11px;font-weight:700;color:var(--muted);border:1px solid var(--line2);border-radius:20px;padding:6px 12px;display:flex;align-items:center;gap:7px}
 .lock-tag svg{width:13px;height:13px;color:var(--accent)}
 @media(max-width:560px){.wl-access{grid-template-columns:1fr}}
- 
+
 /* comparativo */
 .cmp-tbl{width:100%;border-collapse:collapse;font-size:12.5px;min-width:720px}
 .cmp-tbl th{font-size:9.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted2);padding:9px 10px;border-bottom:1.5px solid var(--line2);text-align:right;font-weight:800;white-space:nowrap}
@@ -578,7 +586,7 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 </style>
 </head>
 <body data-accent="amber">
- 
+
 <header class="topbar">
   <div class="topbar-in">
     <div class="brand">
@@ -598,9 +606,9 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
     </div>
   </div>
 </header>
- 
+
 <nav class="crumbs" id="crumbs"></nav>
- 
+
 <main class="wrap">
   <!-- BIENVENIDA / LOGIN -->
   <section class="screen active" id="screen-welcome">
@@ -629,7 +637,7 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
       </div>
     </div>
   </section>
- 
+
   <!-- HOME -->
   <section class="screen" id="screen-home">
     <div class="sec-head">
@@ -639,7 +647,7 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
     </div>
     <div class="div-grid" id="divGrid"></div>
   </section>
- 
+
   <!-- VENDEDORES -->
   <section class="screen" id="screen-vend">
     <button class="back-btn" data-go="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Organizaciones</button>
@@ -653,7 +661,7 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
     </div>
     <div class="vend-grid" id="vendGrid"></div>
   </section>
- 
+
   <!-- CLIENTES -->
   <section class="screen" id="screen-cli">
     <button class="back-btn" data-go="vend"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Vendedores</button>
@@ -686,7 +694,7 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
     </div>
     <div class="cli-list" id="cliGrid"></div>
   </section>
- 
+
   <!-- FICHA -->
   <section class="screen" id="screen-ficha">
     <div class="ficha-bar">
@@ -695,7 +703,7 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
     </div>
     <div id="fichaPrint"><div id="fichaBody"></div></div>
   </section>
- 
+
   <!-- REPORTES -->
   <section class="screen" id="screen-rep">
     <button class="back-btn" data-go="vend"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Vendedores</button>
@@ -707,13 +715,13 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
     <div class="rep-bar" id="repBar"></div>
     <div id="repBody"></div>
   </section>
- 
+
   <div class="footnote">
     <span>Datos en vivo desde Google Sheets · actualización automática</span>
     <span>Uso interno y confidencial · RDV</span>
   </div>
 </main>
- 
+
 <div class="modal-bg" id="authModal">
   <div class="modal">
     <div class="m-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
@@ -724,34 +732,34 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
     <div class="modal-btns"><button class="btn ghost" id="authCancel">Cancelar</button><button class="btn" id="authOk">Entrar</button></div>
   </div>
 </div>
- 
+
 <script>
 /* ============================================================
-   1. CONFIGURACIÓN  (edita aquí nombres / vendedores)
+   1. CONFIGURACI\u00d3N  (edita aqu\u00ed nombres / vendedores)
    ============================================================ */
 const CONFIG = {
-  // Una sola hoja concentra TODOS los clientes; el VENDEDOR define la organización.
+  // Una sola hoja concentra TODOS los clientes; el VENDEDOR define la organizaci\u00f3n.
   source:'https://docs.google.com/spreadsheets/d/e/2PACX-1vSlsq_vV_-82cjZmYnnObTvHtEfjBUPhuzI1Q8oZY7s_2XK3SVjIgNdIIEqNkoPEjKpoBvFl64zaIiz/pub?gid=0&single=true&output=csv',
   orgs:[
     { id:'llanterama', label:'Llanterama Tulancingo', legal:'Llanterama Tulancingo S.A. de C.V.', sub:'Llantas y servicio', initial:'LL', accent:'amber',
       vendors:['Enrique R.','Carlos C.','Ruben L.','Miguel L'] },
-    { id:'autoelectrica', label:'Autoeléctrica Roma', legal:'Autoeléctrica Roma S.A. de C.V.', sub:'Baterías y eléctrico', initial:'AE', accent:'cyan',
+    { id:'autoelectrica', label:'Autoel\u00e9ctrica Roma', legal:'Autoel\u00e9ctrica Roma S.A. de C.V.', sub:'Bater\u00edas y el\u00e9ctrico', initial:'AE', accent:'cyan',
       vendors:['Celene S.','Colosio-Mayoreo','Oscar F.'] },
   ]
 };
- 
+
 const LINES = [
   {key:'PREM',label:'Premium',obj:'OBJ PREM',real:'REAL PREM'},
   {key:'AGM',label:'AGM',obj:'OBJ AGM',real:'REAL AGM'},
-  {key:'ESTANDAR',label:'Estándar',obj:'OBJ ESTANDAR',real:'REAL ESTANDAR'},
+  {key:'ESTANDAR',label:'Est\u00e1ndar',obj:'OBJ ESTANDAR',real:'REAL ESTANDAR'},
   {key:'TOTAL',label:'Total Acum.',obj:'OBJ TOTAL',real:'REAL TOTAL'},
   {key:'FILTRO',label:'Filtros',obj:'OBJ FILTRO',real:'REAL FILTRO'},
   {key:'LUB',label:'Lubricantes',obj:'OBJ LUB',real:'REAL LUB'},
-  {key:'MOTO',label:'Motobatería',obj:'OBJ MOTO',real:'REAL MOTO'},
+  {key:'MOTO',label:'Motobater\u00eda',obj:'OBJ MOTO',real:'REAL MOTO'},
   {key:'USADO',label:'Usados',obj:'OBJ USADO',real:'REAL USADOS'},
   {key:'AUTO',label:'Auto',obj:'OBJ AUTO',real:'REAL AUTO'},
   {key:'CTA',label:'Camioneta',obj:'OBJ CTA',real:'REAL CTA'},
-  {key:'CAMION',label:'Camión',obj:'OBJ CAMION',real:'REAL CAMION'},
+  {key:'CAMION',label:'Cami\u00f3n',obj:'OBJ CAMION',real:'REAL CAMION'},
   {key:'LLANTAS',label:'Total Llantas',obj:'OBJ LLANTAS',real:'REAL LLANTAS'},
   {key:'ALCALIN',label:'Alcalina',obj:'OBJ ALCALIN',real:'REAL ALCALIN'},
 ];
@@ -759,15 +767,15 @@ const HEADLINE_KEY='TOTAL';
 /* orden prioritario para la vista general: Total acum., Lubricantes, Motos, Total llantas, Filtros, Alcalina, luego el resto */
 const GEN_PRIORITY=['TOTAL','LUB','MOTO','LLANTAS','FILTRO','ALCALIN'];
 function orderedLines(){const pri=GEN_PRIORITY.map(k=>LINES.find(l=>l.key===k)).filter(Boolean);const rest=LINES.filter(l=>!GEN_PRIORITY.includes(l.key));return pri.concat(rest);}
-/* nivel de progreso según ritmo de días hábiles */
+/* nivel de progreso seg\u00fan ritmo de d\u00edas h\u00e1biles */
 function tier(pctN,pace){if(pctN==null)return 'na';const ref=(pace==null?100:pace);if(pctN>=ref)return 'good';if(pctN>=ref-15)return 'medio';return 'regular';}
-const TIER_INFO={good:{txt:'▲ Buen progreso',card:'aok',ring:'good'},medio:{txt:'◆ Medio',card:'medio',ring:'mid'},regular:{txt:'▼ Regular',card:'behind',ring:'low'},na:{txt:'',card:'',ring:'na'}};
+const TIER_INFO={good:{txt:'\u25b2 Buen progreso',card:'aok',ring:'good'},medio:{txt:'\u25c6 Medio',card:'medio',ring:'mid'},regular:{txt:'\u25bc Regular',card:'behind',ring:'low'},na:{txt:'',card:'',ring:'na'}};
 function zoneColor(z){z=(z||'').trim();if(!z)return '#6b82a8';let h=0;for(let i=0;i<z.length;i++)h=(h*31+z.charCodeAt(i))%360;return `hsl(${h} 72% 60%)`;}
-/* color distintivo por línea de producto */
+/* color distintivo por l\u00ednea de producto */
 const LINE_COLORS={TOTAL:'#ffd21e',LUB:'#3aa6ff',MOTO:'#a78bfa',LLANTAS:'#3fd18a',FILTRO:'#fb923c',ALCALIN:'#2dd4bf',PREM:'#f472b6',AGM:'#f59e0b',ESTANDAR:'#60a5fa',USADO:'#94a3b8',AUTO:'#34d399',CTA:'#e879f9',CAMION:'#22d3ee'};
 function lineColor(k){return LINE_COLORS[k]||'#6b82a8';}
- 
-/* ===== ACCESO (edita contraseñas aquí; no distinguen mayúsculas) ===== */
+
+/* ===== ACCESO (edita contrase\u00f1as aqu\u00ed; no distinguen may\u00fasculas) ===== */
 const DIRECTIVO_PASS='roma2026';
 const VENDOR_PASS={
   'Enrique R.':'rquique2026','Carlos C.':'carlitos2026','Ruben L.':'rleon2026','Miguel L':'lozadam2026',
@@ -779,9 +787,9 @@ function vendorPass(name){if(!_VPASS){_VPASS={};Object.keys(VENDOR_PASS).forEach
 let ROLE=null; const UNLOCKED=new Set();
 const APOYO=['FACHADA','EXHIBIDOR LTH','EXHIBIDOR LUB','EXHIBIDOR MOT','ACTIVACIONES','MINUTA CREDITO / DESCUENTO','MINUTA DE POP'];
 const DESCUENTOS=['LTH','AMERICA','PREMIUM (HI TEC)','AGM','LUBRICANTE / ACEITE','MOTOBATERIA','FILTROS LTH'];
-const DAYS=[['LUNES','Lun'],['MARTES','Mar'],['MIERCOLES','Mié'],['JUEVES','Jue'],['VIERNES','Vie'],['SABADO','Sáb'],['ESPORADICO','Esp']];
+const DAYS=[['LUNES','Lun'],['MARTES','Mar'],['MIERCOLES','Mi\u00e9'],['JUEVES','Jue'],['VIERNES','Vie'],['SABADO','S\u00e1b'],['ESPORADICO','Esp']];
 const MONTHS={ENERO:1,FEBRERO:2,MARZO:3,ABRIL:4,MAYO:5,JUNIO:6,JULIO:7,AGOSTO:8,SEPTIEMBRE:9,SETIEMBRE:9,OCTUBRE:10,NOVIEMBRE:11,DICIEMBRE:12};
- 
+
 /* ============================================================
    2. UTILIDADES
    ============================================================ */
@@ -792,20 +800,20 @@ function disp(v){v=(v==null?'':String(v)).trim();return v===''?SD:v;}
 function isEmpty(v){return (v==null?'':String(v)).trim()==='';}
 function parseNum(v){if(v==null)return null;let s=String(v).trim();if(s==='')return null;s=s.replace(/[$%]/g,'').replace(/\s/g,'').replace(/,/g,'');if(s===''||s==='-')return null;const n=parseFloat(s);return isNaN(n)?null:n;}
 function fmtNum(n){if(n==null||isNaN(n))return '';return (Math.round(n*100)/100).toLocaleString('es-MX',{maximumFractionDigits:2});}
-function acct(n){if(n==null||isNaN(n))return '—';const neg=n<0;const v=Math.abs(Math.round(n*100)/100).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});return neg?`($${v})`:`$${v}`;}
-function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function acct(n){if(n==null||isNaN(n))return '\u2014';const neg=n<0;const v=Math.abs(Math.round(n*100)/100).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});return neg?`($${v})`:`$${v}`;}
+function esc(s){return String(s==null?'':s).replace(/[\u0026\u003c\u003e\u0022\u0027]/g,c=>({'\u0026':'&amp;','\u003c':'&lt;','\u003e':'&gt;','\u0022':'&quot;','\u0027':'&#39;'}[c]));}
 function clampW(p){return p==null?0:Math.min(100,Math.max(3,p));}
-/* color por ritmo (pace): verde si alcanza lo esperado, ámbar si va cerca, rojo si va atrás */
+/* color por ritmo (pace): verde si alcanza lo esperado, \u00e1mbar si va cerca, rojo si va atr\u00e1s */
 function paceClass(pctN,pace){if(pctN==null)return 'na';const ref=(pace==null?100:pace);if(pctN>=ref)return 'good';if(pctN>=ref-15)return 'mid';return 'low';}
 function isBehind(pctN,pace){if(pctN==null)return false;const ref=(pace==null?100:pace);return pctN<ref;}
- 
-/* días hábiles (lunes a sábado; solo se excluyen domingos) */
+
+/* d\u00edas h\u00e1biles (lunes a s\u00e1bado; solo se excluyen domingos) */
 function daysInMonth(y,m){return new Date(y,m,0).getDate();}
 function workdays(y,m,from,to){let c=0;for(let d=from;d<=to;d++){const wd=new Date(y,m-1,d).getDay();if(wd!==0)c++;}return c;}
- 
+
 /* CSV */
 function parseCSV(text){const rows=[];let row=[],f='',i=0,q=false;while(i<text.length){const c=text[i];if(q){if(c==='"'){if(text[i+1]==='"'){f+='"';i+=2;continue;}q=false;i++;continue;}f+=c;i++;continue;}if(c==='"'){q=true;i++;continue;}if(c===','){row.push(f);f='';i++;continue;}if(c==='\r'){i++;continue;}if(c==='\n'){row.push(f);rows.push(row);row=[];f='';i++;continue;}f+=c;i++;}if(f!==''||row.length){row.push(f);rows.push(row);}return rows;}
- 
+
 /* ============================================================
    3. CARGA
    ============================================================ */
@@ -816,17 +824,29 @@ const RELAYS=[
   {label:'codetabs',make:u=>'https://api.codetabs.com/v1/proxy/?quest='+encodeURIComponent(u)},
   {label:'thingproxy',make:u=>'https://thingproxy.freeboard.io/fetch/'+u},
 ];
-function looksLikeCSV(t){if(!t)return false;const s=t.trim();if(/^<!doctype html|^<html|^\{|^</i.test(s))return false;if(!s.includes(','))return false;const h=s.slice(0,4000).toUpperCase();return h.includes('VENDEDOR')||h.includes('CLIENTE')||h.includes('MES');}
-function fetchOne(r,url,ms){return new Promise((res,rej)=>{const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),ms);fetch(r.make(url),{cache:'no-store',signal:ctrl.signal}).then(x=>x.ok?x.text():Promise.reject(new Error('HTTP '+x.status+' · '+r.label))).then(tx=>{clearTimeout(t);looksLikeCSV(tx)?res(tx):rej(new Error('no válida · '+r.label));}).catch(e=>{clearTimeout(t);rej(new Error(((e&&e.message)||e)+' · '+r.label));});});}
+function looksLikeCSV(t){if(!t)return false;const s=t.trim();const c0=s.charAt(0);if(c0==='\u003c'||c0==='{')return false;if(!s.includes(','))return false;const h=s.slice(0,4000).toUpperCase();return h.includes('VENDEDOR')||h.includes('CLIENTE')||h.includes('MES');}
+function fetchOne(r,url,ms){return new Promise((res,rej)=>{const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),ms);fetch(r.make(url),{cache:'no-store',signal:ctrl.signal}).then(x=>x.ok?x.text():Promise.reject(new Error('HTTP '+x.status+' \u00b7 '+r.label))).then(tx=>{clearTimeout(t);looksLikeCSV(tx)?res(tx):rej(new Error('no v\u00e1lida \u00b7 '+r.label));}).catch(e=>{clearTimeout(t);rej(new Error(((e&&e.message)||e)+' \u00b7 '+r.label));});});}
 async function fetchCSV(url){try{return await Promise.any(RELAYS.map(r=>fetchOne(r,url,18000)));}catch(agg){throw new Error((agg&&agg.errors)?agg.errors.map(e=>e.message).join('  |  '):String(agg));}}
- 
+
 let DB={H:null,rows:[]}, LOAD_ERR='';
+/* Modo Apps Script: si la p\u00e1gina corre dentro de Google Apps Script, lee/escribe la hoja directamente */
+const APPS = (typeof google!=='undefined' && !!(google.script && google.script.run));
+function gsRun(fn,arg){return new Promise((res,rej)=>{google.script.run.withSuccessHandler(res).withFailureHandler(rej)[fn](arg);});}
+/* ====== GUARDADO DE COMENTARIOS (cuando la pagina vive en GitHub) ======
+   Pega aqui la URL /exec de tu app web de Apps Script, entre las comillas: */
+const SAVE_URL = 'https://script.google.com/a/macros/grupollanterama.com/s/AKfycbw790UCZ5ZmEK_SH1TygxSIXKSqiPi91AMDmJKphPUUrga-qLQ8Bp2i4AYb3jWLYgBt/exec';
+function saveConfigured(){return APPS || (SAVE_URL && SAVE_URL.indexOf('http')===0);}
+async function doSave(payload){
+  if(APPS) return await gsRun('guardarComentario',payload);
+  const r=await fetch(SAVE_URL,{method:'POST',body:JSON.stringify(Object.assign({action:'guardar'},payload)),redirect:'follow'});
+  return await r.json();
+}
 function buildHeaderIndex(h){const m={};h.forEach((x,i)=>{const k=norm(x);if(!(k in m))m[k]=i;});return {arr:h,idx:n=>{const k=norm(n);return (k in m)?m[k]:-1;}};}
 function getCell(row,name,H){const i=H.idx(name);return (i>=0&&i<row.length)?String(row[i]).trim():'';}
 function getByIdx(row,i){return (i>=0&&i<row.length)?String(row[i]).trim():'';}
- 
+
 async function loadAll(){
-  const text=await fetchCSV(CONFIG.source);
+  const text = APPS ? await gsRun('getData') : await fetchCSV(CONFIG.source);
   const grid=parseCSV(text).filter(r=>r.some(c=>String(c).trim()!==''));
   const hasCell=(r,w)=>r.some(c=>norm(c)===w), hasLike=(r,w)=>r.some(c=>norm(c).includes(w));
   let hIdx=grid.findIndex(r=>hasCell(r,'VENDEDOR')&&(hasCell(r,'COD CLIENTE')||hasCell(r,'CLIENTE')));
@@ -834,16 +854,16 @@ async function loadAll(){
   if(hIdx<0)hIdx=0;
   const H=buildHeaderIndex(grid[hIdx]);
   let rows=grid.slice(hIdx+1);
-  // rellenar celdas combinadas (MES/AÑO/VENDEDOR vienen en blanco en filas de continuación)
-  const fillNames=['MES','AÑO','ANIO','ANO','VENDEDOR'];
+  // rellenar celdas combinadas (MES/A\u00d1O/VENDEDOR vienen en blanco en filas de continuaci\u00f3n)
+  const fillNames=['MES','A\u00d1O','ANIO','ANO','VENDEDOR'];
   const fill=fillNames.map(n=>H.idx(n)).filter((v,i,a)=>v>=0&&a.indexOf(v)===i);
   const last={};
   rows.forEach(r=>fill.forEach(i=>{const cur=String(r[i]==null?'':r[i]).trim();if(cur!=='')last[i]=r[i];else if(last[i]!==undefined)r[i]=last[i];}));
   rows=rows.filter(r=>getCell(r,'CLIENTE',H)!==''||getCell(r,'COD CLIENTE',H)!=='');
   DB={H,rows};
 }
- 
-/* ---- resolución de vendedor -> organización ---- */
+
+/* ---- resoluci\u00f3n de vendedor -> organizaci\u00f3n ---- */
 const VMAP={};
 CONFIG.orgs.forEach(o=>o.vendors.forEach((v,i)=>{VMAP[keyName(v)]={org:o.id,display:v,order:i};}));
 function resolveVendor(raw){
@@ -852,18 +872,18 @@ function resolveVendor(raw){
   for(const kk in VMAP){if(kk&&(k.includes(kk)||kk.includes(k)))return VMAP[kk];}
   return {org:CONFIG.orgs[0].id,display:(raw||'').trim()||'(Sin vendedor)',order:99,unmatched:true};
 }
- 
+
 /* ---- periodos ---- */
 let PERIODS=[];
 function periodRank(ano,mes){const a=parseInt(String(ano).replace(/\D/g,''))||0;let m=MONTHS[norm(mes)];if(m==null)m=parseInt(String(mes).replace(/\D/g,''))||0;return a*100+m;}
 function buildPeriods(){
   const seen=new Map();
-  DB.rows.forEach(r=>{const ano=getCell(r,'AÑO',DB.H)||getCell(r,'ANIO',DB.H)||getCell(r,'ANO',DB.H);const mes=getCell(r,'MES',DB.H);if(ano===''&&mes==='')return;const key=norm(ano)+'||'+norm(mes);if(!seen.has(key)){let m=MONTHS[norm(mes)]||parseInt(String(mes).replace(/\D/g,''))||0;let y=parseInt(String(ano).replace(/\D/g,''))||0;seen.set(key,{key,ano,mes,y,m,rank:periodRank(ano,mes),label:((mes||'—')+' '+(ano||'')).trim()});}});
+  DB.rows.forEach(r=>{const ano=getCell(r,'A\u00d1O',DB.H)||getCell(r,'ANIO',DB.H)||getCell(r,'ANO',DB.H);const mes=getCell(r,'MES',DB.H);if(ano===''&&mes==='')return;const key=norm(ano)+'||'+norm(mes);if(!seen.has(key)){let m=MONTHS[norm(mes)]||parseInt(String(mes).replace(/\D/g,''))||0;let y=parseInt(String(ano).replace(/\D/g,''))||0;seen.set(key,{key,ano,mes,y,m,rank:periodRank(ano,mes),label:((mes||'\u2014')+' '+(ano||'')).trim()});}});
   PERIODS=[...seen.values()].sort((a,b)=>b.rank-a.rank);
 }
 function currentPeriodObj(){return PERIODS.find(p=>p.key===STATE.period)||null;}
- 
-/* ---- corte / ritmo de días hábiles ---- */
+
+/* ---- corte / ritmo de d\u00edas h\u00e1biles ---- */
 let CUTOFF=new Date();
 function expectedPace(){
   const p=currentPeriodObj();
@@ -878,23 +898,23 @@ function expectedPace(){
 }
 function paceText(){
   const p=currentPeriodObj(); const pace=expectedPace();
-  if(pace==null)return `Periodo acumulado · sin proyección de días hábiles`;
+  if(pace==null)return `Periodo acumulado \u00b7 sin proyecci\u00f3n de d\u00edas h\u00e1biles`;
   const dim=daysInMonth(p.y,p.m), total=workdays(p.y,p.m,1,dim);
   const effDay=(CUTOFF>new Date(p.y,p.m-1,dim))?dim:(CUTOFF<new Date(p.y,p.m-1,1)?0:CUTOFF.getDate());
   const el=workdays(p.y,p.m,1,effDay);
-  return `Avance esperado al corte: <b>${Math.round(pace)}%</b> · ${el} de ${total} días hábiles de ${esc(p.label)}`;
+  return `Avance esperado al corte: <b>${Math.round(pace)}%</b> \u00b7 ${el} de ${total} d\u00edas h\u00e1biles de ${esc(p.label)}`;
 }
- 
+
 /* ============================================================
-   4. MODELO (registros, líneas)
+   4. MODELO (registros, l\u00edneas)
    ============================================================ */
 function clientGroups(orgId,periodKey){
   const H=DB.H; if(periodKey===undefined)periodKey=STATE.period;
   let rows=DB.rows.filter(r=>resolveVendor(getCell(r,'VENDEDOR',H)).org===orgId);
-  if(periodKey!=='ALL') rows=rows.filter(r=>(norm(getCell(r,'AÑO',H)||getCell(r,'ANIO',H)||getCell(r,'ANO',H))+'||'+norm(getCell(r,'MES',H)))===periodKey);
+  if(periodKey!=='ALL') rows=rows.filter(r=>(norm(getCell(r,'A\u00d1O',H)||getCell(r,'ANIO',H)||getCell(r,'ANO',H))+'||'+norm(getCell(r,'MES',H)))===periodKey);
   const g=new Map();
   rows.forEach(r=>{const code=getCell(r,'COD CLIENTE',H)||getCell(r,'CLIENTE',H)||JSON.stringify(r);if(!g.has(code))g.set(code,[]);g.get(code).push(r);});
-  return [...g.values()].map(arr=>{arr.sort((a,b)=>periodRank(getCell(a,'AÑO',H),getCell(a,'MES',H))-periodRank(getCell(b,'AÑO',H),getCell(b,'MES',H)));return makeRecord(arr,H);});
+  return [...g.values()].map(arr=>{arr.sort((a,b)=>periodRank(getCell(a,'A\u00d1O',H),getCell(a,'MES',H))-periodRank(getCell(b,'A\u00d1O',H),getCell(b,'MES',H)));return makeRecord(arr,H);});
 }
 function makeRecord(group,H){
   const single=group.length===1;
@@ -915,7 +935,7 @@ function lineData(rec,line){
   if(isEmpty(obj.lit)&&isEmpty(real.lit)&&isEmpty(pctLit))status='nodata';
   return {obj,real,pctLit,pctN,status};
 }
- 
+
 /* ============================================================
    5. RENDER
    ============================================================ */
@@ -930,19 +950,19 @@ function renderCrumbs(){
   if(STATE.screen==='rep')c.push({t:'Reportes',cur:true});
   if(STATE.vendor&&(STATE.screen==='cli'||STATE.screen==='ficha'))c.push({t:STATE.vendor,go:'cli'});
   if(STATE.screen==='ficha')c.push({t:'Ficha',cur:true});
-  document.getElementById('crumbs').innerHTML=c.map((x,i)=>(i>0?'<span class="crumb-sep">›</span>':'')+`<span class="crumb ${x.cur?'cur':''}" ${x.go?`data-go="${x.go}"`:''}${x.welcome?'data-welcome="1"':''}>${esc(x.t)}</span>`).join('');
+  document.getElementById('crumbs').innerHTML=c.map((x,i)=>(i>0?'<span class="crumb-sep">\u203a</span>':'')+`<span class="crumb ${x.cur?'cur':''}" ${x.go?`data-go="${x.go}"`:''}${x.welcome?'data-welcome="1"':''}>${esc(x.t)}</span>`).join('');
 }
-/* fila de línea compacta */
+/* fila de l\u00ednea compacta */
 function lnRow(name,objLit,realLit,pctN,status,pace,lc){
   lc=lc||'#6b82a8';
   const dot=`<span class="ln-dot" style="background:${lc}"></span>`;
-  if(status==='nodata') return `<div class="ln-row noobj" style="--lc:${lc}"><div class="ln-nm">${dot}${esc(name)}</div><div class="ln-or t-na">sin objetivo aún</div><div class="ln-bar"></div><div class="ln-pc t-na">—</div></div>`;
+  if(status==='nodata') return `<div class="ln-row noobj" style="--lc:${lc}"><div class="ln-nm">${dot}${esc(name)}</div><div class="ln-or t-na">sin objetivo a\u00fan</div><div class="ln-bar"></div><div class="ln-pc t-na">\u2014</div></div>`;
   if(status==='sinobj') return `<div class="ln-row so" style="--lc:${lc}"><div class="ln-nm">${dot}${esc(name)}</div><div class="ln-or">REAL <b>${esc(realLit||SD)}</b></div><div class="ln-bar"></div><div class="ln-pc"><span class="so-flag">s/obj</span></div></div>`;
   const cls=paceClass(pctN,pace);
   const mk=(pace!=null)?`<span class="mk" style="left:${Math.min(100,pace)}%"></span>`:'';
-  return `<div class="ln-row" style="--lc:${lc}"><div class="ln-nm">${dot}${esc(name)}</div><div class="ln-or">OBJ <b>${esc(objLit||SD)}</b> · REAL <b>${esc(realLit||SD)}</b></div><div class="ln-bar"><div class="bar ${cls}"><i style="width:${clampW(pctN)}%"></i>${mk}</div></div><div class="ln-pc t-${cls}">${pctN!=null?Math.round(pctN)+'%':'—'}</div></div>`;
+  return `<div class="ln-row" style="--lc:${lc}"><div class="ln-nm">${dot}${esc(name)}</div><div class="ln-or">OBJ <b>${esc(objLit||SD)}</b> \u00b7 REAL <b>${esc(realLit||SD)}</b></div><div class="ln-bar"><div class="bar ${cls}"><i style="width:${clampW(pctN)}%"></i>${mk}</div></div><div class="ln-pc t-${cls}">${pctN!=null?Math.round(pctN)+'%':'\u2014'}</div></div>`;
 }
- 
+
 /* ---- HOME ---- */
 function orgStats(id){
   const groups=clientGroups(id); const vend=new Set();
@@ -962,13 +982,13 @@ function renderHome(){
       <div class="div-kpis">
         <div class="kpi"><div class="v mono">${s.vend}</div><div class="l">Vendedores</div></div>
         <div class="kpi"><div class="v mono">${s.cli}</div><div class="l">Clientes</div></div>
-        <div class="kpi"><div class="v mono t-${pc}">${s.pct!=null?Math.round(s.pct)+'<small>%</small>':'—'}</div><div class="l">Avance Total</div></div>
+        <div class="kpi"><div class="v mono t-${pc}">${s.pct!=null?Math.round(s.pct)+'<small>%</small>':'\u2014'}</div><div class="l">Avance Total</div></div>
       </div>
       <div class="div-cta">Ver vendedores <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
     </div>`;
   }).join('');
 }
- 
+
 /* ---- VENDEDORES ---- */
 function vendorAggregates(orgId){
   const groups=clientGroups(orgId);
@@ -982,7 +1002,7 @@ function renderVendors(){
   const list=vendorAggregates(STATE.org); const pace=expectedPace();
   const totalCli=list.reduce((a,v)=>a+v.recs.length,0);
   const perEl=document.getElementById('periodSel'); const perTxt=perEl.selectedOptions[0]?perEl.selectedOptions[0].textContent:'';
-  document.getElementById('vendSub').innerHTML=`% de venta real vs objetivo por línea. <b>${list.length} vendedor${list.length!==1?'es':''} · ${totalCli} cliente${totalCli!==1?'s':''}</b> en ${esc(perTxt)}. ${pace!=null?`Esperado al corte: <b>${Math.round(pace)}%</b>.`:''}`;
+  document.getElementById('vendSub').innerHTML=`% de venta real vs objetivo por l\u00ednea. <b>${list.length} vendedor${list.length!==1?'es':''} \u00b7 ${totalCli} cliente${totalCli!==1?'s':''}</b> en ${esc(perTxt)}. ${pace!=null?`Esperado al corte: <b>${Math.round(pace)}%</b>.`:''}`;
   const grid=document.getElementById('vendGrid');
   if(!list.length){grid.innerHTML='<div class="empty-state">Sin vendedores con datos en este periodo. Prueba cambiar el Periodo arriba.</div>';return;}
   grid.innerHTML=list.map((v,i)=>{
@@ -993,24 +1013,24 @@ function renderVendors(){
       <div class="vend-top">
         <div class="vend-avatar">${esc(ini)}</div>
         <div><div class="vend-name display">${esc(v.name)}</div><div class="vend-meta">${v.recs.length} cliente${v.recs.length!==1?'s':''}</div></div>
-        <div class="vend-ring"><div class="big mono t-${paceClass(hl.pct,pace)}">${hl.pct!=null?Math.round(hl.pct)+'%':'—'}</div>
-          <div class="or mono">OBJ <b>${hl.objSum!=null?fmtNum(hl.objSum):'—'}</b> · REAL <b>${hl.realSum!=null?fmtNum(hl.realSum):'—'}</b></div>
+        <div class="vend-ring"><div class="big mono t-${paceClass(hl.pct,pace)}">${hl.pct!=null?Math.round(hl.pct)+'%':'\u2014'}</div>
+          <div class="or mono">OBJ <b>${hl.objSum!=null?fmtNum(hl.objSum):'\u2014'}</b> \u00b7 REAL <b>${hl.realSum!=null?fmtNum(hl.realSum):'\u2014'}</b></div>
           <div class="lbl">Total acumulado</div></div>
       </div>
       <div class="ln-list">${rows}</div>
     </div>`;
   }).join('');
 }
- 
+
 /* ---- CLIENTES ---- */
 let CLI=[], LINE_FILTER='ALL', OBJF='con', DAY_FILTER='ALL', ORDER='regular';
 const REVIEWED=new Set();
 function hasObjective(rec){return LINES.some(l=>{const o=rec.numLit(l.obj);return o.n!=null&&o.n>0;});}
 function hasSales(rec){return LINES.some(l=>{const r=rec.numLit(l.real);return r.n!=null&&r.n!==0;});}
-function buildLineSelector(){document.getElementById('lineSel').innerHTML=`<option value="ALL">Todas las líneas (vista general)</option>`+LINES.map(l=>`<option value="${l.key}">Por línea · ${esc(l.label)}</option>`).join('');document.getElementById('lineSel').value=LINE_FILTER;}
+function buildLineSelector(){document.getElementById('lineSel').innerHTML=`<option value="ALL">Todas las l\u00edneas (vista general)</option>`+LINES.map(l=>`<option value="${l.key}">Por l\u00ednea \u00b7 ${esc(l.label)}</option>`).join('');document.getElementById('lineSel').value=LINE_FILTER;}
 function renderClients(){
   const o=org(STATE.org);
-  document.getElementById('cliEyebrow').textContent=o.label+' · Vendedor';
+  document.getElementById('cliEyebrow').textContent=o.label+' \u00b7 Vendedor';
   document.getElementById('cliTitle').textContent=STATE.vendor;
   document.getElementById('cliPace').innerHTML=paceText();
   const groups=clientGroups(STATE.org).filter(rec=>rec.vendor===STATE.vendor);
@@ -1040,13 +1060,13 @@ function renderMatrix(base,grid,pace,note){
   let list=sortList(base.slice(),pace,c=>c.pctN);
   const counts={good:0,medio:0,regular:0};
   base.forEach(c=>{const t=tier(c.pctN,pace);if(counts[t]!=null)counts[t]++;});
-  document.getElementById('cliCount').textContent=`${list.length} cliente${list.length!==1?'s':''} · ${note} · ${counts.regular} rezagados / ${counts.medio} medios / ${counts.good} en meta`;
+  document.getElementById('cliCount').textContent=`${list.length} cliente${list.length!==1?'s':''} \u00b7 ${note} \u00b7 ${counts.regular} rezagados / ${counts.medio} medios / ${counts.good} en meta`;
   if(!list.length){grid.innerHTML='<div class="empty-state">Sin clientes en este filtro.</div>';return;}
   const lines=orderedLines();
   grid.innerHTML=list.map((c,i)=>{
     const tr=tier(c.pctN,pace), info=TIER_INFO[tr];
     let ringTxt,ringCls;
-    if(c.hlStatus==='sinobj'){ringTxt='s/obj';ringCls='na';}else if(c.pctN==null){ringTxt='—';ringCls='na';}else{ringTxt=Math.round(c.pctN)+'%';ringCls=info.ring;}
+    if(c.hlStatus==='sinobj'){ringTxt='s/obj';ringCls='na';}else if(c.pctN==null){ringTxt='\u2014';ringCls='na';}else{ringTxt=Math.round(c.pctN)+'%';ringCls=info.ring;}
     const badge=(c.hlStatus==='ok'&&info.txt)?`<span class="badge-st ${info.card}">${info.txt}</span>`:'';
     const done=REVIEWED.has(c.uid)?' done':'';
     return `<div class="cli-card reveal ${c.hlStatus==='ok'?info.card:''}${done}" data-cli="${c.uid}" style="animation-delay:${Math.min(i,16)*.03}s">
@@ -1066,61 +1086,85 @@ function renderMatrix(base,grid,pace,note){
 }
 function cardComments(c){
   const per=document.getElementById('periodSel'); const perTxt=per&&per.selectedOptions[0]?per.selectedOptions[0].textContent:'';
-  const mid=isEmpty(c.cMid)?null:c.cMid, end=isEmpty(c.cEnd)?null:c.cEnd, ger=isEmpty(c.cGer)?null:c.cGer;
-  const row=(lbl,val,cls)=>`<div class="cco-row ${cls||''} ${val?'':'sininfo'}"><span class="cco-lbl">${lbl}</span><span class="cco-txt">${val?esc(val):'Sin información'}</span></div>`;
-  return `<div class="cli-coments"><div class="cco-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Comentarios${perTxt?` · ${esc(perTxt)}`:''}</div>${row('Vendedor · mitad',mid)}${row('Vendedor · final',end)}${row('Gerente de ventas',ger,'ger')}</div>`;
+  const canMonth = STATE.period && STATE.period!=='ALL';
+  const editVend = (ROLE==='vendedor'), editGer = (ROLE==='directivo');
+  const field=(key,lbl,val,canEdit,cls)=>{
+    val=isEmpty(val)?'':val;
+    if(canEdit){
+      if(!canMonth) return `<div class="cco-row ${cls||''}"><span class="cco-lbl">${lbl}</span><span class="cco-txt" style="color:var(--muted2);font-style:italic">Selecciona un mes espec\u00edfico arriba para capturar.</span></div>`;
+      return `<div class="cco-row edit ${cls||''}"><span class="cco-lbl">${lbl}</span><div class="cco-edit"><textarea class="cco-ta" id="ta_${key}_${c.uid}" rows="2" placeholder="Escribe el comentario\u2026">${esc(val)}</textarea><button class="cco-save" data-save="${key}" data-uid="${c.uid}" data-code="${esc(c.code)}"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>Guardar</button></div></div>`;
+    }
+    return `<div class="cco-row ${cls||''} ${val?'':'sininfo'}"><span class="cco-lbl">${lbl}</span><span class="cco-txt">${val?esc(val):'Sin informaci\u00f3n'}</span></div>`;
+  };
+  return `<div class="cli-coments"><div class="cco-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Comentarios${perTxt?` \u00b7 ${esc(perTxt)}`:''}</div>${field('mid','Vendedor \u00b7 mitad',c.cMid,editVend)}${field('end','Vendedor \u00b7 final',c.cEnd,editVend)}${field('ger','Gerente de ventas',c.cGer,editGer,'ger')}</div>`;
 }
-/* chips de lo que falta por cumplir, por línea */
+async function saveComment(btn){
+  const field=btn.dataset.save, uid=btn.dataset.uid, code=btn.dataset.code;
+  const ta=document.getElementById('ta_'+field+'_'+uid); const texto=ta?ta.value:'';
+  if(!STATE.period||STATE.period==='ALL'){alert('Selecciona un mes espec\u00edfico arriba para guardar.');return;}
+  const parts=STATE.period.split('||'); const anio=parts[0], mes=parts[1];
+  if(!saveConfigured()){alert('A\u00fan no se ha configurado el guardado (falta la URL de Apps Script).');return;}
+  const orig=btn.innerHTML; btn.disabled=true; btn.textContent='Guardando\u2026';
+  try{
+    const res=await doSave({codCliente:code,mes:mes,anio:anio,campo:field,texto:texto});
+    if(res&&res.ok){
+      const c=CLI.find(x=>String(x.uid)===String(uid)); if(c){if(field==='mid')c.cMid=texto;else if(field==='end')c.cEnd=texto;else c.cGer=texto;}
+      btn.innerHTML='\u2713 Guardado'; btn.classList.add('ok');
+      setTimeout(()=>{btn.innerHTML=orig;btn.disabled=false;btn.classList.remove('ok');},1600);
+    } else { alert('No se pudo guardar: '+((res&&res.error)||'error desconocido')); btn.innerHTML=orig; btn.disabled=false; }
+  }catch(err){ alert('Error al guardar: '+((err&&err.message)||err)); btn.innerHTML=orig; btn.disabled=false; }
+}
+/* chips de lo que falta por cumplir, por l\u00ednea */
 function pendingChips(rec){
   const items=[];
   orderedLines().forEach(l=>{const ld=lineData(rec,l);if(ld.status==='ok'&&ld.obj.n!=null&&ld.obj.n>0){const falta=ld.obj.n-(ld.real.n||0);items.push({l,pctN:ld.pctN,falta});}});
   if(!items.length) return '';
   const pend=items.filter(x=>x.falta>0.0001).sort((a,b)=>(a.pctN==null?0:a.pctN)-(b.pctN==null?0:b.pctN));
-  if(!pend.length) return `<div class="pend-row"><span class="pend-lbl">✓ Objetivos cumplidos en todas sus líneas</span></div>`;
+  if(!pend.length) return `<div class="pend-row"><span class="pend-lbl">\u2713 Objetivos cumplidos en todas sus l\u00edneas</span></div>`;
   const chips=pend.map(x=>`<span class="pend-chip" style="--lc:${lineColor(x.l.key)}"><b>${esc(x.l.label)}</b> faltan ${esc(fmtNum(x.falta))} <i>${x.pctN!=null?Math.round(x.pctN)+'%':''}</i></span>`).join('');
   return `<div class="pend-row"><span class="pend-lbl">Falta por cumplir:</span>${chips}</div>`;
 }
-/* tabla de líneas: Línea | OBJ | REAL | Avance (con color por línea) */
+/* tabla de l\u00edneas: L\u00ednea | OBJ | REAL | Avance (con color por l\u00ednea) */
 function clientLineTable(rec,lines,pace){
   const rows=lines.map(line=>{
     const ld=lineData(rec,line); const lc=lineColor(line.key);
     const nm=`<span class="lt-nm"><span class="lt-dot" style="background:${lc}"></span>${esc(line.label)}</span>`;
     if(ld.status==='nodata')
-      return `<div class="lt-row noobj" style="--lc:${lc}">${nm}<span class="lt-o">—</span><span class="lt-r">—</span><span class="lt-a t-na">sin objetivo aún</span><span class="lt-bar"></span></div>`;
+      return `<div class="lt-row noobj" style="--lc:${lc}">${nm}<span class="lt-o">\u2014</span><span class="lt-r">\u2014</span><span class="lt-a t-na">sin objetivo a\u00fan</span><span class="lt-bar"></span></div>`;
     if(ld.status==='sinobj')
       return `<div class="lt-row so" style="--lc:${lc}">${nm}<span class="lt-o">s/obj</span><span class="lt-r hot">${esc(ld.real.lit||SD)}</span><span class="lt-a"><span class="so-flag">venta s/obj</span></span><span class="lt-bar"></span></div>`;
     const cls=paceClass(ld.pctN,pace);
     const mk=(pace!=null)?`<span class="mk" style="left:${Math.min(100,pace)}%"></span>`:'';
-    return `<div class="lt-row" style="--lc:${lc}">${nm}<span class="lt-o mono">${esc(ld.obj.lit||SD)}</span><span class="lt-r mono">${esc(ld.real.lit||SD)}</span><span class="lt-a mono t-${cls}">${ld.pctN!=null?Math.round(ld.pctN)+'%':'—'}</span><span class="lt-bar"><span class="bar ${cls}"><i style="width:${clampW(ld.pctN)}%"></i>${mk}</span></span></div>`;
+    return `<div class="lt-row" style="--lc:${lc}">${nm}<span class="lt-o mono">${esc(ld.obj.lit||SD)}</span><span class="lt-r mono">${esc(ld.real.lit||SD)}</span><span class="lt-a mono t-${cls}">${ld.pctN!=null?Math.round(ld.pctN)+'%':'\u2014'}</span><span class="lt-bar"><span class="bar ${cls}"><i style="width:${clampW(ld.pctN)}%"></i>${mk}</span></span></div>`;
   }).join('');
-  return `<div class="lt"><div class="lt-head"><span>Línea</span><span>OBJ</span><span>REAL</span><span>Avance</span><span></span></div>${rows}</div>`;
+  return `<div class="lt"><div class="lt-head"><span>L\u00ednea</span><span>OBJ</span><span>REAL</span><span>Avance</span><span></span></div>${rows}</div>`;
 }
 function renderLineFocus(base,grid,line,pace){
   const conObj=[],sinObj=[];
   base.forEach(c=>{const ld=lineData(c.rec,line);const it={...c,ld};if(ld.obj.n!=null&&ld.obj.n>0)conObj.push(it);else if(ld.real.n!=null&&ld.real.n!==0)sinObj.push(it);});
   sortList(conObj,pace,c=>c.ld.pctN);
   const nBehind=conObj.filter(c=>isBehind(c.ld.pctN,pace)).length;
-  document.getElementById('cliCount').textContent=`${conObj.length} con objetivo · ${nBehind} rezagado${nBehind!==1?'s':''} · ${sinObj.length} venta s/obj`;
-  const rowCon=(c,i)=>{const cls=paceClass(c.ld.pctN,pace),behind=isBehind(c.ld.pctN,pace);const mk=(pace!=null)?`<span class="mk" style="left:${Math.min(100,pace)}%"></span>`:'';const pctTxt=c.ld.pctN!=null?Math.round(c.ld.pctN)+'%':'—';
+  document.getElementById('cliCount').textContent=`${conObj.length} con objetivo \u00b7 ${nBehind} rezagado${nBehind!==1?'s':''} \u00b7 ${sinObj.length} venta s/obj`;
+  const rowCon=(c,i)=>{const cls=paceClass(c.ld.pctN,pace),behind=isBehind(c.ld.pctN,pace);const mk=(pace!=null)?`<span class="mk" style="left:${Math.min(100,pace)}%"></span>`:'';const pctTxt=c.ld.pctN!=null?Math.round(c.ld.pctN)+'%':'\u2014';
     return `<div class="line-row reveal ${behind?'behind':(c.ld.pctN!=null?'aok':'')}" data-cli="${c.uid}" style="animation-delay:${Math.min(i,20)*.02}s">
       <div class="lr-rank mono">${i+1}</div>
-      <div class="lr-id"><div class="code">${esc(disp(c.code))}</div><h4 class="display">${esc(c.cliente||SD)}</h4><div class="neg">${esc(c.negocio||SD)} · ${esc(c.zona||'sin zona')}</div></div>
-      <div class="lr-metric"><div class="lr-or mono">OBJ <b>${esc(c.ld.obj.lit||SD)}</b> · REAL <b>${esc(c.ld.real.lit||SD)}</b></div><div class="bar ${cls}"><i style="width:${clampW(c.ld.pctN)}%"></i>${mk}</div></div>
-      <div class="lr-pct t-${cls}">${pctTxt}${behind?'<span class="badge-st behind" style="font-size:8.5px">▼</span>':''}</div>
+      <div class="lr-id"><div class="code">${esc(disp(c.code))}</div><h4 class="display">${esc(c.cliente||SD)}</h4><div class="neg">${esc(c.negocio||SD)} \u00b7 ${esc(c.zona||'sin zona')}</div></div>
+      <div class="lr-metric"><div class="lr-or mono">OBJ <b>${esc(c.ld.obj.lit||SD)}</b> \u00b7 REAL <b>${esc(c.ld.real.lit||SD)}</b></div><div class="bar ${cls}"><i style="width:${clampW(c.ld.pctN)}%"></i>${mk}</div></div>
+      <div class="lr-pct t-${cls}">${pctTxt}${behind?'<span class="badge-st behind" style="font-size:8.5px">\u25bc</span>':''}</div>
       ${comentInline(c)}
     </div>`;};
   const rowSin=(c,i)=>`<div class="line-row so reveal" data-cli="${c.uid}" style="animation-delay:${Math.min(i,20)*.02}s">
-      <div class="lr-rank mono">•</div>
-      <div class="lr-id"><div class="code">${esc(disp(c.code))}</div><h4 class="display">${esc(c.cliente||SD)}</h4><div class="neg">${esc(c.negocio||SD)} · ${esc(c.zona||'sin zona')}</div></div>
+      <div class="lr-rank mono">\u2022</div>
+      <div class="lr-id"><div class="code">${esc(disp(c.code))}</div><h4 class="display">${esc(c.cliente||SD)}</h4><div class="neg">${esc(c.negocio||SD)} \u00b7 ${esc(c.zona||'sin zona')}</div></div>
       <div class="lr-metric"><div class="lr-or mono">REAL <b>${esc(c.ld.real.lit||SD)}</b></div></div>
       <div class="lr-pct t-na">s/obj</div>${comentInline(c)}</div>`;
-  let html=`<div class="sec-divider" style="--sc:${lineColor(line.key)}"><b>Con objetivo en ${esc(line.label)}</b><span>${conObj.length} cliente${conObj.length!==1?'s':''} · del más bajo al más alto</span></div>`;
-  html+=conObj.length?conObj.map(rowCon).join(''):'<div class="empty-state">Ningún cliente tiene objetivo en esta línea.</div>';
-  html+=`<div class="sec-divider sd2"><b>Venta sin objetivo · ${esc(line.label)}</b><span>${sinObj.length} con venta pero sin meta</span></div>`;
-  html+=sinObj.length?sinObj.map(rowSin).join(''):'<div class="empty-state">Sin clientes con venta y sin objetivo en esta línea.</div>';
+  let html=`<div class="sec-divider" style="--sc:${lineColor(line.key)}"><b>Con objetivo en ${esc(line.label)}</b><span>${conObj.length} cliente${conObj.length!==1?'s':''} \u00b7 del m\u00e1s bajo al m\u00e1s alto</span></div>`;
+  html+=conObj.length?conObj.map(rowCon).join(''):'<div class="empty-state">Ning\u00fan cliente tiene objetivo en esta l\u00ednea.</div>';
+  html+=`<div class="sec-divider sd2"><b>Venta sin objetivo \u00b7 ${esc(line.label)}</b><span>${sinObj.length} con venta pero sin meta</span></div>`;
+  html+=sinObj.length?sinObj.map(rowSin).join(''):'<div class="empty-state">Sin clientes con venta y sin objetivo en esta l\u00ednea.</div>';
   grid.innerHTML=html;
 }
- 
+
 /* ---- FICHA ---- */
 const HIST_ORDER=['PREM','AGM','ESTANDAR','TOTAL','LUB','MOTO','FILTRO','AUTO','CTA','CAMION','LLANTAS'];
 function histLines(){const seen=new Set();const out=[];HIST_ORDER.forEach(k=>{const l=LINES.find(x=>x.key===k);if(l){out.push(l);seen.add(k);}});LINES.forEach(l=>{if(!seen.has(l.key))out.push(l);});return out;}
@@ -1129,14 +1173,14 @@ function historyTable(rec){
   const code=getCell(rec.group[rec.group.length-1],'COD CLIENTE',H)||rec.text('CLIENTE');
   const rows=DB.rows.filter(r=>(getCell(r,'COD CLIENTE',H)||getCell(r,'CLIENTE',H))===code);
   const pmap=new Map();
-  rows.forEach(r=>{const ano=getCell(r,'AÑO',H)||getCell(r,'ANIO',H)||getCell(r,'ANO',H),mes=getCell(r,'MES',H);const key=norm(ano)+'||'+norm(mes);if(!pmap.has(key))pmap.set(key,{rank:periodRank(ano,mes),label:((mes||'—')+' '+(ano||'')).trim(),row:r});});
+  rows.forEach(r=>{const ano=getCell(r,'A\u00d1O',H)||getCell(r,'ANIO',H)||getCell(r,'ANO',H),mes=getCell(r,'MES',H);const key=norm(ano)+'||'+norm(mes);if(!pmap.has(key))pmap.set(key,{rank:periodRank(ano,mes),label:((mes||'\u2014')+' '+(ano||'')).trim(),row:r});});
   const periods=[...pmap.values()].sort((a,b)=>a.rank-b.rank);
   if(!periods.length)return '<div class="empty-state">Sin historial de compra registrado.</div>';
-  const head=`<th class="l">Línea</th>`+periods.map(p=>`<th>${esc(p.label)}</th>`).join('')+`<th>Total año</th><th>Prom/mes</th>`;
+  const head=`<th class="l">L\u00ednea</th>`+periods.map(p=>`<th>${esc(p.label)}</th>`).join('')+`<th>Total a\u00f1o</th><th>Prom/mes</th>`;
   const body=histLines().map(line=>{
-    let tot=null;const cells=periods.map(p=>{const v=parseNum(getCell(p.row,line.real,H));if(v!=null)tot=(tot==null?0:tot)+v;return `<td>${v!=null?fmtNum(v):'·'}</td>`;}).join('');
+    let tot=null;const cells=periods.map(p=>{const v=parseNum(getCell(p.row,line.real,H));if(v!=null)tot=(tot==null?0:tot)+v;return `<td>${v!=null?fmtNum(v):'\u00b7'}</td>`;}).join('');
     const prom=tot!=null?Math.round(tot/periods.length):null;
-    return `<tr><td class="l"><span class="lt-dot" style="background:${lineColor(line.key)}"></span>${esc(line.label)}</td>${cells}<td class="r">${tot!=null?fmtNum(tot):'—'}</td><td class="prom">${prom!=null?fmtNum(prom):'—'}</td></tr>`;
+    return `<tr><td class="l"><span class="lt-dot" style="background:${lineColor(line.key)}"></span>${esc(line.label)}</td>${cells}<td class="r">${tot!=null?fmtNum(tot):'\u2014'}</td><td class="prom">${prom!=null?fmtNum(prom):'\u2014'}</td></tr>`;
   }).join('');
   return `<div class="rd-tblwrap"><table class="hist-tbl hl-table"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
 }
@@ -1144,7 +1188,8 @@ function dl(pairs){return '<dl class="dl">'+pairs.map(([k,v])=>{const e=isEmpty(
 function fotoBlock(rec){
   const code=rec.text('FOTO GOOGLE'),lat=rec.text('LATITUD'),lng=rec.text('LONGITUD'),dir=rec.text('DIRECCION');
   let src='';const c=(code||'').trim();
-  if(/^https?:\/\//i.test(c))src=c;else if(/^[A-Za-z0-9_\-]{25,}$/.test(c))src=`https://drive.google.com/thumbnail?id=${encodeURIComponent(c)}&sz=w1600`;else if(c.length>4)src=c;
+  const cl=c.toLowerCase();
+  if(cl.indexOf('http://')===0||cl.indexOf('https://')===0)src=c;else if(c.length>=25&&/^[A-Za-z0-9_-]+$/.test(c))src=`https://drive.google.com/thumbnail?id=${encodeURIComponent(c)}&sz=w1600`;else if(c.length>4)src=c;
   const q=(lat&&lng)?`${lat},${lng}`:dir;const mapsUrl=q?`https://www.google.com/maps?q=${encodeURIComponent(q)}`:'';
   const ph=`<div class="foto-ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span>Sin foto de fachada</span></div>`;
   const img=src?`<img src="${esc(src)}" alt="Fachada" referrerpolicy="no-referrer" onerror="this.parentNode.innerHTML='${ph.replace(/'/g,"\\'")}'">`:ph;
@@ -1155,54 +1200,54 @@ function renderFicha(rec){
   const pace=expectedPace();
   const cliente=rec.text('CLIENTE'),negocio=rec.text('NOMBRE DE NEGOCIO'),code=rec.text('COD CLIENTE');
   const foto=fotoBlock(rec);
-  const perf=orderedLines().map(line=>{const ld=lineData(rec,line);const cls=paceClass(ld.pctN,pace);let pctTxt,flag='';if(ld.status==='nodata'){pctTxt='—';flag='<span class="flag nd">sin data</span>';}else if(ld.status==='sinobj'){pctTxt='—';flag='<span class="flag so">venta s/objetivo</span>';}else pctTxt=ld.pctLit?esc(ld.pctLit):(ld.pctN!=null?Math.round(ld.pctN)+'%':'—');const mk=(pace!=null&&ld.status==='ok')?`<span class="mk" style="left:${Math.min(100,pace)}%"></span>`:'';
+  const perf=orderedLines().map(line=>{const ld=lineData(rec,line);const cls=paceClass(ld.pctN,pace);let pctTxt,flag='';if(ld.status==='nodata'){pctTxt='\u2014';flag='<span class="flag nd">sin data</span>';}else if(ld.status==='sinobj'){pctTxt='\u2014';flag='<span class="flag so">venta s/objetivo</span>';}else pctTxt=ld.pctLit?esc(ld.pctLit):(ld.pctN!=null?Math.round(ld.pctN)+'%':'\u2014');const mk=(pace!=null&&ld.status==='ok')?`<span class="mk" style="left:${Math.min(100,pace)}%"></span>`:'';
     return `<div class="perf-item"><div class="perf-top"><span class="perf-name">${esc(line.label)}${flag}</span><span class="perf-pct t-${cls}">${pctTxt}</span></div><div class="bar ${cls}"><i style="width:${clampW(ld.pctN)}%"></i>${mk}</div><div class="perf-nums"><span><span class="nlbl">Objetivo</span><b>${esc(ld.obj.lit||SD)}</b></span><span style="text-align:right"><span class="nlbl">Real</span><b>${esc(ld.real.lit||SD)}</b></span></div></div>`;}).join('');
-  const apoyo=APOYO.map(n=>{const v=rec.text(n);const on=!isEmpty(v);const s=n.replace('MINUTA CREDITO / DESCUENTO','Minuta crédito/desc.').replace('MINUTA DE POP','Minuta POP').replace('EXHIBIDOR ','Exh. ').replace('ACTIVACIONES','Activaciones').replace('FACHADA','Fachada');return `<span class="chip ${on?'on':''}"><b>${esc(s)}:</b> ${esc(on?v:SD)}</span>`;}).join('');
+  const apoyo=APOYO.map(n=>{const v=rec.text(n);const on=!isEmpty(v);const s=n.replace('MINUTA CREDITO / DESCUENTO','Minuta cr\u00e9dito/desc.').replace('MINUTA DE POP','Minuta POP').replace('EXHIBIDOR ','Exh. ').replace('ACTIVACIONES','Activaciones').replace('FACHADA','Fachada');return `<span class="chip ${on?'on':''}"><b>${esc(s)}:</b> ${esc(on?v:SD)}</span>`;}).join('');
   const desc=dl(DESCUENTOS.map(n=>[n.replace(' (HI TEC)',' (Hi-Tec)'),rec.text(n)]));
   const cMid=rec.text('COMMENTARIO A MITAD DE MES')||rec.text('COMENTARIO A MITAD DE MES'),cEnd=rec.text('COMENTARIOS A FINAL DE MES')||rec.text('COMENTARIO A FINAL DE MES'),cGer=rec.text('COMENTARIO GERENTE')||rec.text('COMENTARIOS GERENTE')||rec.text('COMENTARIO DEL GERENTE')||rec.text('COMENTARIOS DEL GERENTE')||rec.text('RETROALIMENTACION GERENTE')||rec.text('RETROALIMENTACION DEL GERENTE')||rec.text('COMENTARIO GERENTE DE VENTAS')||rec.text('GERENTE DE VENTAS');
   document.getElementById('fichaBody').innerHTML=`
-    <div class="print-head ficha-ph"><div class="ph-org">${esc(org(STATE.org).label)}</div><div class="ph-title">Ficha informativa de cliente · ${esc(cliente||SD)}</div></div>
+    <div class="print-head ficha-ph"><div class="ph-org">${esc(org(STATE.org).label)}</div><div class="ph-title">Ficha informativa de cliente \u00b7 ${esc(cliente||SD)}</div></div>
     <div class="ficha-head">
       <div class="card" style="--sc:#ffd21e">
         <div class="fh-name display">${esc(cliente||SD)}</div><div class="fh-neg">${esc(negocio||SD)}</div>
-        <div class="fh-code">COD ${esc(disp(code))} · ${esc(rec.text('MES'))} ${esc(rec.text('AÑO'))}</div>
+        <div class="fh-code">COD ${esc(disp(code))} \u00b7 ${esc(rec.text('MES'))} ${esc(rec.text('A\u00d1O'))}</div>
         <div class="chips"><span class="chip"><b>Vendedor:</b> ${esc(disp(rec.vendor))}</span><span class="chip"><b>Giro:</b> ${esc(disp(rec.text('GIRO')))}</span><span class="chip"><b>Zona:</b> ${esc(disp(rec.text('ZONA')))}</span></div>
-        <div class="section-block" style="--sc:#ffd21e"><div class="card-title"><span class="dot"></span>Condición de crédito</div>${dl([['Tipo',rec.text('TIPO')],['Días de crédito',rec.text('DIAS')],['Límite',rec.text('LIMITE')],['PLR',rec.text('PLR')],['Fecha de alta',rec.text('FECHA DE ALTA')]])}</div>
-        <div class="section-block" style="--sc:#a78bfa"><div class="card-title"><span class="dot"></span>Días de visita</div><div class="days">${DAYS.map(([col,ab])=>`<div class="day ${!isEmpty(rec.text(col))?'on':''}">${ab}</div>`).join('')}</div></div>
+        <div class="section-block" style="--sc:#ffd21e"><div class="card-title"><span class="dot"></span>Condici\u00f3n de cr\u00e9dito</div>${dl([['Tipo',rec.text('TIPO')],['D\u00edas de cr\u00e9dito',rec.text('DIAS')],['L\u00edmite',rec.text('LIMITE')],['PLR',rec.text('PLR')],['Fecha de alta',rec.text('FECHA DE ALTA')]])}</div>
+        <div class="section-block" style="--sc:#a78bfa"><div class="card-title"><span class="dot"></span>D\u00edas de visita</div><div class="days">${DAYS.map(([col,ab])=>`<div class="day ${!isEmpty(rec.text(col))?'on':''}">${ab}</div>`).join('')}</div></div>
       </div>
       <div class="card flat" style="--sc:#3aa6ff">
-        <div class="card-title"><span class="dot"></span>Fachada y ubicación</div>
+        <div class="card-title"><span class="dot"></span>Fachada y ubicaci\u00f3n</div>
         <div class="foto-wrap">${foto.img}</div>${foto.btn}
-        <div class="section-block">${dl([['Encargado de compras',rec.text('ENCARGADO DE COMPRAS')],['Celular',rec.text('NUMERO CELULAR')],['Dirección',rec.text('DIRECCION')],['Latitud',rec.text('LATITUD')],['Longitud',rec.text('LONGITUD')]])}</div>
+        <div class="section-block">${dl([['Encargado de compras',rec.text('ENCARGADO DE COMPRAS')],['Celular',rec.text('NUMERO CELULAR')],['Direcci\u00f3n',rec.text('DIRECCION')],['Latitud',rec.text('LATITUD')],['Longitud',rec.text('LONGITUD')]])}</div>
       </div>
     </div>
-    <div class="card section-block perf-section" style="--sc:#3fd18a"><div class="card-title"><span class="dot"></span>Desempeño por línea · Real vs Objetivo</div><div class="perf-grid">${perf}</div></div>
+    <div class="card section-block perf-section" style="--sc:#3fd18a"><div class="card-title"><span class="dot"></span>Desempe\u00f1o por l\u00ednea \u00b7 Real vs Objetivo</div><div class="perf-grid">${perf}</div></div>
     <div class="card section-block" style="--sc:#38bdf8"><div class="card-title"><span class="dot"></span>Historial de compra por mes (unidades reales)</div>${historyTable(rec)}</div>
     <div class="two-col section-block">
       <div class="card flat" style="--sc:#a78bfa"><div class="card-title"><span class="dot"></span>Apoyo comercial (POP)</div><div class="chips">${apoyo}</div></div>
       <div class="card flat" style="--sc:#2dd4bf"><div class="card-title"><span class="dot"></span>Descuentos otorgados</div>${desc}</div>
     </div>
     <div class="two-col section-block">
-      <div class="card flat" style="--sc:#f472b6"><div class="card-title"><span class="dot"></span>Comentario del vendedor · mitad de mes</div><div class="coment ${isEmpty(cMid)?'empty':''}">${esc(isEmpty(cMid)?SD:cMid)}</div></div>
-      <div class="card flat" style="--sc:#fb923c"><div class="card-title"><span class="dot"></span>Comentario del vendedor · final de mes</div><div class="coment ${isEmpty(cEnd)?'empty':''}">${esc(isEmpty(cEnd)?SD:cEnd)}</div></div>
+      <div class="card flat" style="--sc:#f472b6"><div class="card-title"><span class="dot"></span>Comentario del vendedor \u00b7 mitad de mes</div><div class="coment ${isEmpty(cMid)?'empty':''}">${esc(isEmpty(cMid)?SD:cMid)}</div></div>
+      <div class="card flat" style="--sc:#fb923c"><div class="card-title"><span class="dot"></span>Comentario del vendedor \u00b7 final de mes</div><div class="coment ${isEmpty(cEnd)?'empty':''}">${esc(isEmpty(cEnd)?SD:cEnd)}</div></div>
     </div>
-    <div class="card section-block" style="--sc:#22d3ee"><div class="card-title"><span class="dot"></span>Retroalimentación del gerente de ventas</div><div class="coment ger ${isEmpty(cGer)?'empty':''}">${esc(isEmpty(cGer)?SD:cGer)}</div></div>`;
+    <div class="card section-block" style="--sc:#22d3ee"><div class="card-title"><span class="dot"></span>Retroalimentaci\u00f3n del gerente de ventas</div><div class="coment ger ${isEmpty(cGer)?'empty':''}">${esc(isEmpty(cGer)?SD:cGer)}</div></div>`;
 }
- 
+
 /* ---- REPORTES ---- */
 const RUTA_LINES=['TOTAL','LUB','MOTO','FILTRO','LLANTAS'];
-const DAYFULL={LUNES:'Lunes',MARTES:'Martes',MIERCOLES:'Miércoles',JUEVES:'Jueves',VIERNES:'Viernes',SABADO:'Sábado',ESPORADICO:'Esporádico'};
+const DAYFULL={LUNES:'Lunes',MARTES:'Martes',MIERCOLES:'Mi\u00e9rcoles',JUEVES:'Jueves',VIERNES:'Viernes',SABADO:'S\u00e1bado',ESPORADICO:'Espor\u00e1dico'};
 let REPORT='ruta', REP_VENDOR=null, REP_DAY='LUNES';
 function renderReportes(){
   document.getElementById('repEyebrow').textContent=org(STATE.org).label;
   document.getElementById('repBar').innerHTML=
-    `<button class="btn ${REPORT==='ruta'?'act':''}" data-rep="ruta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>Ruta fija permanente (por día)</button>
+    `<button class="btn ${REPORT==='ruta'?'act':''}" data-rep="ruta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>Ruta fija permanente (por d\u00eda)</button>
      <button class="btn ${REPORT==='fact'?'act':''}" data-rep="fact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Resumen semanal</button>
      <button class="btn ${REPORT==='cmp'?'act':''}" data-rep="cmp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l3-3 3 2 4-5"/></svg>Rendimiento entre meses</button>`;
   renderActiveReport();
 }
 function renderActiveReport(){ if(REPORT==='ruta')renderRutaDia(); else if(REPORT==='fact')renderFactSemanal(); else renderComparativo(); }
- 
+
 /* === Reporte 3: RENDIMIENTO POR CLIENTE ENTRE MESES === */
 let CMP_VENDOR=null,CMP_A=null,CMP_B=null,CMP_SORT={key:null,dir:'desc'};
 function cmpMetric(rec,kind){if(!rec)return null;const f=rec.numLit('REAL FACT'),c=rec.numLit('COSTO'),d=rec.numLit('DIF');
@@ -1210,9 +1255,9 @@ function cmpMetric(rec,kind){if(!rec)return null;const f=rec.numLit('REAL FACT')
   if(kind==='fac')return f.n;
   return d.n!=null?d.n:((f.n!=null&&c.n!=null)?f.n-c.n:null);}
 function deltaCell(a,b,money){
-  if(a==null&&b==null)return `<td class="delta flat">—</td>`;
+  if(a==null&&b==null)return `<td class="delta flat">\u2014</td>`;
   const va=a||0,vb=b||0,diff=va-vb;
-  const cls=diff>0?'up':(diff<0?'down':'flat');const arrow=diff>0?'▲':(diff<0?'▼':'=');
+  const cls=diff>0?'up':(diff<0?'down':'flat');const arrow=diff>0?'\u25b2':(diff<0?'\u25bc':'=');
   const val=money?acct(diff):(fmtNum(diff)||'0');
   return `<td class="delta ${cls}">${arrow} ${esc(val)}</td>`;
 }
@@ -1245,27 +1290,27 @@ function renderComparativo(){
   // modelo de filas
   let model=codes.map(code=>{const ra=mapA.get(code),rb=mapB.get(code),ref=ra||rb;const cells={};lines.forEach(l=>{const a=realN(ra,l),b=realN(rb,l);cells[l.key]={a,b,oa:objN(ra,l),ob:objN(rb,l),dif:(a||0)-(b||0)};});return {name:ref.text('CLIENTE')||SD,zona:ref.text('ZONA')||'',cells};});
   // ordenamiento por columna
-  const arrowFor=key=>CMP_SORT.key===key?(CMP_SORT.dir==='desc'?' ▼':' ▲'):'';
+  const arrowFor=key=>CMP_SORT.key===key?(CMP_SORT.dir==='desc'?' \u25bc':' \u25b2'):'';
   if(CMP_SORT.key==='name')model.sort((a,b)=>a.name.localeCompare(b.name)*(CMP_SORT.dir==='desc'?-1:1));
   else if(CMP_SORT.key){const[lk,fld]=CMP_SORT.key.split('|');const val=r=>{const c=r.cells[lk];return c?(c[fld]==null?-Infinity:c[fld]):-Infinity;};model.sort((a,b)=>(val(b)-val(a))*(CMP_SORT.dir==='desc'?1:-1));}
   const headTop=lines.map(l=>`<th colspan="3" class="gh" style="--lc:${lineColor(l.key)}">${esc(l.label)}</th>`).join('');
   const headSub=lines.map(l=>`<th class="cmp-grp sortable" data-cmpsort="${l.key}|a">${esc(la)}${arrowFor(l.key+'|a')}</th><th class="sortable" data-cmpsort="${l.key}|b">${esc(lb)}${arrowFor(l.key+'|b')}</th><th class="difcol sortable" data-cmpsort="${l.key}|dif">Dif${arrowFor(l.key+'|dif')}</th>`).join('');
-  const cellMonth=(c,fld,grp)=>{const r=c[fld],o=fld==='a'?c.oa:c.ob;return `<td class="${grp?'cmp-grp':''}"><span class="cm-real">${r!=null?fmtNum(r):'·'}</span>${o!=null?`<span class="cm-obj">obj ${fmtNum(o)}</span>`:''}</td>`;};
-  const difCell=(c)=>{const a=c.a,b=c.b;if(a==null&&b==null)return `<td class="difcol delta flat">·</td>`;const d=c.dif,cls=d>0?'up':(d<0?'down':'flat'),ar=d>0?'▲':(d<0?'▼':'=');return `<td class="difcol delta ${cls}">${ar} ${esc(fmtNum(Math.abs(d))||'0')}</td>`;};
+  const cellMonth=(c,fld,grp)=>{const r=c[fld],o=fld==='a'?c.oa:c.ob;return `<td class="${grp?'cmp-grp':''}"><span class="cm-real">${r!=null?fmtNum(r):'\u00b7'}</span>${o!=null?`<span class="cm-obj">obj ${fmtNum(o)}</span>`:''}</td>`;};
+  const difCell=(c)=>{const a=c.a,b=c.b;if(a==null&&b==null)return `<td class="difcol delta flat">\u00b7</td>`;const d=c.dif,cls=d>0?'up':(d<0?'down':'flat'),ar=d>0?'\u25b2':(d<0?'\u25bc':'=');return `<td class="difcol delta ${cls}">${ar} ${esc(fmtNum(Math.abs(d))||'0')}</td>`;};
   const rows=model.map(m=>{
     const cells=lines.map(l=>{const c=m.cells[l.key];return cellMonth(c,'a',true)+cellMonth(c,'b',false)+difCell(c);}).join('');
     return `<tr><td class="name">${esc(m.name)}<br><span style="color:var(--muted);font-size:11px">${esc(m.zona)}</span></td>${cells}</tr>`;
   }).join('');
-  const subCells=lines.map(l=>{let sa=0,sb=0;model.forEach(m=>{const c=m.cells[l.key];if(c.a!=null)sa+=c.a;if(c.b!=null)sb+=c.b;});const d=sa-sb,cls=d>0?'up':(d<0?'down':'flat'),ar=d>0?'▲':(d<0?'▼':'=');return `<td class="cmp-grp"><span class="cm-real">${fmtNum(sa)}</span></td><td><span class="cm-real">${fmtNum(sb)}</span></td><td class="difcol delta ${cls}">${ar} ${esc(fmtNum(Math.abs(d)))}</td>`;}).join('');
+  const subCells=lines.map(l=>{let sa=0,sb=0;model.forEach(m=>{const c=m.cells[l.key];if(c.a!=null)sa+=c.a;if(c.b!=null)sb+=c.b;});const d=sa-sb,cls=d>0?'up':(d<0?'down':'flat'),ar=d>0?'\u25b2':(d<0?'\u25bc':'=');return `<td class="cmp-grp"><span class="cm-real">${fmtNum(sa)}</span></td><td><span class="cm-real">${fmtNum(sb)}</span></td><td class="difcol delta ${cls}">${ar} ${esc(fmtNum(Math.abs(d)))}</td>`;}).join('');
   const sub=`<tr class="sub"><td class="name">Totales</td>${subCells}</tr>`;
   const ncols=1+lines.length*3;
-  body.innerHTML=controls+`<div class="rd-wrap"><div class="rep-note" style="margin-bottom:14px">Comparativo de <b>${esc(CMP_VENDOR)}</b> · unidades reales por línea. Muestra <b>${esc(la)}</b>, <b>${esc(lb)}</b> y la <b>diferencia</b> (${esc(la)} − ${esc(lb)}): ▲ verde si vendió más, ▼ rojo si bajó. <b>Clic en cualquier encabezado de columna para ordenar de mayor a menor.</b></div>
+  body.innerHTML=controls+`<div class="rd-wrap"><div class="rep-note" style="margin-bottom:14px">Comparativo de <b>${esc(CMP_VENDOR)}</b> \u00b7 unidades reales por l\u00ednea. Muestra <b>${esc(la)}</b>, <b>${esc(lb)}</b> y la <b>diferencia</b> (${esc(la)} \u2212 ${esc(lb)}): \u25b2 verde si vendi\u00f3 m\u00e1s, \u25bc rojo si baj\u00f3. <b>Clic en cualquier encabezado de columna para ordenar de mayor a menor.</b></div>
     <div class="rd-tblwrap"><table class="cmp-tbl cmp-lines hl-table">
     <thead><tr><th rowspan="2" class="l sortable" data-cmpsort="name">Cliente${arrowFor('name')}</th>${headTop}</tr><tr>${headSub}</tr></thead>
     <tbody>${model.length?rows+sub:`<tr><td colspan="${ncols}" style="text-align:center;color:var(--muted2);padding:24px">Sin clientes para comparar.</td></tr>`}</tbody></table></div></div>`;
 }
- 
-/* === Reporte 1: RUTA FIJA PERMANENTE (por vendedor y día) === */
+
+/* === Reporte 1: RUTA FIJA PERMANENTE (por vendedor y d\u00eda) === */
 function renderRutaDia(){
   const vends=vendorAggregates(STATE.org);
   const body=document.getElementById('repBody');
@@ -1277,40 +1322,40 @@ function renderRutaDia(){
   const avance=vObj.lines[HEADLINE_KEY].pct;
   const groups=clientGroups(STATE.org).filter(r=>r.vendor===REP_VENDOR);
   const dayClients=groups.filter(rec=>!isEmpty(rec.text(REP_DAY)));
- 
+
   const controls=`<div class="rd-controls">
     <div class="ctrl"><label>Vendedor</label><select class="inp" id="repVendSel">${vends.map(v=>`<option ${v.name===REP_VENDOR?'selected':''}>${esc(v.name)}</option>`).join('')}</select></div>
-    <div class="ctrl"><label>Día de visita</label><select class="inp" id="repDaySel">${DAYS.map(([col])=>`<option value="${col}" ${col===REP_DAY?'selected':''}>${DAYFULL[col]}</option>`).join('')}</select></div>
+    <div class="ctrl"><label>D\u00eda de visita</label><select class="inp" id="repDaySel">${DAYS.map(([col])=>`<option value="${col}" ${col===REP_DAY?'selected':''}>${DAYFULL[col]}</option>`).join('')}</select></div>
     <button class="btn" onclick="printRoute()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></svg>Exportar PDF (carta horizontal)</button>
     <button class="btn ghost" onclick="exportRuta()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13l6 6M15 13l-6 6"/></svg>Excel</button>
   </div>`;
- 
+
   const headTop=RUTA_LINES.map(k=>{const l=LINES.find(x=>x.key===k);return `<th colspan="3" class="lh" style="--lc:${lineColor(k)}">${esc(l.label)}</th>`;}).join('');
   const headSub=RUTA_LINES.map(()=>`<th class="gsep">Obj</th><th>Real</th><th>%</th>`).join('');
   let oSum={},rSum={};RUTA_LINES.forEach(k=>{oSum[k]=null;rSum[k]=null;});const add=(a,v)=>v==null?a:(a==null?v:a+v);
   const rows=dayClients.map(rec=>{
     const cells=RUTA_LINES.map(k=>{const line=LINES.find(x=>x.key===k);const ld=lineData(rec,line);
       if(ld.obj.n!=null)oSum[k]=add(oSum[k],ld.obj.n);if(ld.real.n!=null)rSum[k]=add(rSum[k],ld.real.n);
-      if(ld.status==='nodata')return `<td class="gsep o">—</td><td class="r">—</td><td class="p t-na">—</td>`;
+      if(ld.status==='nodata')return `<td class="gsep o">\u2014</td><td class="r">\u2014</td><td class="p t-na">\u2014</td>`;
       if(ld.status==='sinobj')return `<td class="gsep o">s/o</td><td class="r">${esc(ld.real.lit||'0')}</td><td class="p so-flag">s/obj</td>`;
       const cls=paceClass(ld.pctN,pace);
       return `<td class="gsep o">${esc(ld.obj.lit||'0')}</td><td class="r">${esc(ld.real.lit||'0')}</td><td class="p t-${cls}">${ld.pctN!=null?Math.round(ld.pctN)+'%':''}</td>`;}).join('');
     const zc=zoneColor(rec.text('ZONA')||'');
-    return `<tr><td class="name">${esc(rec.text('CLIENTE')||SD)}</td><td class="zone"><span class="rd-zonedot" style="background:${zc}"></span>${esc(rec.text('ZONA')||'—')}</td>${cells}</tr>`;
+    return `<tr><td class="name">${esc(rec.text('CLIENTE')||SD)}</td><td class="zone"><span class="rd-zonedot" style="background:${zc}"></span>${esc(rec.text('ZONA')||'\u2014')}</td>${cells}</tr>`;
   }).join('');
-  const subCells=RUTA_LINES.map(k=>{const p=(oSum[k]!=null&&oSum[k]>0&&rSum[k]!=null)?Math.round(rSum[k]/oSum[k]*100)+'%':'';return `<td class="gsep">${oSum[k]!=null?fmtNum(oSum[k]):'—'}</td><td>${rSum[k]!=null?fmtNum(rSum[k]):'—'}</td><td>${p}</td>`;}).join('');
-  const totalRow=dayClients.length?`<tr class="sub"><td class="name">Totales del día</td><td></td>${subCells}</tr>`:'';
+  const subCells=RUTA_LINES.map(k=>{const p=(oSum[k]!=null&&oSum[k]>0&&rSum[k]!=null)?Math.round(rSum[k]/oSum[k]*100)+'%':'';return `<td class="gsep">${oSum[k]!=null?fmtNum(oSum[k]):'\u2014'}</td><td>${rSum[k]!=null?fmtNum(rSum[k]):'\u2014'}</td><td>${p}</td>`;}).join('');
+  const totalRow=dayClients.length?`<tr class="sub"><td class="name">Totales del d\u00eda</td><td></td>${subCells}</tr>`:'';
   const ncols=2+RUTA_LINES.length*3;
   const tbody=dayClients.length?rows+totalRow:`<tr><td colspan="${ncols}" style="text-align:center;color:var(--muted2);padding:24px">Este vendedor no tiene clientes asignados a ${DAYFULL[REP_DAY]}.</td></tr>`;
- 
+
   body.innerHTML=controls+`
   <div id="printArea" class="rd-wrap">
     <div class="rd-head">
       <div><div class="rd-org">${esc(o.label)}</div><div class="rd-title">Ruta fija permanente</div></div>
       <div class="rd-meta">
         <div><span>Vendedor</span><b>${esc(REP_VENDOR)}</b></div>
-        <div><span>Día de ruta</span><b>${DAYFULL[REP_DAY]}</b></div>
-        <div><span>Avance total</span><b class="t-${paceClass(avance,pace)}">${avance!=null?Math.round(avance)+'%':'—'}</b></div>
+        <div><span>D\u00eda de ruta</span><b>${DAYFULL[REP_DAY]}</b></div>
+        <div><span>Avance total</span><b class="t-${paceClass(avance,pace)}">${avance!=null?Math.round(avance)+'%':'\u2014'}</b></div>
         <div><span>Periodo</span><b>${esc(perTxt)}</b></div>
         <div><span>Clientes</span><b>${dayClients.length}</b></div>
       </div>
@@ -1324,7 +1369,7 @@ function renderRutaDia(){
     </table></div>
   </div>`;
 }
- 
+
 /* === Reporte 2: RESUMEN SEMANAL (calendario, con importes facturados) === */
 let FACT_FILTER='all';
 function calCard(rec){
@@ -1333,7 +1378,7 @@ function calCard(rec){
   const code=disp(getCell(rec.group[rec.group.length-1],'COD CLIENTE',rec.H));
   const lines=RUTA_LINES.map(k=>{const line=LINES.find(l=>l.key===k);const ld=lineData(rec,line);const cls=paceClass(ld.pctN,pace);let val;
     if(ld.status==='nodata')val='<span class="t-na">s/d</span>';
-    else if(ld.status==='sinobj')val=`<span class="mono">${esc(ld.real.lit||'—')}</span> <span class="so-flag">s/obj</span>`;
+    else if(ld.status==='sinobj')val=`<span class="mono">${esc(ld.real.lit||'\u2014')}</span> <span class="so-flag">s/obj</span>`;
     else val=`<span class="mono">${esc(ld.real.lit||'0')}/${esc(ld.obj.lit||'0')}</span> <b class="t-${cls}">${ld.pctN!=null?Math.round(ld.pctN)+'%':''}</b>`;
     return `<div class="cc-line"><span class="cc-l">${esc(line.label)}</span><span class="cc-v">${val}</span></div>`;}).join('');
   const fac=rec.numLit('REAL FACT');const vendido=fac.n!=null&&fac.n>0;
@@ -1356,9 +1401,9 @@ function renderFactSemanal(){
     <div class="segmented" id="factSeg">
       <button class="seg-btn ${FACT_FILTER==='all'?'act':''}" data-fact="all">Todos</button>
       <button class="seg-btn ${FACT_FILTER==='sold'?'act':''}" data-fact="sold">Ya compraron</button>
-      <button class="seg-btn ${FACT_FILTER==='pend'?'act':''}" data-fact="pend">Sin compra aún</button>
+      <button class="seg-btn ${FACT_FILTER==='pend'?'act':''}" data-fact="pend">Sin compra a\u00fan</button>
     </div>
-    <div class="rep-note">Facturado por día de la semana de <b>${esc(REP_VENDOR)}</b> · ${esc(perTxt)}. Los clientes <b style="color:var(--low)">sin compra</b> se resaltan en rojo (faltan por visitar). Clic en un cliente para ver detalle.</div></div>`;
+    <div class="rep-note">Facturado por d\u00eda de la semana de <b>${esc(REP_VENDOR)}</b> \u00b7 ${esc(perTxt)}. Los clientes <b style="color:var(--low)">sin compra</b> se resaltan en rojo (faltan por visitar). Clic en un cliente para ver detalle.</div></div>`;
   const groups=clientGroups(STATE.org).filter(r=>r.vendor===REP_VENDOR);
   const cols=DAYS.map(([col])=>{
     let dayClients=groups.filter(rec=>!isEmpty(rec.text(col)));
@@ -1371,17 +1416,17 @@ function renderFactSemanal(){
   }).join('');
   body.innerHTML=sel+`<div class="cal">${cols}</div>`;
 }
- 
+
 /* ============================================================
-   6. NAVEGACIÓN
+   6. NAVEGACI\u00d3N
    ============================================================ */
 function goHome(){STATE.org=null;STATE.vendor=null;setAccent(null);renderHome();showScreen('home');}
 function goVend(id){STATE.org=id;STATE.vendor=null;setAccent(id);document.getElementById('repBtn').style.display=(ROLE==='directivo')?'':'none';renderVendors();showScreen('vend');}
 function goCli(v){
   if(ROLE==='vendedor'&&!UNLOCKED.has(keyName(v))){
     const pass=vendorPass(v);
-    if(!pass){openAuth('Acceso no disponible','Este vendedor no tiene una contraseña configurada. Contacta a dirección.',()=>false,null);return;}
-    openAuth('Acceso de vendedor','Ingresa la contraseña de '+v+' para ver su cartera de clientes.',x=>x===pass,()=>{UNLOCKED.add(keyName(v));_goCli(v);});
+    if(!pass){openAuth('Acceso no disponible','Este vendedor no tiene una contrase\u00f1a configurada. Contacta a direcci\u00f3n.',()=>false,null);return;}
+    openAuth('Acceso de vendedor','Ingresa la contrase\u00f1a de '+v+' para ver su cartera de clientes.',x=>x===pass,()=>{UNLOCKED.add(keyName(v));_goCli(v);});
     return;
   }
   _goCli(v);
@@ -1389,7 +1434,7 @@ function goCli(v){
 function _goCli(v){STATE.vendor=v;document.getElementById('cliSearch').value='';LINE_FILTER='ALL';OBJF='con';DAY_FILTER='ALL';ORDER='regular';document.getElementById('daySel').value='ALL';document.getElementById('orderSel').value='regular';document.querySelectorAll('#objSeg .seg-btn').forEach(b=>b.classList.toggle('act',b.dataset.obj==='con'));buildLineSelector();renderClients();showScreen('cli');}
 function goFicha(uid){const c=CLI.find(x=>x.uid===uid);if(!c)return;renderFicha(c.rec);showScreen('ficha');}
 function goRep(){if(ROLE!=='directivo')return;renderReportes();showScreen('rep');}
- 
+
 /* ----- acceso ----- */
 let _authValidator=null,_authOnOk=null;
 function openAuth(title,sub,validator,onOk){
@@ -1402,7 +1447,7 @@ function openAuth(title,sub,validator,onOk){
   setTimeout(()=>inp.focus(),60);
 }
 function closeAuth(){document.getElementById('authModal').classList.remove('show');_authValidator=null;_authOnOk=null;}
-function submitAuth(){const v=passKey(document.getElementById('authInput').value);if(_authValidator&&_authValidator(v)){const cb=_authOnOk;closeAuth();cb&&cb();}else document.getElementById('authErr').textContent='Contraseña incorrecta. Inténtalo de nuevo.';}
+function submitAuth(){const v=passKey(document.getElementById('authInput').value);if(_authValidator&&_authValidator(v)){const cb=_authOnOk;closeAuth();cb&&cb();}else document.getElementById('authErr').textContent='Contrase\u00f1a incorrecta. Int\u00e9ntalo de nuevo.';}
 function setRoleUI(){
   const tag=document.getElementById('roleTag'),out=document.getElementById('logoutBtn');
   if(ROLE){out.style.display='';tag.style.display='';tag.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>${ROLE==='directivo'?'Directivos':'Vendedores'}`;}
@@ -1423,8 +1468,9 @@ function exportRuta(){exportExcel(document.querySelector('#printArea .rd-tbl'),`
 function exportCmp(){exportExcel(document.querySelector('.cmp-tbl'),`Comparativo_${(CMP_VENDOR||'').replace(/\s+/g,'_')}.xls`);}
 function showWelcome(){ROLE=null;UNLOCKED.clear();setRoleUI();showScreen('welcome');}
 function logout(){showWelcome();}
- 
+
 document.addEventListener('click',e=>{
+  const co=e.target.closest('.cli-coments');if(co){const sv=e.target.closest('[data-save]');if(sv)saveComment(sv);return;}
   const cc=e.target.closest('.cal-card');if(cc){cc.classList.toggle('open');return;}
   const rb=e.target.closest('[data-rep]');if(rb){REPORT=rb.dataset.rep;renderReportes();return;}
   const ov=e.target.closest('[data-org]');if(ov){goVend(ov.dataset.org);return;}
@@ -1455,7 +1501,7 @@ document.getElementById('orderSel').addEventListener('change',e=>{ORDER=e.target
 document.getElementById('periodSel').addEventListener('change',e=>{STATE.period=e.target.value;rerender();});
 document.getElementById('cutoffSel').addEventListener('change',e=>{const v=e.target.value;if(v){const[y,m,d]=v.split('-').map(Number);CUTOFF=new Date(y,m-1,d);}rerender();});
 document.getElementById('refreshBtn').addEventListener('click',init);
-document.getElementById('accDir').addEventListener('click',()=>openAuth('Acceso directivos','Ingresa la contraseña directiva para ver todo.',v=>v===passKey(DIRECTIVO_PASS),()=>{ROLE='directivo';afterLogin();}));
+document.getElementById('accDir').addEventListener('click',()=>openAuth('Acceso directivos','Ingresa la contrase\u00f1a directiva para ver todo.',v=>v===passKey(DIRECTIVO_PASS),()=>{ROLE='directivo';afterLogin();}));
 document.getElementById('accVen').addEventListener('click',()=>{ROLE='vendedor';afterLogin();});
 document.getElementById('logoutBtn').addEventListener('click',logout);
 document.getElementById('authOk').addEventListener('click',submitAuth);
@@ -1471,7 +1517,7 @@ document.addEventListener('change',e=>{
   else if(e.target.id==='cmpB'){CMP_B=e.target.value;renderComparativo();}
 });
 function rerender(){if(STATE.screen==='home')renderHome();else if(STATE.screen==='vend')renderVendors();else if(STATE.screen==='cli')renderClients();else if(STATE.screen==='rep')renderReportes();else if(STATE.screen==='ficha'){renderClients();goCli(STATE.vendor);}}
- 
+
 /* ============================================================
    7. INICIO
    ============================================================ */
@@ -1486,11 +1532,11 @@ function initCutoff(){const t=new Date();const z=n=>String(n).padStart(2,'0');do
 async function init(){
   const btn=document.getElementById('refreshBtn');btn.classList.add('spin');
   const grid=document.getElementById('divGrid');
-  grid.innerHTML=`<div class="state" style="grid-column:1/-1"><div class="ring"></div><h3>Cargando datos…</h3><p>Leyendo tu hoja publicada de Google Sheets (todos los relevos en paralelo).</p></div>`;
+  grid.innerHTML=`<div class="state" style="grid-column:1/-1"><div class="ring"></div><h3>Cargando datos\u2026</h3><p>Leyendo tu hoja publicada de Google Sheets (todos los relevos en paralelo).</p></div>`;
   try{await loadAll();LOAD_ERR='';}catch(err){LOAD_ERR=(err&&err.message)||String(err);DB={H:null,rows:[]};}
   btn.classList.remove('spin');
   if(!DB.rows.length){
-    grid.innerHTML=`<div class="state" style="grid-column:1/-1"><h3>No se pudieron cargar los datos</h3><p>Si lo ves en una vista previa, <b>descarga el archivo y ábrelo en tu navegador</b>. Verifica también que la hoja siga publicada como CSV.</p><div class="err-detail">${esc(LOAD_ERR)}</div><button class="btn" style="margin-top:16px" onclick="init()">Reintentar</button></div>`;
+    grid.innerHTML=`<div class="state" style="grid-column:1/-1"><h3>No se pudieron cargar los datos</h3><p>Si lo ves en una vista previa, <b>descarga el archivo y \u00e1brelo en tu navegador</b>. Verifica tambi\u00e9n que la hoja siga publicada como CSV.</p><div class="err-detail">${esc(LOAD_ERR)}</div><button class="btn" style="margin-top:16px" onclick="init()">Reintentar</button></div>`;
     return;
   }
   initCutoff(); buildPeriodSelector(); setRoleUI(); if(ROLE)goHome(); else showWelcome();
@@ -1499,4 +1545,3 @@ init();
 </script>
 </body>
 </html>
- 
