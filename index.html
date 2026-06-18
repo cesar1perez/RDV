@@ -114,7 +114,7 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .ln-pc{grid-area:pc;font-family:'IBM Plex Mono';font-weight:700;font-size:14px;text-align:right}
 .bar{height:7px;border-radius:6px;background:rgba(255,255,255,.07);overflow:visible;position:relative}
 .bar>i{display:block;height:100%;border-radius:6px;transition:width .6s cubic-bezier(.22,.9,.3,1)}
-.bar>.mk{position:absolute;top:-3px;bottom:-3px;width:2px;background:rgba(255,255,255,.65);border-radius:2px}
+.bar>.mk{position:absolute;top:-2px;bottom:-2px;width:2px;background:#fff;border-radius:2px;transform:translateX(-1px);box-shadow:0 0 0 1.5px rgba(7,20,46,.55)}
 .good>i{background:linear-gradient(90deg,#2fa46a,var(--good))}.t-good{color:var(--good)}
 .mid>i{background:linear-gradient(90deg,#d9a233,var(--mid))}.t-mid{color:var(--mid)}
 .low>i{background:linear-gradient(90deg,#d24f4f,var(--low))}.t-low{color:var(--low)}
@@ -217,6 +217,10 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 @media(max-width:560px){
   .cco-row{grid-template-columns:1fr;gap:3px;padding:8px 11px}
   .cco-txt{font-size:14px}
+  .cli-head{gap:8px 10px;align-items:flex-start}
+  .cli-id{flex:1 1 55%}
+  .cli-ring{margin-left:auto;padding-left:0}
+  .cli-tags{order:3;flex-basis:100%;margin-top:1px}
 }
 /* tabla de líneas alineada en tarjeta de cliente */
 .lt{margin-top:6px}
@@ -1108,7 +1112,15 @@ async function saveComment(btn){
   try{
     const res=await doSave({codCliente:code,mes:mes,anio:anio,campo:field,texto:texto});
     if(res&&res.ok){
-      const c=CLI.find(x=>String(x.uid)===String(uid)); if(c){if(field==='mid')c.cMid=texto;else if(field==='end')c.cEnd=texto;else c.cGer=texto;}
+      const c=CLI.find(x=>String(x.uid)===String(uid));
+      if(c){
+        if(field==='mid')c.cMid=texto;else if(field==='end')c.cEnd=texto;else c.cGer=texto;
+        try{
+          const heads={mid:['COMMENTARIO A MITAD DE MES','COMENTARIO A MITAD DE MES'],end:['COMENTARIOS A FINAL DE MES','COMENTARIO A FINAL DE MES'],ger:['COMENTARIO GERENTE','COMENTARIOS GERENTE','COMENTARIO DEL GERENTE','COMENTARIOS DEL GERENTE','RETROALIMENTACION GERENTE','RETROALIMENTACION DEL GERENTE','COMENTARIO GERENTE DE VENTAS','GERENTE DE VENTAS']}[field]||[];
+          const H=c.rec.H; let ci=-1; for(let j=0;j<heads.length;j++){const k=H.idx(heads[j]); if(k>=0){ci=k;break;}}
+          if(ci>=0){const g=c.rec.group; g[g.length-1][ci]=texto;}
+        }catch(e){}
+      }
       btn.innerHTML='\u2713 Guardado'; btn.classList.add('ok');
       setTimeout(()=>{btn.innerHTML=orig;btn.disabled=false;btn.classList.remove('ok');},1600);
     } else { alert('No se pudo guardar: '+((res&&res.error)||'error desconocido')); btn.innerHTML=orig; btn.disabled=false; }
