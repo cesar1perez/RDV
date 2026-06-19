@@ -446,6 +446,45 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .rep-tbl td.code{color:var(--accent)}
 .rep-tbl tr.sub td{font-weight:700;color:var(--txt);border-top:2px solid var(--line2);background:rgba(255,255,255,.03)}
 .rep-empty{font-size:12.5px;color:var(--muted2);font-style:italic;padding:6px 0}
+/* ACT.1 caja de evidencia */
+.act1-box{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:40px 24px;background:linear-gradient(160deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;max-width:540px;margin:0 auto}
+.act1-title{font-family:'Archivo';font-weight:800;font-size:18px}
+.act1-sub{font-size:13px;color:var(--muted)}
+.act1-btn{margin-top:8px;display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#07142e;text-decoration:none;font-family:'Manrope';font-weight:800;font-size:14px;padding:12px 22px;border-radius:11px;transition:.18s}
+.act1-btn:hover{filter:brightness(1.06)}
+/* ACT.119 mapa */
+.map-legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin:4px 0 12px}
+.map-leg{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--muted)}
+.map-leg.dim{opacity:.32}
+.dotc{width:11px;height:11px;border-radius:50%;flex:none}
+.map-canvas-wrap{display:grid;grid-template-columns:1fr 270px;gap:14px}
+.map-canvas{position:relative;height:540px;border:1px solid var(--line2);border-radius:14px;background:
+  linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px) 0 0/100% 34px,
+  linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px) 0 0/34px 100%,
+  radial-gradient(circle at 50% 40%,rgba(255,210,30,.05),transparent 70%),var(--bg2);
+  overflow:hidden}
+.map-empty{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:var(--muted2);font-size:13px}
+.map-pin{position:absolute;width:15px;height:15px;border-radius:50%;background:var(--pc);border:2px solid rgba(7,20,46,.65);transform:translate(-50%,-50%);cursor:pointer;padding:0;transition:.12s;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+.map-pin.nc{border-color:#e23c3c;box-shadow:0 0 0 2px rgba(225,60,60,.35)}
+.map-pin:hover{width:19px;height:19px;z-index:5}
+.map-pin.sel{width:21px;height:21px;z-index:6;box-shadow:0 0 0 4px rgba(255,255,255,.25)}
+.map-info{background:linear-gradient(160deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:14px;padding:16px;min-height:160px}
+.mi-empty{color:var(--muted2);font-size:12.5px;line-height:1.5}
+.mi-head{display:flex;align-items:flex-start;gap:9px;border-bottom:1px solid var(--line);padding-bottom:11px;margin-bottom:11px}
+.mi-head .dotc{margin-top:4px;width:13px;height:13px}
+.mi-name{font-family:'Archivo';font-weight:800;font-size:15px;line-height:1.2}
+.mi-neg{font-size:12px;color:var(--muted);margin-top:2px}
+.mi-rows{display:flex;flex-direction:column;gap:9px}
+.mi-rows>div{display:flex;flex-direction:column;gap:1px}
+.mi-rows span{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted2);font-weight:700}
+.mi-rows b{font-size:13.5px}
+.mi-ok{color:var(--good)} .mi-no{color:var(--low)}
+.map-foot{font-size:12px;color:var(--muted);margin-top:10px}
+@media(max-width:760px){.map-canvas-wrap{grid-template-columns:1fr}.map-canvas{height:420px}}
+/* ACT.121 */
+.act121-block{margin-bottom:22px}
+.act121-h{font-family:'Archivo';font-weight:800;font-size:15px;margin-bottom:10px;display:flex;align-items:center;gap:9px}
+.act121-count{background:rgba(225,60,60,.15);color:#ff6b6b;font-family:'IBM Plex Mono';font-size:12px;font-weight:700;padding:2px 9px;border-radius:20px}
 /* calendario semanal de ruta */
 .rep-controls{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px}
 .rep-note{font-size:12.5px;color:var(--muted)}
@@ -839,6 +878,8 @@ function gsRun(fn,arg){return new Promise((res,rej)=>{google.script.run.withSucc
 /* ====== GUARDADO DE COMENTARIOS (cuando la pagina vive en GitHub) ======
    Pega aqui la URL /exec de tu app web de Apps Script, entre las comillas: */
 const SAVE_URL = 'https://script.google.com/a/macros/grupollanterama.com/s/AKfycbw790UCZ5ZmEK_SH1TygxSIXKSqiPi91AMDmJKphPUUrga-qLQ8Bp2i4AYb3jWLYgBt/exec';
+/* ACT.1 - enlace de evidencia (carpeta de Drive). Cambia este link cuando quieras: */
+const ACT1_LINK = 'https://1drv.ms/f/c/497943c6565ceafb/IgCLGSsk_tJQTJqz8KZNESp9Ae7H96Tf4iR6oi1EcUnznng?e=GmLWbe';
 function saveConfigured(){return APPS || (SAVE_URL && SAVE_URL.indexOf('http')===0);}
 async function doSave(payload){
   if(APPS) return await gsRun('guardarComentario',payload);
@@ -850,7 +891,16 @@ function getCell(row,name,H){const i=H.idx(name);return (i>=0&&i<row.length)?Str
 function getByIdx(row,i){return (i>=0&&i<row.length)?String(row[i]).trim():'';}
 
 async function loadAll(){
-  const text = APPS ? await gsRun('getData') : await fetchCSV(CONFIG.source);
+  let text;
+  if(APPS){ text = await gsRun('getData'); }
+  else if(SAVE_URL && SAVE_URL.indexOf('http')===0){
+    const r=await fetch(SAVE_URL,{method:'POST',body:JSON.stringify({action:'getData'}),redirect:'follow'});
+    const j=await r.json();
+    if(!j||!j.ok) throw new Error((j&&j.error)||'No se pudo leer la hoja desde Apps Script');
+    text=j.csv;
+  } else {
+    text = await fetchCSV(CONFIG.source);
+  }
   const grid=parseCSV(text).filter(r=>r.some(c=>String(c).trim()!==''));
   const hasCell=(r,w)=>r.some(c=>norm(c)===w), hasLike=(r,w)=>r.some(c=>norm(c).includes(w));
   let hIdx=grid.findIndex(r=>hasCell(r,'VENDEDOR')&&(hasCell(r,'COD CLIENTE')||hasCell(r,'CLIENTE')));
@@ -927,6 +977,15 @@ function makeRecord(group,H){
   rec.numLit=name=>{if(single){const raw=getCell(group[0],name,H);return {lit:raw,n:parseNum(raw)};}let s=0,had=false;group.forEach(r=>{const x=parseNum(getCell(r,name,H));if(x!=null){s+=x;had=true;}});return had?{lit:fmtNum(s),n:s}:{lit:'',n:null};};
   rec.vendor=resolveVendor(rec.text('VENDEDOR')).display;
   return rec;
+}
+/* Registro con la informacion general MAS RECIENTE del cliente (toma el ultimo mes con dato) */
+function latestInfoRec(rec){
+  const H=DB.H; const code=String(rec.text('COD CLIENTE')||'').trim();
+  if(!code) return rec;
+  const rows=DB.rows.filter(r=>String(getCell(r,'COD CLIENTE',H)||'').trim()===code);
+  if(!rows.length) return rec;
+  rows.sort((a,b)=>periodRank(getCell(a,'A\u00d1O',H),getCell(a,'MES',H))-periodRank(getCell(b,'A\u00d1O',H),getCell(b,'MES',H)));
+  return makeRecord(rows,H);
 }
 function lineData(rec,line){
   const H=rec.H, obj=rec.numLit(line.obj), real=rec.numLit(line.real);
@@ -1038,7 +1097,7 @@ function renderClients(){
   document.getElementById('cliTitle').textContent=STATE.vendor;
   document.getElementById('cliPace').innerHTML=paceText();
   const groups=clientGroups(STATE.org).filter(rec=>rec.vendor===STATE.vendor);
-  CLI=groups.map((rec,i)=>{const hl=lineData(rec,LINES.find(l=>l.key===HEADLINE_KEY));return {rec,uid:i,code:getCell(rec.group[rec.group.length-1],'COD CLIENTE',rec.H),cliente:rec.text('CLIENTE'),negocio:rec.text('NOMBRE DE NEGOCIO'),zona:rec.text('ZONA'),giro:rec.text('GIRO'),cMid:rec.text('COMMENTARIO A MITAD DE MES')||rec.text('COMENTARIO A MITAD DE MES'),cEnd:rec.text('COMENTARIOS A FINAL DE MES')||rec.text('COMENTARIO A FINAL DE MES'),cGer:rec.text('COMENTARIO GERENTE')||rec.text('COMENTARIOS GERENTE')||rec.text('COMENTARIO DEL GERENTE')||rec.text('COMENTARIOS DEL GERENTE')||rec.text('RETROALIMENTACION GERENTE')||rec.text('RETROALIMENTACION DEL GERENTE')||rec.text('COMENTARIO GERENTE DE VENTAS')||rec.text('GERENTE DE VENTAS'),pctN:hl.pctN,hlStatus:hl.status,search:keyName([rec.text('CLIENTE'),rec.text('NOMBRE DE NEGOCIO'),rec.text('COD CLIENTE'),rec.text('ZONA'),rec.text('GIRO')].join(' '))};});
+  CLI=groups.map((rec,i)=>{const hl=lineData(rec,LINES.find(l=>l.key===HEADLINE_KEY));const inf=latestInfoRec(rec);return {rec,uid:i,code:getCell(rec.group[rec.group.length-1],'COD CLIENTE',rec.H),cliente:inf.text('CLIENTE'),negocio:inf.text('NOMBRE DE NEGOCIO'),zona:inf.text('ZONA'),giro:inf.text('GIRO'),cMid:rec.text('COMMENTARIO A MITAD DE MES')||rec.text('COMENTARIO A MITAD DE MES'),cEnd:rec.text('COMENTARIOS A FINAL DE MES')||rec.text('COMENTARIO A FINAL DE MES'),cGer:rec.text('COMENTARIO GERENTE')||rec.text('COMENTARIOS GERENTE')||rec.text('COMENTARIO DEL GERENTE')||rec.text('COMENTARIOS DEL GERENTE')||rec.text('RETROALIMENTACION GERENTE')||rec.text('RETROALIMENTACION DEL GERENTE')||rec.text('COMENTARIO GERENTE DE VENTAS')||rec.text('GERENTE DE VENTAS'),pctN:hl.pctN,hlStatus:hl.status,search:keyName([inf.text('CLIENTE'),inf.text('NOMBRE DE NEGOCIO'),rec.text('COD CLIENTE'),inf.text('ZONA'),inf.text('GIRO')].join(' '))};});
   REVIEWED.clear();
   filterClients();
 }
@@ -1088,10 +1147,13 @@ function renderMatrix(base,grid,pace,note){
     </div>`;
   }).join('');
 }
+const CMT_OVERRIDE={};
+function cmtKey(uid,key){return uid+'|'+key+'|'+STATE.period;}
 function cardComments(c){
   const per=document.getElementById('periodSel'); const perTxt=per&&per.selectedOptions[0]?per.selectedOptions[0].textContent:'';
   const canMonth = STATE.period && STATE.period!=='ALL';
   const editVend = (ROLE==='vendedor'), editGer = (ROLE==='directivo');
+  const ov=(key,fallback)=>{const k=cmtKey(c.uid,key);return (k in CMT_OVERRIDE)?CMT_OVERRIDE[k]:fallback;};
   const field=(key,lbl,val,canEdit,cls)=>{
     val=isEmpty(val)?'':val;
     if(canEdit){
@@ -1100,7 +1162,7 @@ function cardComments(c){
     }
     return `<div class="cco-row ${cls||''} ${val?'':'sininfo'}"><span class="cco-lbl">${lbl}</span><span class="cco-txt">${val?esc(val):'Sin informaci\u00f3n'}</span></div>`;
   };
-  return `<div class="cli-coments"><div class="cco-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Comentarios${perTxt?` \u00b7 ${esc(perTxt)}`:''}</div>${field('mid','Vendedor \u00b7 mitad',c.cMid,editVend)}${field('end','Vendedor \u00b7 final',c.cEnd,editVend)}${field('ger','Gerente de ventas',c.cGer,editGer,'ger')}</div>`;
+  return `<div class="cli-coments"><div class="cco-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Comentarios${perTxt?` \u00b7 ${esc(perTxt)}`:''}</div>${field('mid','Vendedor \u00b7 mitad',ov('mid',c.cMid),editVend)}${field('end','Vendedor \u00b7 final',ov('end',c.cEnd),editVend)}${field('ger','Gerente de ventas',ov('ger',c.cGer),editGer,'ger')}</div>`;
 }
 async function saveComment(btn){
   const field=btn.dataset.save, uid=btn.dataset.uid, code=btn.dataset.code;
@@ -1112,6 +1174,7 @@ async function saveComment(btn){
   try{
     const res=await doSave({codCliente:code,mes:mes,anio:anio,campo:field,texto:texto});
     if(res&&res.ok){
+      CMT_OVERRIDE[cmtKey(uid,field)]=texto;
       const c=CLI.find(x=>String(x.uid)===String(uid));
       if(c){
         if(field==='mid')c.cMid=texto;else if(field==='end')c.cEnd=texto;else c.cGer=texto;
@@ -1210,8 +1273,9 @@ function fotoBlock(rec){
 }
 function renderFicha(rec){
   const pace=expectedPace();
-  const cliente=rec.text('CLIENTE'),negocio=rec.text('NOMBRE DE NEGOCIO'),code=rec.text('COD CLIENTE');
-  const foto=fotoBlock(rec);
+  const info=latestInfoRec(rec);
+  const cliente=info.text('CLIENTE'),negocio=info.text('NOMBRE DE NEGOCIO'),code=rec.text('COD CLIENTE');
+  const foto=fotoBlock(info);
   const perf=orderedLines().map(line=>{const ld=lineData(rec,line);const cls=paceClass(ld.pctN,pace);let pctTxt,flag='';if(ld.status==='nodata'){pctTxt='\u2014';flag='<span class="flag nd">sin data</span>';}else if(ld.status==='sinobj'){pctTxt='\u2014';flag='<span class="flag so">venta s/objetivo</span>';}else pctTxt=ld.pctLit?esc(ld.pctLit):(ld.pctN!=null?Math.round(ld.pctN)+'%':'\u2014');const mk=(pace!=null&&ld.status==='ok')?`<span class="mk" style="left:${Math.min(100,pace)}%"></span>`:'';
     return `<div class="perf-item"><div class="perf-top"><span class="perf-name">${esc(line.label)}${flag}</span><span class="perf-pct t-${cls}">${pctTxt}</span></div><div class="bar ${cls}"><i style="width:${clampW(ld.pctN)}%"></i>${mk}</div><div class="perf-nums"><span><span class="nlbl">Objetivo</span><b>${esc(ld.obj.lit||SD)}</b></span><span style="text-align:right"><span class="nlbl">Real</span><b>${esc(ld.real.lit||SD)}</b></span></div></div>`;}).join('');
   const apoyo=APOYO.map(n=>{const v=rec.text(n);const on=!isEmpty(v);const s=n.replace('MINUTA CREDITO / DESCUENTO','Minuta cr\u00e9dito/desc.').replace('MINUTA DE POP','Minuta POP').replace('EXHIBIDOR ','Exh. ').replace('ACTIVACIONES','Activaciones').replace('FACHADA','Fachada');return `<span class="chip ${on?'on':''}"><b>${esc(s)}:</b> ${esc(on?v:SD)}</span>`;}).join('');
@@ -1223,14 +1287,14 @@ function renderFicha(rec){
       <div class="card" style="--sc:#ffd21e">
         <div class="fh-name display">${esc(cliente||SD)}</div><div class="fh-neg">${esc(negocio||SD)}</div>
         <div class="fh-code">COD ${esc(disp(code))} \u00b7 ${esc(rec.text('MES'))} ${esc(rec.text('A\u00d1O'))}</div>
-        <div class="chips"><span class="chip"><b>Vendedor:</b> ${esc(disp(rec.vendor))}</span><span class="chip"><b>Giro:</b> ${esc(disp(rec.text('GIRO')))}</span><span class="chip"><b>Zona:</b> ${esc(disp(rec.text('ZONA')))}</span></div>
-        <div class="section-block" style="--sc:#ffd21e"><div class="card-title"><span class="dot"></span>Condici\u00f3n de cr\u00e9dito</div>${dl([['Tipo',rec.text('TIPO')],['D\u00edas de cr\u00e9dito',rec.text('DIAS')],['L\u00edmite',rec.text('LIMITE')],['PLR',rec.text('PLR')],['Fecha de alta',rec.text('FECHA DE ALTA')]])}</div>
-        <div class="section-block" style="--sc:#a78bfa"><div class="card-title"><span class="dot"></span>D\u00edas de visita</div><div class="days">${DAYS.map(([col,ab])=>`<div class="day ${!isEmpty(rec.text(col))?'on':''}">${ab}</div>`).join('')}</div></div>
+        <div class="chips"><span class="chip"><b>Vendedor:</b> ${esc(disp(info.vendor))}</span><span class="chip"><b>Giro:</b> ${esc(disp(info.text('GIRO')))}</span><span class="chip"><b>Zona:</b> ${esc(disp(info.text('ZONA')))}</span></div>
+        <div class="section-block" style="--sc:#ffd21e"><div class="card-title"><span class="dot"></span>Condici\u00f3n de cr\u00e9dito</div>${dl([['Tipo',info.text('TIPO')],['D\u00edas de cr\u00e9dito',info.text('DIAS')],['L\u00edmite',info.text('LIMITE')],['PLR',info.text('PLR')],['Fecha de alta',info.text('FECHA DE ALTA')]])}</div>
+        <div class="section-block" style="--sc:#a78bfa"><div class="card-title"><span class="dot"></span>D\u00edas de visita</div><div class="days">${DAYS.map(([col,ab])=>`<div class="day ${!isEmpty(info.text(col))?'on':''}">${ab}</div>`).join('')}</div></div>
       </div>
       <div class="card flat" style="--sc:#3aa6ff">
         <div class="card-title"><span class="dot"></span>Fachada y ubicaci\u00f3n</div>
         <div class="foto-wrap">${foto.img}</div>${foto.btn}
-        <div class="section-block">${dl([['Encargado de compras',rec.text('ENCARGADO DE COMPRAS')],['Celular',rec.text('NUMERO CELULAR')],['Direcci\u00f3n',rec.text('DIRECCION')],['Latitud',rec.text('LATITUD')],['Longitud',rec.text('LONGITUD')]])}</div>
+        <div class="section-block">${dl([['Encargado de compras',info.text('ENCARGADO DE COMPRAS')],['Celular',info.text('NUMERO CELULAR')],['Direcci\u00f3n',info.text('DIRECCION')],['Latitud',info.text('LATITUD')],['Longitud',info.text('LONGITUD')]])}</div>
       </div>
     </div>
     <div class="card section-block perf-section" style="--sc:#3fd18a"><div class="card-title"><span class="dot"></span>Desempe\u00f1o por l\u00ednea \u00b7 Real vs Objetivo</div><div class="perf-grid">${perf}</div></div>
@@ -1253,12 +1317,25 @@ let REPORT='ruta', REP_VENDOR=null, REP_DAY='LUNES';
 function renderReportes(){
   document.getElementById('repEyebrow').textContent=org(STATE.org).label;
   document.getElementById('repBar').innerHTML=
-    `<button class="btn ${REPORT==='ruta'?'act':''}" data-rep="ruta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>Ruta fija permanente (por d\u00eda)</button>
+    `<button class="btn ${REPORT==='act1'?'act':''}" data-rep="act1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h6l2 2h8v12a2 2 0 0 1-2 2H4z"/></svg>Act. 1 \u00b7 Carpeta de ruta</button>
+     <button class="btn ${REPORT==='act106'?'act':''}" data-rep="act106"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16M8 16v-5M12 16V8M16 16v-9"/></svg>Act. 106 \u00b7 Objetivos por l\u00ednea</button>
+     <button class="btn ${REPORT==='act119'?'act':''}" data-rep="act119"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3 3 6v15l6-3 6 3 6-3V3l-6 3-6-3z"/><path d="M9 3v15M15 6v15"/></svg>Act. 119 \u00b7 Mapa de clientes</button>
+     <button class="btn ${REPORT==='ruta'?'act':''}" data-rep="ruta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>Act. 120 \u00b7 Ruta fija permanente</button>
+     <button class="btn ${REPORT==='act121'?'act':''}" data-rep="act121"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM19 8v6M22 11h-6"/></svg>Act. 121 \u00b7 Altas y bajas</button>
      <button class="btn ${REPORT==='fact'?'act':''}" data-rep="fact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Resumen semanal</button>
      <button class="btn ${REPORT==='cmp'?'act':''}" data-rep="cmp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l3-3 3 2 4-5"/></svg>Rendimiento entre meses</button>`;
   renderActiveReport();
 }
-function renderActiveReport(){ if(REPORT==='ruta')renderRutaDia(); else if(REPORT==='fact')renderFactSemanal(); else renderComparativo(); }
+function renderActiveReport(){
+  if(REPORT==='ruta')renderRutaDia();
+  else if(REPORT==='fact')renderFactSemanal();
+  else if(REPORT==='cmp')renderComparativo();
+  else if(REPORT==='act1')renderAct1();
+  else if(REPORT==='act106')renderAct106();
+  else if(REPORT==='act119')renderAct119();
+  else if(REPORT==='act121')renderAct121();
+  else renderRutaDia();
+}
 
 /* === Reporte 3: RENDIMIENTO POR CLIENTE ENTRE MESES === */
 let CMP_VENDOR=null,CMP_A=null,CMP_B=null,CMP_SORT={key:null,dir:'desc'};
@@ -1478,6 +1555,188 @@ function exportExcel(tableEl,filename){
 }
 function exportRuta(){exportExcel(document.querySelector('#printArea .rd-tbl'),`Ruta_${(REP_VENDOR||'').replace(/\s+/g,'_')}_${REP_DAY}.xls`);}
 function exportCmp(){exportExcel(document.querySelector('.cmp-tbl'),`Comparativo_${(CMP_VENDOR||'').replace(/\s+/g,'_')}.xls`);}
+function exportAct106(){exportExcel(document.querySelector('.act106-tbl'),`Objetivos_${ACT106_SCOPE}.xls`);}
+function exportAct121(){exportExcel(document.querySelector('.act121-altas'),`Altas_clientes.xls`);}
+
+/* ===== ACT. 1 - Carpeta de evidencia (Drive) ===== */
+function renderAct1(){
+  const body=document.getElementById('repBody');
+  body.innerHTML=`<div class="rd-wrap"><div class="rep-note" style="margin-bottom:16px">El vendedor sale a ruta diariamente con la carpeta completa. La evidencia (im\u00e1genes) se encuentra en la carpeta compartida.</div>
+  <div class="act1-box">
+    <svg viewBox="0 0 24 24" width="50" height="50" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h6l2 2h8v12a2 2 0 0 1-2 2H4z"/></svg>
+    <div class="act1-title">Carpeta de evidencia \u00b7 Ruta diaria</div>
+    <div class="act1-sub">Da clic para abrir la carpeta con las im\u00e1genes de evidencia.</div>
+    <a class="act1-btn" href="${esc(ACT1_LINK)}" target="_blank" rel="noopener">Ver evidencia en Drive
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+  </div></div>`;
+}
+
+/* ===== ACT. 106 - Objetivos por l\u00ednea (mensual / semestral / anual) ===== */
+let ACT106_SCOPE='mes';
+function objAgg(orgId,scope){
+  const H=DB.H; const p=currentPeriodObj(); const y=p?p.y:0, m=p?p.m:0; const sem=m<=6?[1,6]:[7,12];
+  const rows=DB.rows.filter(r=>{
+    if(resolveVendor(getCell(r,'VENDEDOR',H)).org!==orgId)return false;
+    const ry=parseInt(String(getCell(r,'A\u00d1O',H)).replace(/\D/g,''))||0;
+    let rm=MONTHS[norm(getCell(r,'MES',H))]; if(rm==null)rm=parseInt(String(getCell(r,'MES',H)).replace(/\D/g,''))||0;
+    if(scope==='mes')return ry===y&&rm===m;
+    if(scope==='sem')return ry===y&&rm>=sem[0]&&rm<=sem[1];
+    return ry===y;
+  });
+  const byV=new Map();
+  rows.forEach(r=>{const rv=resolveVendor(getCell(r,'VENDEDOR',H));const name=rv.display;if(!byV.has(name))byV.set(name,{name,order:rv.order,lines:{}});const ob=byV.get(name);
+    LINES.forEach(line=>{const v=parseNum(getCell(r,line.obj,H));if(v!=null)ob.lines[line.key]=(ob.lines[line.key]||0)+v;});});
+  return {list:[...byV.values()].sort((a,b)=>a.order-b.order),y,m,sem};
+}
+function renderAct106(){
+  const body=document.getElementById('repBody'); const p=currentPeriodObj();
+  const agg=objAgg(STATE.org,ACT106_SCOPE); const lines=histLines();
+  const scopeLbl=ACT106_SCOPE==='mes'?(p?esc(p.label):'Mes')
+    :ACT106_SCOPE==='sem'?('Semestre '+(agg.m<=6?'1 (Ene\u2013Jun)':'2 (Jul\u2013Dic)')+' '+(p?p.y:''))
+    :('A\u00f1o '+(p?p.y:''));
+  const seg=`<div class="segmented" id="act106Seg">
+    <button class="seg-btn ${ACT106_SCOPE==='mes'?'act':''}" data-sc="mes">Mensual</button>
+    <button class="seg-btn ${ACT106_SCOPE==='sem'?'act':''}" data-sc="sem">Semestral</button>
+    <button class="seg-btn ${ACT106_SCOPE==='anio'?'act':''}" data-sc="anio">Anual</button></div>`;
+  const totLine={}; lines.forEach(l=>totLine[l.key]=0);
+  const rowsHtml=agg.list.map(v=>{
+    const cells=lines.map(l=>{const val=v.lines[l.key]||0;totLine[l.key]+=val;return `<td>${val?fmtNum(val):'\u2014'}</td>`;}).join('');
+    const vt=lines.reduce((a,l)=>a+(v.lines[l.key]||0),0);
+    return `<tr><td class="name">${esc(v.name)}</td>${cells}<td class="r">${fmtNum(vt)}</td></tr>`;
+  }).join('');
+  const totCells=lines.map(l=>`<td>${fmtNum(totLine[l.key])}</td>`).join('');
+  const grand=lines.reduce((a,l)=>a+totLine[l.key],0);
+  const head=lines.map(l=>`<th style="--lc:${lineColor(l.key)}">${esc(l.label)}</th>`).join('');
+  body.innerHTML=`<div class="rd-controls">${seg}
+    <button class="btn ghost" onclick="exportAct106()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Excel</button></div>
+    <div class="rd-wrap"><div class="rep-note" style="margin-bottom:12px">Suma de <b>objetivos por l\u00ednea de producto</b> de cada vendedor \u00b7 <b>${scopeLbl}</b>. Apoya la definici\u00f3n de estrategias para lograr los objetivos planteados (Act. 106).</div>
+    <div class="rd-tblwrap"><table class="rep-tbl hl-table act106-tbl">
+      <thead><tr><th class="l">Vendedor</th>${head}<th class="r">Total</th></tr></thead>
+      <tbody>${agg.list.length?rowsHtml+`<tr class="sub"><td class="name">Totales por l\u00ednea</td>${totCells}<td class="r">${fmtNum(grand)}</td></tr>`:`<tr><td colspan="${lines.length+2}" style="text-align:center;color:var(--muted2);padding:24px">Sin objetivos en este periodo.</td></tr>`}</tbody>
+    </table></div></div>`;
+}
+
+/* ===== ACT. 119 - Mapa de ubicaci\u00f3n de clientes ===== */
+const MAP_PALETTE=['#ffd21e','#22d3ee','#fb923c','#a78bfa','#3fd18a','#f472b6','#60a5fa','#f87171','#34d399','#facc15'];
+let ACT119={vend:'ALL',day:'ALL',zona:'ALL',compra:'ALL'};
+function mapDataset(){
+  const groups=clientGroups(STATE.org); const out=[];
+  groups.forEach(rec=>{
+    const inf=latestInfoRec(rec);
+    const lat=parseNum(inf.text('LATITUD')), lng=parseNum(inf.text('LONGITUD'));
+    const days=DAYS.filter(([col])=>!isEmpty(rec.text(col))).map(([col])=>col);
+    const fac=rec.numLit('REAL FACT').n; const compro=fac!=null&&fac>0;
+    out.push({cliente:inf.text('CLIENTE')||SD,negocio:inf.text('NOMBRE DE NEGOCIO')||'',zona:inf.text('ZONA')||'Sin zona',vendor:rec.vendor,lat,lng,days,compro,cel:inf.text('NUMERO CELULAR')||''});
+  });
+  return out;
+}
+function renderAct119(){
+  const body=document.getElementById('repBody');
+  const all=mapDataset();
+  const vendors=[...new Set(all.map(d=>d.vendor))].sort();
+  const zonas=[...new Set(all.map(d=>d.zona))].sort();
+  const vColor={}; vendors.forEach((v,i)=>vColor[v]=MAP_PALETTE[i%MAP_PALETTE.length]);
+  const filtered=all.filter(d=>{
+    if(ACT119.vend!=='ALL'&&d.vendor!==ACT119.vend)return false;
+    if(ACT119.day!=='ALL'&&!d.days.includes(ACT119.day))return false;
+    if(ACT119.zona!=='ALL'&&d.zona!==ACT119.zona)return false;
+    if(ACT119.compra==='si'&&!d.compro)return false;
+    if(ACT119.compra==='no'&&d.compro)return false;
+    return true;
+  });
+  const pts=filtered.filter(d=>d.lat!=null&&d.lng!=null&&isFinite(d.lat)&&isFinite(d.lng));
+  const sinCoord=filtered.length-pts.length;
+  let lats=pts.map(d=>d.lat), lngs=pts.map(d=>d.lng);
+  let minLa=Math.min(...lats),maxLa=Math.max(...lats),minLo=Math.min(...lngs),maxLo=Math.max(...lngs);
+  let rLa=(maxLa-minLa)||1, rLo=(maxLo-minLo)||1;
+  const proj=(d)=>{const x=4+((d.lng-minLo)/rLo)*92;const y=4+(1-(d.lat-minLa)/rLa)*92;return {x,y};};
+  const opt=(val,lbl,cur)=>`<option value="${esc(val)}" ${cur===val?'selected':''}>${esc(lbl)}</option>`;
+  const controls=`<div class="rd-controls map-controls">
+    <div class="ctrl"><label>Vendedor</label><select class="inp" id="mapVendSel">${opt('ALL','Todos',ACT119.vend)}${vendors.map(v=>opt(v,v,ACT119.vend)).join('')}</select></div>
+    <div class="ctrl"><label>D\u00eda de visita</label><select class="inp" id="mapDaySel">${opt('ALL','Todos los d\u00edas',ACT119.day)}${DAYS.map(([col])=>opt(col,DAYFULL[col],ACT119.day)).join('')}</select></div>
+    <div class="ctrl"><label>Zona</label><select class="inp" id="mapZonaSel">${opt('ALL','Todas',ACT119.zona)}${zonas.map(z=>opt(z,z,ACT119.zona)).join('')}</select></div>
+    <div class="ctrl"><label>Compra</label><select class="inp" id="mapCompraSel">${opt('ALL','Todos',ACT119.compra)}${opt('si','Ya compraron',ACT119.compra)}${opt('no','Sin compra',ACT119.compra)}</select></div>
+  </div>`;
+  const legend=vendors.map(v=>`<span class="map-leg ${ACT119.vend!=='ALL'&&ACT119.vend!==v?'dim':''}"><span class="dotc" style="background:${vColor[v]}"></span>${esc(v)}</span>`).join('');
+  const pins=pts.map((d,i)=>{const pr=proj(d);const col=vColor[d.vendor]||'#999';return `<button class="map-pin ${d.compro?'':'nc'}" data-pin="${i}" style="left:${pr.x}%;top:${pr.y}%;--pc:${col}" title="${esc(d.cliente)}"></button>`;}).join('');
+  body.innerHTML=controls+`<div class="rd-wrap">
+    <div class="rep-note" style="margin-bottom:10px">Ubicaci\u00f3n de clientes seg\u00fan ruta del vendedor (Act. 119). Color por vendedor. El borde rojo marca clientes <b>sin compra</b>. Da clic en un punto para ver su informaci\u00f3n.</div>
+    <div class="map-legend">${legend}</div>
+    <div class="map-canvas-wrap"><div class="map-canvas" id="mapCanvas">${pts.length?pins:'<div class="map-empty">Sin clientes con coordenadas para este filtro.</div>'}</div>
+      <div class="map-info" id="mapInfo"><div class="mi-empty">Selecciona un punto del mapa para ver el detalle del cliente.</div></div>
+    </div>
+    <div class="map-foot">Mostrando <b>${pts.length}</b> cliente(s) ubicados${sinCoord>0?` \u00b7 <b>${sinCoord}</b> sin coordenadas en la hoja`:''}.</div>
+  </div>`;
+  MAP_CACHE=pts; MAP_VCOLOR=vColor;
+}
+let MAP_CACHE=[], MAP_VCOLOR={};
+function showMapInfo(i){
+  const d=MAP_CACHE[i]; if(!d)return; const col=MAP_VCOLOR[d.vendor]||'#999';
+  const dias=d.days.length?d.days.map(c=>DAYFULL[c]).join(', '):'Sin d\u00eda asignado';
+  document.getElementById('mapInfo').innerHTML=`<div class="mi-card">
+    <div class="mi-head"><span class="dotc" style="background:${col}"></span><div><div class="mi-name">${esc(d.cliente)}</div>${d.negocio?`<div class="mi-neg">${esc(d.negocio)}</div>`:''}</div></div>
+    <div class="mi-rows">
+      <div><span>Vendedor</span><b>${esc(d.vendor)}</b></div>
+      <div><span>Zona</span><b>${esc(d.zona)}</b></div>
+      <div><span>D\u00eda(s) de visita</span><b>${esc(dias)}</b></div>
+      <div><span>Estado</span><b class="${d.compro?'mi-ok':'mi-no'}">${d.compro?'Ya compr\u00f3':'Sin compra'}</b></div>
+      ${d.cel?`<div><span>Celular</span><b>${esc(d.cel)}</b></div>`:''}
+    </div></div>`;
+}
+
+/* ===== ACT. 121 - Altas y bajas de clientes ===== */
+function parseAlta(s){
+  if(s==null||s==='')return null;
+  let str=String(s).trim();
+  let d=new Date(str);
+  if(!isNaN(d.getTime())&&/\d{4}/.test(str)&&str.length>6)return {y:d.getFullYear(),m:d.getMonth()+1};
+  const mm=str.match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/);
+  if(mm){let yy=parseInt(mm[3]);if(yy<100)yy+=2000;return {y:yy,m:parseInt(mm[2])};}
+  return null;
+}
+const MES_ABBR=['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+function renderAct121(){
+  const body=document.getElementById('repBody'); const H=DB.H;
+  // clientes (uno por cliente, info mas reciente)
+  const recs=clientGroups(STATE.org,'ALL');
+  const byCode={};
+  recs.forEach(rec=>{const code=String(rec.text('COD CLIENTE')||rec.text('CLIENTE')).trim();byCode[code]={code,cliente:rec.text('CLIENTE')||SD,vendor:rec.vendor,alta:parseAlta(rec.text('FECHA DE ALTA'))};});
+  // ALTAS: por mes de alta y vendedor
+  const vendors=[...new Set(Object.values(byCode).map(c=>c.vendor))].sort();
+  const buckets={}; // 'y-m' -> {y,m, perV:{vendor:count}, total}
+  Object.values(byCode).forEach(c=>{if(!c.alta)return;const key=c.alta.y+'-'+String(c.alta.m).padStart(2,'0');if(!buckets[key])buckets[key]={y:c.alta.y,m:c.alta.m,perV:{},total:0};buckets[key].perV[c.vendor]=(buckets[key].perV[c.vendor]||0)+1;buckets[key].total++;});
+  const bkeys=Object.keys(buckets).sort();
+  const altasHead=vendors.map(v=>`<th>${esc(v)}</th>`).join('');
+  const totV={}; vendors.forEach(v=>totV[v]=0); let totAll=0;
+  const altasRows=bkeys.map(k=>{const b=buckets[k];const cells=vendors.map(v=>{const n=b.perV[v]||0;totV[v]+=n;return `<td>${n||'\u2014'}</td>`;}).join('');totAll+=b.total;return `<tr><td class="name">${MES_ABBR[b.m]} ${b.y}</td>${cells}<td class="r">${b.total}</td></tr>`;}).join('');
+  const altasTot=`<tr class="sub"><td class="name">Total altas</td>${vendors.map(v=>`<td>${totV[v]}</td>`).join('')}<td class="r">${totAll}</td></tr>`;
+  const sinAlta=Object.values(byCode).filter(c=>!c.alta).length;
+  // BAJAS: presentes en un periodo y ausentes en el siguiente
+  const periodsAsc=PERIODS.filter(p=>p.key!=='ALL').slice().sort((a,b)=>a.rank-b.rank);
+  const presence=periodsAsc.map(p=>{
+    const set=new Set();
+    DB.rows.forEach(r=>{if(resolveVendor(getCell(r,'VENDEDOR',H)).org!==STATE.org)return;const ry=parseInt(String(getCell(r,'A\u00d1O',H)).replace(/\D/g,''))||0;let rm=MONTHS[norm(getCell(r,'MES',H))];if(rm==null)rm=parseInt(String(getCell(r,'MES',H)).replace(/\D/g,''))||0;if(ry===p.y&&rm===p.m){const code=String(getCell(r,'COD CLIENTE',H)||getCell(r,'CLIENTE',H)).trim();if(code)set.add(code);}});
+    return {p,set};
+  });
+  const bajas=[];
+  for(let i=1;i<presence.length;i++){const prev=presence[i-1],cur=presence[i];prev.set.forEach(code=>{if(!cur.set.has(code)){const info=byCode[code]||{cliente:code,vendor:'\u2014'};bajas.push({cliente:info.cliente,vendor:info.vendor,visto:prev.p.label,baja:cur.p.label});}});}
+  const bajasRows=bajas.length?bajas.map(b=>`<tr><td class="name">${esc(b.cliente)}</td><td>${esc(b.vendor)}</td><td>${esc(b.visto)}</td><td>${esc(b.baja)}</td></tr>`).join('')
+    :`<tr><td colspan="4" style="text-align:center;color:var(--muted2);padding:18px">No se detectaron bajas (ning\u00fan cliente desapareci\u00f3 entre meses).</td></tr>`;
+  body.innerHTML=`<div class="rd-controls"><button class="btn ghost" onclick="exportAct121()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Excel (altas)</button></div>
+    <div class="rd-wrap">
+    <div class="rep-note" style="margin-bottom:12px">Revisi\u00f3n anual de ruta (Act. 121). <b>Altas</b> por mes seg\u00fan la fecha de alta del cliente, y <b>bajas</b> detectadas (clientes que aparec\u00edan un mes y desaparecen al siguiente).</div>
+    <div class="act121-block"><div class="act121-h">Altas de clientes por mes y vendedor</div>
+    <div class="rd-tblwrap"><table class="rep-tbl hl-table act121-altas">
+      <thead><tr><th class="l">Mes de alta</th>${altasHead}<th class="r">Total</th></tr></thead>
+      <tbody>${bkeys.length?altasRows+altasTot:`<tr><td colspan="${vendors.length+2}" style="text-align:center;color:var(--muted2);padding:18px">Sin fechas de alta registradas.</td></tr>`}</tbody>
+    </table></div>${sinAlta>0?`<div class="rep-empty">${sinAlta} cliente(s) sin fecha de alta en la hoja.</div>`:''}</div>
+    <div class="act121-block"><div class="act121-h">Bajas detectadas <span class="act121-count">${bajas.length}</span></div>
+    <div class="rd-tblwrap"><table class="rep-tbl hl-table">
+      <thead><tr><th class="l">Cliente</th><th>Vendedor</th><th>Visto por \u00faltima vez</th><th>Desapareci\u00f3 en</th></tr></thead>
+      <tbody>${bajasRows}</tbody>
+    </table></div></div>
+    </div>`;
+}
 function showWelcome(){ROLE=null;UNLOCKED.clear();setRoleUI();showScreen('welcome');}
 function logout(){showWelcome();}
 
@@ -1491,6 +1750,8 @@ document.addEventListener('click',e=>{
   const cl=e.target.closest('[data-cli]');if(cl){goFicha(parseInt(cl.dataset.cli));return;}
   const fs=e.target.closest('#factSeg .seg-btn');if(fs){FACT_FILTER=fs.dataset.fact;renderFactSemanal();return;}
   const cs=e.target.closest('[data-cmpsort]');if(cs){const k=cs.dataset.cmpsort;if(CMP_SORT.key===k)CMP_SORT.dir=CMP_SORT.dir==='desc'?'asc':'desc';else{CMP_SORT.key=k;CMP_SORT.dir='desc';}renderComparativo();return;}
+  const a6=e.target.closest('#act106Seg .seg-btn');if(a6){ACT106_SCOPE=a6.dataset.sc;renderAct106();return;}
+  const mp=e.target.closest('.map-pin');if(mp){document.querySelectorAll('.map-pin.sel').forEach(x=>x.classList.remove('sel'));mp.classList.add('sel');showMapInfo(parseInt(mp.dataset.pin));return;}
   const sg=e.target.closest('#objSeg .seg-btn');if(sg){OBJF=sg.dataset.obj;document.querySelectorAll('#objSeg .seg-btn').forEach(b=>b.classList.toggle('act',b===sg));filterClients();return;}
   const wc=e.target.closest('[data-welcome]');if(wc){gotoWelcome();return;}
   const bk=e.target.closest('[data-go]');if(bk){const g=bk.dataset.go;if(g==='home')goHome();else if(g==='vend')goVend(STATE.org);else if(g==='cli')goCli(STATE.vendor);return;}
@@ -1527,6 +1788,10 @@ document.addEventListener('change',e=>{
   else if(e.target.id==='cmpVendSel'){CMP_VENDOR=e.target.value;renderComparativo();}
   else if(e.target.id==='cmpA'){CMP_A=e.target.value;renderComparativo();}
   else if(e.target.id==='cmpB'){CMP_B=e.target.value;renderComparativo();}
+  else if(e.target.id==='mapVendSel'){ACT119.vend=e.target.value;renderAct119();}
+  else if(e.target.id==='mapDaySel'){ACT119.day=e.target.value;renderAct119();}
+  else if(e.target.id==='mapZonaSel'){ACT119.zona=e.target.value;renderAct119();}
+  else if(e.target.id==='mapCompraSel'){ACT119.compra=e.target.value;renderAct119();}
 });
 function rerender(){if(STATE.screen==='home')renderHome();else if(STATE.screen==='vend')renderVendors();else if(STATE.screen==='cli')renderClients();else if(STATE.screen==='rep')renderReportes();else if(STATE.screen==='ficha'){renderClients();goCli(STATE.vendor);}}
 
