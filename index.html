@@ -485,6 +485,53 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .act121-block{margin-bottom:22px}
 .act121-h{font-family:'Archivo';font-weight:800;font-size:15px;margin-bottom:10px;display:flex;align-items:center;gap:9px}
 .act121-count{background:rgba(225,60,60,.15);color:#ff6b6b;font-family:'IBM Plex Mono';font-size:12px;font-weight:700;padding:2px 9px;border-radius:20px}
+.act1-pending{margin-top:8px;font-family:'Manrope';font-weight:800;font-size:13px;color:var(--mid);background:rgba(255,200,58,.12);border:1px solid rgba(255,200,58,.3);padding:9px 18px;border-radius:11px}
+/* ACT.2-3 reporte de comentarios */
+.a2-list{display:flex;flex-direction:column;gap:13px}
+.a2-card{background:linear-gradient(160deg,var(--panel),var(--bg2));border:1px solid var(--line);border-left:5px solid var(--line2);border-radius:13px;padding:15px 17px}
+.a2-card.t-bd-good{border-left-color:var(--good)} .a2-card.t-bd-mid{border-left-color:var(--mid)} .a2-card.t-bd-low{border-left-color:var(--low)} .a2-card.t-bd-na{border-left-color:var(--line2)}
+.a2-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;border-bottom:1px solid var(--line);padding-bottom:11px;margin-bottom:11px}
+.a2-name{font-family:'Archivo';font-weight:800;font-size:16px;line-height:1.2}
+.a2-meta{font-size:11.5px;color:var(--muted);margin-top:3px}
+.a2-avbox{text-align:right;flex:none}
+.a2-avlbl{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted2);font-weight:700}
+.a2-av{font-family:'IBM Plex Mono';font-weight:800;font-size:21px;letter-spacing:-1px}
+.a2-na{font-size:11px;color:var(--muted2);font-weight:700}
+.a2-cmts{display:flex;flex-direction:column;gap:8px}
+.a2-cmt{display:grid;grid-template-columns:150px 1fr;gap:11px;align-items:start;padding:8px 11px;border-left:3px solid var(--accent);background:rgba(255,210,30,.05);border-radius:0 8px 8px 0}
+.a2-cmt.ger{border-left-color:var(--cyan);background:rgba(34,211,238,.06)}
+.a2-cmt.sin{border-left-color:var(--line2);background:rgba(255,255,255,.02)}
+.a2-lbl{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);padding-top:2px}
+.a2-cmt.ger .a2-lbl{color:var(--cyan)} .a2-cmt.sin .a2-lbl{color:var(--muted2)}
+.a2-txt{font-size:14px;color:var(--txt);line-height:1.45}
+.a2-cmt.sin .a2-txt{color:var(--muted2);font-style:italic}
+@media(max-width:560px){.a2-cmt{grid-template-columns:1fr;gap:2px}.a2-head{flex-direction:column}.a2-avbox{text-align:left}}
+/* ACT.87 */
+.a87-on{color:var(--accent);font-weight:700}
+.a87-no{color:var(--muted2)}
+/* ACT.5 mapa mental reloj */
+.mindmap{position:relative;max-width:680px;height:560px;margin:0 auto;display:none}
+.mm-ring{position:absolute;inset:6%;width:88%;height:88%;opacity:.9}
+.mm-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:120px;height:120px;border-radius:50%;background:var(--accent);color:#07142e;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-family:'Archivo';font-weight:800;font-size:13px;text-align:center;line-height:1.1;box-shadow:0 8px 24px rgba(0,0,0,.35);z-index:2}
+.mm-node{position:absolute;width:230px;background:linear-gradient(160deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:13px;padding:13px 15px 13px 14px;display:flex;gap:11px;align-items:flex-start;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.mm-node .mm-num{flex:none;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#07142e;font-family:'IBM Plex Mono';font-weight:800;display:flex;align-items:center;justify-content:center;font-size:14px}
+.mm-txt{font-size:12.5px;line-height:1.4;color:var(--txt)}
+.mm-top{top:0;left:50%;transform:translateX(-50%)}
+.mm-right{top:50%;right:0;transform:translateY(-50%)}
+.mm-bottom{bottom:0;left:50%;transform:translateX(-50%)}
+.mm-left{top:50%;left:0;transform:translateY(-50%)}
+.mm-flow{display:flex;flex-direction:column;gap:0;max-width:560px;margin:0 auto}
+.mm-fitem{display:flex;gap:12px;align-items:center;background:linear-gradient(160deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.mm-fitem .mm-num{flex:none;width:28px;height:28px;border-radius:50%;background:var(--accent);color:#07142e;font-family:'IBM Plex Mono';font-weight:800;display:flex;align-items:center;justify-content:center;font-size:14px}
+.mm-fitem span:last-child{font-size:13.5px;line-height:1.4}
+.mm-arrow{text-align:center;color:var(--accent);font-size:20px;line-height:1;padding:5px 0;font-weight:800}
+@media(min-width:780px){.mindmap{display:block}.mm-flow{display:none}}
+/* ACT.9 pasos */
+.steps9{display:flex;flex-direction:column;gap:11px;max-width:680px}
+.step9{display:flex;gap:14px;align-items:flex-start;background:linear-gradient(160deg,var(--panel),var(--bg2));border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:12px;padding:15px 17px}
+.s9-num{flex:none;width:34px;height:34px;border-radius:10px;background:var(--accent);color:#07142e;font-family:'Archivo';font-weight:800;display:flex;align-items:center;justify-content:center;font-size:17px}
+.s9-title{font-family:'Archivo';font-weight:800;font-size:15px}
+.s9-desc{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.45}
 /* calendario semanal de ruta */
 .rep-controls{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px}
 .rep-note{font-size:12.5px;color:var(--muted)}
@@ -1313,17 +1360,27 @@ function renderFicha(rec){
 /* ---- REPORTES ---- */
 const RUTA_LINES=['TOTAL','LUB','MOTO','FILTRO','LLANTAS'];
 const DAYFULL={LUNES:'Lunes',MARTES:'Martes',MIERCOLES:'Mi\u00e9rcoles',JUEVES:'Jueves',VIERNES:'Viernes',SABADO:'S\u00e1bado',ESPORADICO:'Espor\u00e1dico'};
-let REPORT='ruta', REP_VENDOR=null, REP_DAY='LUNES';
+let REPORT='act1', REP_VENDOR=null, REP_DAY='LUNES';
+const REP_TABS=[
+  ['act1','Act. 1 \u00b7 Carpeta de ruta'],
+  ['act2','Act. 2-3 \u00b7 Reporte de visitas'],
+  ['act4','Act. 4 \u00b7 Pedido sugerido'],
+  ['act5','Act. 5 \u00b7 Productos caducos'],
+  ['act7','Act. 7 \u00b7 Mezcla por canal'],
+  ['act81','Act. 8.1 \u00b7 Objetivos AGM'],
+  ['act9','Act. 9 \u00b7 Pasos de visita'],
+  ['act87','Act. 87 \u00b7 Plan de comercializaci\u00f3n'],
+  ['act89','Act. 89 \u00b7 Satisfacci\u00f3n del cliente'],
+  ['act106','Act. 106 \u00b7 Objetivos por l\u00ednea'],
+  ['act119','Act. 119 \u00b7 Mapa de clientes'],
+  ['ruta','Act. 120 \u00b7 Ruta fija permanente'],
+  ['act121','Act. 121 \u00b7 Altas y bajas'],
+  ['fact','Resumen semanal'],
+  ['cmp','Rendimiento entre meses'],
+];
 function renderReportes(){
   document.getElementById('repEyebrow').textContent=org(STATE.org).label;
-  document.getElementById('repBar').innerHTML=
-    `<button class="btn ${REPORT==='act1'?'act':''}" data-rep="act1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h6l2 2h8v12a2 2 0 0 1-2 2H4z"/></svg>Act. 1 \u00b7 Carpeta de ruta</button>
-     <button class="btn ${REPORT==='act106'?'act':''}" data-rep="act106"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16M8 16v-5M12 16V8M16 16v-9"/></svg>Act. 106 \u00b7 Objetivos por l\u00ednea</button>
-     <button class="btn ${REPORT==='act119'?'act':''}" data-rep="act119"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3 3 6v15l6-3 6 3 6-3V3l-6 3-6-3z"/><path d="M9 3v15M15 6v15"/></svg>Act. 119 \u00b7 Mapa de clientes</button>
-     <button class="btn ${REPORT==='ruta'?'act':''}" data-rep="ruta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>Act. 120 \u00b7 Ruta fija permanente</button>
-     <button class="btn ${REPORT==='act121'?'act':''}" data-rep="act121"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM19 8v6M22 11h-6"/></svg>Act. 121 \u00b7 Altas y bajas</button>
-     <button class="btn ${REPORT==='fact'?'act':''}" data-rep="fact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Resumen semanal</button>
-     <button class="btn ${REPORT==='cmp'?'act':''}" data-rep="cmp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l3-3 3 2 4-5"/></svg>Rendimiento entre meses</button>`;
+  document.getElementById('repBar').innerHTML=REP_TABS.map(([k,lbl])=>`<button class="btn ${REPORT===k?'act':''}" data-rep="${k}">${esc(lbl)}</button>`).join('');
   renderActiveReport();
 }
 function renderActiveReport(){
@@ -1331,10 +1388,18 @@ function renderActiveReport(){
   else if(REPORT==='fact')renderFactSemanal();
   else if(REPORT==='cmp')renderComparativo();
   else if(REPORT==='act1')renderAct1();
+  else if(REPORT==='act2')renderAct2();
+  else if(REPORT==='act4')renderAct4();
+  else if(REPORT==='act5')renderAct5();
+  else if(REPORT==='act7')renderAct7();
+  else if(REPORT==='act81')renderAct81();
+  else if(REPORT==='act9')renderAct9();
+  else if(REPORT==='act87')renderAct87();
+  else if(REPORT==='act89')renderAct89();
   else if(REPORT==='act106')renderAct106();
   else if(REPORT==='act119')renderAct119();
   else if(REPORT==='act121')renderAct121();
-  else renderRutaDia();
+  else renderAct1();
 }
 
 /* === Reporte 3: RENDIMIENTO POR CLIENTE ENTRE MESES === */
@@ -1737,6 +1802,156 @@ function renderAct121(){
     </table></div></div>
     </div>`;
 }
+
+/* ===== Reporte generico con enlace (Act. 4, 7, 89) ===== */
+function linkReport(opt){
+  const body=document.getElementById('repBody');
+  const btn = opt.link
+    ? `<a class="act1-btn" href="${esc(opt.link)}" target="_blank" rel="noopener">${esc(opt.btn||'Abrir enlace')}<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a>`
+    : `<div class="act1-pending">En desarrollo</div>`;
+  body.innerHTML=`<div class="rd-wrap"><div class="rep-note" style="margin-bottom:16px">${opt.note}</div>
+  <div class="act1-box">
+    <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${opt.icon}</svg>
+    <div class="act1-title">${esc(opt.title)}</div>
+    <div class="act1-sub">${esc(opt.sub)}</div>
+    ${btn}
+  </div></div>`;
+}
+function renderAct4(){linkReport({title:'Pedido sugerido',sub:'Da clic para abrir la evidencia del pedido sugerido.',btn:'Ver en Drive',link:ACT1_LINK,note:'El vendedor realiza un pedido sugerido al cliente (Act. 4). La evidencia se encuentra en la carpeta de Drive.',icon:'<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>'});}
+function renderAct7(){linkReport({title:'Estrategias de mezcla por canal',sub:'Da clic para abrir la evidencia de estrategias por canal.',btn:'Ver en Drive',link:ACT1_LINK,note:'Se cuenta con estrategias para incrementar la mezcla por canal (Act. 7). La evidencia se encuentra en la carpeta de Drive.',icon:'<path d="M3 3v18h18"/><path d="M18 9l-5 5-3-3-4 4"/>'});}
+function renderAct89(){linkReport({title:'Satisfacci\u00f3n del cliente',sub:'Indicador de evaluaci\u00f3n de satisfacci\u00f3n del cliente.',link:'',note:'Se cuenta con un indicador de evaluaci\u00f3n de satisfacci\u00f3n del cliente, analizado con el equipo gerencial y directivo (Act. 89). Pr\u00f3ximamente se enlazar\u00e1 el formulario.',icon:'<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/>'});}
+
+/* ===== ACT. 2-3 - Reporte formal de visitas / comentarios ===== */
+let ACT2={vend:'ALL',day:'ALL',q:''};
+function renderAct2(){
+  const body=document.getElementById('repBody'); const pace=expectedPace();
+  const groups=clientGroups(STATE.org);
+  const vendors=[...new Set(groups.map(r=>r.vendor))].sort();
+  const o=org(STATE.org), perTxt=document.getElementById('periodSel').selectedOptions[0]?.textContent||'';
+  let list=groups.map(rec=>{
+    const ld=lineData(rec,LINES.find(l=>l.key===HEADLINE_KEY));
+    const cMid=rec.text('COMMENTARIO A MITAD DE MES')||rec.text('COMENTARIO A MITAD DE MES');
+    const cEnd=rec.text('COMENTARIOS A FINAL DE MES')||rec.text('COMENTARIO A FINAL DE MES');
+    const cGer=rec.text('COMENTARIO GERENTE')||rec.text('COMENTARIOS GERENTE')||rec.text('COMENTARIO DEL GERENTE')||rec.text('COMENTARIOS DEL GERENTE')||rec.text('RETROALIMENTACION GERENTE')||rec.text('RETROALIMENTACION DEL GERENTE')||rec.text('COMENTARIO GERENTE DE VENTAS')||rec.text('GERENTE DE VENTAS');
+    const days=DAYS.filter(([col])=>!isEmpty(rec.text(col))).map(([col])=>col);
+    return {rec,cliente:rec.text('CLIENTE')||SD,negocio:rec.text('NOMBRE DE NEGOCIO')||'',zona:rec.text('ZONA')||'',vendor:rec.vendor,code:disp(getCell(rec.group[rec.group.length-1],'COD CLIENTE',rec.H)),pctN:ld.pctN,status:ld.status,days,cMid,cEnd,cGer};
+  });
+  if(ACT2.vend!=='ALL')list=list.filter(c=>c.vendor===ACT2.vend);
+  if(ACT2.day!=='ALL')list=list.filter(c=>c.days.includes(ACT2.day));
+  if(ACT2.q){const q=keyName(ACT2.q);list=list.filter(c=>keyName(c.cliente+' '+c.negocio+' '+c.code+' '+c.zona).includes(q));}
+  list.sort((a,b)=>{const pa=a.pctN==null?9999:a.pctN, pb=b.pctN==null?9999:b.pctN;return pa-pb;});
+  const controls=`<div class="rd-controls">
+    <div class="ctrl"><label>Vendedor</label><select class="inp" id="a2Vend">${['ALL',...vendors].map(v=>`<option value="${esc(v)}" ${ACT2.vend===v?'selected':''}>${v==='ALL'?'Todos':esc(v)}</option>`).join('')}</select></div>
+    <div class="ctrl"><label>D\u00eda de visita</label><select class="inp" id="a2Day"><option value="ALL" ${ACT2.day==='ALL'?'selected':''}>Todos los d\u00edas</option>${DAYS.map(([col])=>`<option value="${col}" ${ACT2.day===col?'selected':''}>${DAYFULL[col]}</option>`).join('')}</select></div>
+    <div class="ctrl" style="flex:1;min-width:180px"><label>Cliente</label><input class="inp" id="a2Q" placeholder="Buscar cliente, negocio, zona..." value="${esc(ACT2.q)}"></div>
+  </div>`;
+  const cmt=(lbl,val,cls)=>`<div class="a2-cmt ${cls||''} ${isEmpty(val)?'sin':''}"><span class="a2-lbl">${lbl}</span><span class="a2-txt">${isEmpty(val)?'Sin comentarios':esc(val)}</span></div>`;
+  const cards=list.map(c=>{
+    const cls=paceClass(c.pctN,pace);
+    const av=c.status==='nodata'?'<span class="a2-na">Sin objetivo</span>':(c.pctN!=null?`<span class="a2-av t-${cls}">${Math.round(c.pctN)}%</span>`:'\u2014');
+    const dias=c.days.length?c.days.map(d=>DAYFULL[d]).join(', '):'Sin d\u00eda';
+    return `<div class="a2-card t-bd-${cls}">
+      <div class="a2-head"><div><div class="a2-name">${esc(c.cliente)}</div><div class="a2-meta">${esc(c.negocio||'')}${c.negocio?' \u00b7 ':''}COD ${esc(c.code)} \u00b7 ${esc(c.vendor)} \u00b7 ${esc(c.zona||'\u2014')} \u00b7 ${esc(dias)}</div></div><div class="a2-avbox"><span class="a2-avlbl">Avance</span>${av}</div></div>
+      <div class="a2-cmts">${cmt('Vendedor \u00b7 mitad de mes',c.cMid)}${cmt('Vendedor \u00b7 final de mes',c.cEnd)}${cmt('Gerente de ventas',c.cGer,'ger')}</div>
+    </div>`;
+  }).join('');
+  body.innerHTML=controls+`<div class="rd-wrap">
+    <div class="print-head"><div class="ph-org">${esc(o.label)}</div><div class="ph-title">Reporte de visitas y comentarios \u00b7 ${esc(perTxt)}</div></div>
+    <div class="rep-note" style="margin-bottom:14px">Reporte diario de visitas con comentarios del <b>vendedor</b> y del <b>gerente</b> (Act. 2 y 3). Ordenado por los casos <b>m\u00e1s alarmantes</b> (menor avance primero). <b>${list.length}</b> cliente(s).</div>
+    <div class="a2-list">${list.length?cards:'<div class="empty-state">Sin clientes para este filtro.</div>'}</div>
+  </div>`;
+}
+
+/* ===== ACT. 8.1 - Objetivos AGM ===== */
+let ACT81_VEND='ALL';
+function renderAct81(){
+  const body=document.getElementById('repBody'); const pace=expectedPace();
+  const line=LINES.find(l=>l.key==='AGM');
+  const groups=clientGroups(STATE.org);
+  const vendors=[...new Set(groups.map(r=>r.vendor))].sort();
+  let list=groups.map(rec=>{const ld=lineData(rec,line);return {cliente:rec.text('CLIENTE')||SD,zona:rec.text('ZONA')||'\u2014',vendor:rec.vendor,code:disp(getCell(rec.group[rec.group.length-1],'COD CLIENTE',rec.H)),ld};});
+  if(ACT81_VEND!=='ALL')list=list.filter(c=>c.vendor===ACT81_VEND);
+  list=list.filter(c=>!(c.ld.status==='nodata'));
+  list.sort((a,b)=>{const pa=a.ld.pctN==null?9999:a.ld.pctN,pb=b.ld.pctN==null?9999:b.ld.pctN;return pa-pb;});
+  let oSum=0,rSum=0;
+  const rows=list.map(c=>{const ld=c.ld;if(ld.obj.n!=null)oSum+=ld.obj.n;if(ld.real.n!=null)rSum+=ld.real.n;
+    const cls=paceClass(ld.pctN,pace);
+    const av=ld.status==='sinobj'?'<span class="so-flag">s/obj</span>':(ld.pctN!=null?`<span class="t-${cls}">${Math.round(ld.pctN)}%</span>`:'\u2014');
+    return `<tr><td class="name">${esc(c.cliente)}</td><td>${esc(c.code)}</td><td>${esc(c.vendor)}</td><td>${esc(c.zona)}</td><td>${esc(ld.obj.lit||'0')}</td><td>${esc(ld.real.lit||'0')}</td><td class="r">${av}</td></tr>`;}).join('');
+  const tp=(oSum>0)?Math.round(rSum/oSum*100)+'%':'\u2014';
+  const tot=list.length?`<tr class="sub"><td class="name">Totales AGM</td><td></td><td></td><td></td><td>${fmtNum(oSum)}</td><td>${fmtNum(rSum)}</td><td class="r">${tp}</td></tr>`:'';
+  const controls=`<div class="rd-controls">
+    <div class="ctrl"><label>Vendedor</label><select class="inp" id="a81Vend">${['ALL',...vendors].map(v=>`<option value="${esc(v)}" ${ACT81_VEND===v?'selected':''}>${v==='ALL'?'Todos':esc(v)}</option>`).join('')}</select></div>
+    <button class="btn ghost" onclick="exportExcel(document.querySelector('.act81-tbl'),'Objetivos_AGM.xls')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Excel</button>
+  </div>`;
+  body.innerHTML=controls+`<div class="rd-wrap"><div class="rep-note" style="margin-bottom:12px">Objetivo y avance de la l\u00ednea <b>Bater\u00edas AGM</b> por cliente (Act. 8.1), ordenado por menor avance. El color del avance indica el ritmo esperado al corte.</div>
+    <div class="rd-tblwrap"><table class="rep-tbl hl-table act81-tbl">
+      <thead><tr><th class="l">Cliente</th><th>COD</th><th>Vendedor</th><th>Zona</th><th>Obj AGM</th><th>Real AGM</th><th class="r">Avance</th></tr></thead>
+      <tbody>${list.length?rows+tot:'<tr><td colspan="7" style="text-align:center;color:var(--muted2);padding:24px">Sin clientes con objetivo de AGM en este filtro.</td></tr>'}</tbody>
+    </table></div></div>`;
+}
+
+/* ===== ACT. 87 - Plan de comercializaci\u00f3n ===== */
+let ACT87_VEND='ALL';
+const ACT87_COLS=[['FACHADA','Fachada'],['EXHIBIDOR LTH','Exh. LTH'],['EXHIBIDOR LUB','Exh. Lubricante'],['EXHIBIDOR MOT','Exh. Motobater\u00eda'],['ACTIVACIONES','Activaciones'],['MINUTA CREDITO / DESCUENTO','Minuta cr\u00e9dito/desc.'],['MINUTA DE POP','Minuta POP']];
+function renderAct87(){
+  const body=document.getElementById('repBody');
+  const groups=clientGroups(STATE.org);
+  const vendors=[...new Set(groups.map(r=>r.vendor))].sort();
+  let list=groups.slice();
+  if(ACT87_VEND!=='ALL')list=list.filter(r=>r.vendor===ACT87_VEND);
+  const rows=list.map(rec=>{
+    const cells=ACT87_COLS.map(([col])=>{const v=rec.text(col);return isEmpty(v)?'<td class="a87-no">\u2014</td>':`<td class="a87-on">${esc(v)}</td>`;}).join('');
+    return `<tr><td class="name">${esc(rec.text('CLIENTE')||SD)}</td><td>${esc(rec.vendor)}</td>${cells}</tr>`;
+  }).join('');
+  const head=ACT87_COLS.map(([,lbl])=>`<th>${esc(lbl)}</th>`).join('');
+  const controls=`<div class="rd-controls">
+    <div class="ctrl"><label>Vendedor</label><select class="inp" id="a87Vend">${['ALL',...vendors].map(v=>`<option value="${esc(v)}" ${ACT87_VEND===v?'selected':''}>${v==='ALL'?'Todos':esc(v)}</option>`).join('')}</select></div>
+    <button class="btn ghost" onclick="exportExcel(document.querySelector('.act87-tbl'),'Plan_comercializacion.xls')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Excel</button>
+  </div>`;
+  body.innerHTML=controls+`<div class="rd-wrap"><div class="rep-note" style="margin-bottom:12px">Plan de comercializaci\u00f3n por cliente (Act. 87): fachada, exhibidores, activaciones y minutas. Las celdas con dato resaltan en \u00e1mbar.</div>
+    <div class="rd-tblwrap"><table class="rep-tbl hl-table act87-tbl">
+      <thead><tr><th class="l">Cliente</th><th>Vendedor</th>${head}</tr></thead>
+      <tbody>${list.length?rows:`<tr><td colspan="${ACT87_COLS.length+2}" style="text-align:center;color:var(--muted2);padding:24px">Sin clientes para este filtro.</td></tr>`}</tbody>
+    </table></div></div>`;
+}
+
+/* ===== ACT. 5 - Mapa mental (sentido horario): productos caducos ===== */
+function renderAct5(){
+  const body=document.getElementById('repBody');
+  const steps=[
+    'El vendedor identifica y registra acumuladores por vencer (rango de 4 meses) en tienda.',
+    'El vendedor recoge y reemplaza acumuladores vencidos por caducidad.',
+    'El t\u00e9cnico master valida el mes del acumulador y alg\u00fan detalle que tenga.',
+    'El vendedor desplaza el acumulador vencido con clientes espec\u00edficos de su cartera para su r\u00e1pida venta.'
+  ];
+  const pos=['top','right','bottom','left'];
+  const nodes=steps.map((t,i)=>`<div class="mm-node mm-${pos[i]}"><div class="mm-num">${i+1}</div><div class="mm-txt">${esc(t)}</div></div>`).join('');
+  body.innerHTML=`<div class="rd-wrap"><div class="rep-note" style="margin-bottom:16px">Revisi\u00f3n y seguimiento de productos caducos \u2013 detallista (Act. 5). Flujo en sentido de las manecillas del reloj.</div>
+  <div class="mindmap">
+    <svg class="mm-ring" viewBox="0 0 100 100" preserveAspectRatio="none"><circle cx="50" cy="50" r="34" fill="none" stroke="var(--line2)" stroke-width="0.6" stroke-dasharray="2 2"/><path d="M50 16 A34 34 0 0 1 84 50" fill="none" stroke="var(--accent)" stroke-width="1" marker-end="url(#mmar)"/><path d="M84 50 A34 34 0 0 1 50 84" fill="none" stroke="var(--accent)" stroke-width="1" marker-end="url(#mmar)"/><path d="M50 84 A34 34 0 0 1 16 50" fill="none" stroke="var(--accent)" stroke-width="1" marker-end="url(#mmar)"/><path d="M16 50 A34 34 0 0 1 50 16" fill="none" stroke="var(--accent)" stroke-width="1" marker-end="url(#mmar)"/><defs><marker id="mmar" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 z" fill="var(--accent)"/></marker></defs></svg>
+    <div class="mm-center"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#07142e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M19 5l-3 3M8 16l-3 3"/></svg><span>Productos<br>caducos</span></div>
+    ${nodes}
+  </div>
+  <div class="mm-flow">${steps.map((t,i)=>`<div class="mm-fitem"><span class="mm-num">${i+1}</span><span>${esc(t)}</span></div>`).join('<div class="mm-arrow">\u2193</div>')}</div>
+  </div>`;
+}
+
+/* ===== ACT. 9 - Pasos b\u00e1sicos de visita ===== */
+function renderAct9(){
+  const body=document.getElementById('repBody');
+  const pasos=[
+    ['Acercamiento','Saludo y presentaci\u00f3n con el cliente.'],
+    ['Revisi\u00f3n de inventario','En caso de que el cliente lo permita.'],
+    ['Pedido','Proponer o recibir el pedido.'],
+    ['Promociones','Ofrecer promociones y/o art\u00edculos comercializados.'],
+    ['Cobranza','Revisar cr\u00e9dito y/o cobranza pendiente.'],
+    ['Actividades promocionales','Revisar material POP, negociar exhibidores, revisar la imagen del producto y dar seguimiento a estas actividades.']
+  ];
+  const items=pasos.map((p,i)=>`<div class="step9"><div class="s9-num">${i+1}</div><div class="s9-body"><div class="s9-title">${esc(p[0])}</div><div class="s9-desc">${esc(p[1])}</div></div></div>`).join('');
+  body.innerHTML=`<div class="rd-wrap"><div class="rep-note" style="margin-bottom:16px">El vendedor cumple con los pasos b\u00e1sicos de visita (Act. 9).</div>
+  <div class="steps9">${items}</div></div>`;
+}
 function showWelcome(){ROLE=null;UNLOCKED.clear();setRoleUI();showScreen('welcome');}
 function logout(){showWelcome();}
 
@@ -1768,6 +1983,9 @@ document.addEventListener('mouseover',e=>{
   table.querySelectorAll('tbody tr').forEach(tr=>{const c=tr.children[idx];if(c){c.classList.add('col-hl');_colHL.push(c);}});
 });
 document.getElementById('cliSearch').addEventListener('input',filterClients);
+document.addEventListener('input',e=>{
+  if(e.target.id==='a2Q'){ACT2.q=e.target.value;renderAct2();const n=document.getElementById('a2Q');if(n){n.focus();const v=n.value;try{n.setSelectionRange(v.length,v.length);}catch(_){}}}
+});
 document.getElementById('lineSel').addEventListener('change',e=>{LINE_FILTER=e.target.value;filterClients();});
 document.getElementById('daySel').addEventListener('change',e=>{DAY_FILTER=e.target.value;filterClients();});
 document.getElementById('orderSel').addEventListener('change',e=>{ORDER=e.target.value;filterClients();});
@@ -1792,6 +2010,10 @@ document.addEventListener('change',e=>{
   else if(e.target.id==='mapDaySel'){ACT119.day=e.target.value;renderAct119();}
   else if(e.target.id==='mapZonaSel'){ACT119.zona=e.target.value;renderAct119();}
   else if(e.target.id==='mapCompraSel'){ACT119.compra=e.target.value;renderAct119();}
+  else if(e.target.id==='a2Vend'){ACT2.vend=e.target.value;renderAct2();}
+  else if(e.target.id==='a2Day'){ACT2.day=e.target.value;renderAct2();}
+  else if(e.target.id==='a81Vend'){ACT81_VEND=e.target.value;renderAct81();}
+  else if(e.target.id==='a87Vend'){ACT87_VEND=e.target.value;renderAct87();}
 });
 function rerender(){if(STATE.screen==='home')renderHome();else if(STATE.screen==='vend')renderVendors();else if(STATE.screen==='cli')renderClients();else if(STATE.screen==='rep')renderReportes();else if(STATE.screen==='ficha'){renderClients();goCli(STATE.vendor);}}
 
