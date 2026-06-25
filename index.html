@@ -2141,7 +2141,25 @@ const ACU_LINES=['PREMIUM','AGM','ESTANDAR'];
 const ACU_COLOR={PREMIUM:'#ffd21e',AGM:'#22d3ee',ESTANDAR:'#a78bfa',TOTAL:'#3fd18a'};
 const MESC={ene:1,feb:2,mar:3,abr:4,may:5,jun:6,jul:7,ago:8,sep:9,set:9,oct:10,nov:11,dic:12};
 const MESF=['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-function parseCampDate(s){s=String(s==null?'':s).trim().toLowerCase();if(!s)return null;const m=s.split(/[\/\-.\s]+/).filter(Boolean);if(m.length<3)return null;let d=parseInt(m[0]);let mo=MESC[m[1].slice(0,3)]||parseInt(m[1]);let y=parseInt(m[2]);if(isNaN(d)||!mo||isNaN(y))return null;if(y<100)y+=2000;return new Date(y,mo-1,d);}
+function parseCampDate(s){
+  s=String(s==null?'':s).trim(); if(!s)return null;
+  const low=s.toLowerCase();
+  const parts=low.split(/[\/\-.\s]+/).filter(Boolean);
+  // 1) formato es: dd/mmm/yy  (ej. 2/may/26)
+  if(parts.length>=3 && MESC[(parts[1]||'').slice(0,3)]){
+    let d=parseInt(parts[0]), mo=MESC[parts[1].slice(0,3)], y=parseInt(parts[2]);
+    if(!isNaN(d)&&mo&&!isNaN(y)){if(y<100)y+=2000;return new Date(y,mo-1,d);}
+  }
+  // 2) dd/mm/yyyy numerico (formato Mexico)
+  if(parts.length>=3 && /^\d+$/.test(parts[0]) && /^\d+$/.test(parts[1]) && /^\d+$/.test(parts[2])){
+    let d=parseInt(parts[0]), mo=parseInt(parts[1]), y=parseInt(parts[2]);
+    if(d>=1&&d<=31&&mo>=1&&mo<=12){if(y<100)y+=2000;return new Date(y,mo-1,d);}
+  }
+  // 3) fecha real (cuando la celda es tipo fecha): "Sat May 02 2026 ..."
+  const nd=new Date(s);
+  if(!isNaN(nd.getTime()))return new Date(nd.getFullYear(),nd.getMonth(),nd.getDate());
+  return null;
+}
 function dnum(dt){return dt.getFullYear()*10000+(dt.getMonth()+1)*100+dt.getDate();}
 function fdate(dt){return dt.getDate()+' '+MESF[dt.getMonth()+1].slice(0,3).toLowerCase()+' '+dt.getFullYear();}
 const CAMP_START=new Date(2026,5,25), CAMP_END=new Date(2026,6,25);
@@ -2181,6 +2199,7 @@ function calMonth(){
 }
 function renderStrategy(){
   const body=document.getElementById('stratBody');
+  if(!CAMP_DB){body.innerHTML=`<div class="empty-state">No se pudieron cargar los datos de la pesta\u00f1a <b>campania</b>.<br><span style="color:var(--muted2);font-size:12px">${esc(CAMP_ERR||'Revisa que el Codigo.gs tenga la funcion getCampania y que la pestana se llame campania.')}</span></div>`;return;}
   const ref=campAgg(STRAT.refStart,STRAT.refEnd), camp=campAgg(CAMP_START,CAMP_END);
   const codes=CAMP_CLIENTS.map(([c])=>_normCode(c).noz);
   // comparativo por cliente
