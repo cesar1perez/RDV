@@ -532,6 +532,23 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .s9-num{flex:none;width:34px;height:34px;border-radius:10px;background:var(--accent);color:#07142e;font-family:'Archivo';font-weight:800;display:flex;align-items:center;justify-content:center;font-size:17px}
 .s9-title{font-family:'Archivo';font-weight:800;font-size:15px}
 .s9-desc{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.45}
+/* CAMPANA especial */
+.camp-banner{margin-top:22px;display:flex;align-items:center;gap:16px;padding:18px 20px;border-radius:16px;cursor:pointer;background:linear-gradient(120deg,rgba(255,210,30,.16),rgba(34,211,238,.10));border:1px solid rgba(255,210,30,.35);transition:.18s;position:relative;overflow:hidden}
+.camp-banner::after{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent,rgba(255,255,255,.06));opacity:0;transition:.18s}
+.camp-banner:hover{transform:translateY(-2px);border-color:var(--accent);box-shadow:0 12px 30px rgba(0,0,0,.3)}
+.camp-banner:hover::after{opacity:1}
+.camp-ic{flex:none;width:52px;height:52px;border-radius:14px;background:var(--accent);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(255,210,30,.3)}
+.camp-txt{flex:1;min-width:0}
+.camp-tag{font-family:'Manrope';font-weight:800;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--accent)}
+.camp-title{font-family:'Archivo';font-weight:800;font-size:19px;line-height:1.15;margin:3px 0}
+.camp-sub{font-size:12.5px;color:var(--muted)}
+.camp-cta{flex:none;display:inline-flex;align-items:center;gap:7px;font-family:'Manrope';font-weight:800;font-size:13.5px;color:var(--accent)}
+@media(max-width:560px){.camp-banner{flex-wrap:wrap}.camp-cta{width:100%;justify-content:flex-end}}
+.camp-strip{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;font-family:'IBM Plex Mono';font-size:12.5px;color:var(--muted);background:rgba(255,210,30,.06);border:1px solid var(--line2);border-radius:11px;padding:11px 15px}
+.camp-strip-tag{font-family:'Manrope';font-weight:800;font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:#07142e;background:var(--accent);padding:3px 10px;border-radius:20px}
+.camp-strip-per{margin-left:auto}
+.camp-tbl .camp-nd{color:var(--muted2);font-style:italic;text-align:center}
+.camp-tbl tr.camp-miss td.name{color:var(--muted)}
 /* calendario semanal de ruta */
 .rep-controls{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px}
 .rep-note{font-size:12.5px;color:var(--muted)}
@@ -736,6 +753,17 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
       <p class="sub">Venta por línea. Elige la organización para ver a sus vendedores, clientes y el avance real vs objetivo. Datos en vivo; considera los meses que vayas agregando.</p>
     </div>
     <div class="div-grid" id="divGrid"></div>
+    <div id="campaignZone"></div>
+  </section>
+
+  <!-- CAMPANA ESPECIAL -->
+  <section class="screen" id="screen-camp">
+    <button class="back-btn" data-go="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Inicio</button>
+    <div class="sec-head">
+      <div class="eyebrow" id="campEyebrow">Campa\u00f1a especial</div>
+      <h1 class="h1 display">Recuperaci\u00f3n de venta de Acumuladores</h1>
+    </div>
+    <div id="campBody"></div>
   </section>
 
   <!-- VENDEDORES -->
@@ -1097,6 +1125,71 @@ function renderHome(){
       <div class="div-cta">Ver vendedores <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
     </div>`;
   }).join('');
+  const cz=document.getElementById('campaignZone');
+  if(cz){cz.innerHTML = DB.rows.length ? `<div class="camp-banner" data-camp="1">
+    <div class="camp-ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#07142e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg></div>
+    <div class="camp-txt"><div class="camp-tag">Campa\u00f1a especial \u00b7 25 jun \u2013 25 jul 2026</div>
+      <div class="camp-title">Recuperaci\u00f3n de venta de Acumuladores</div>
+      <div class="camp-sub">Seguimiento enfocado de clientes clave \u00b7 Premium, AGM, Est\u00e1ndar y Total \u00b7 objetivo vs real</div></div>
+    <div class="camp-cta">Ver campa\u00f1a <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+  </div>` : '';}
+}
+
+/* ===== CAMPANA: Recuperacion de Acumuladores ===== */
+const CAMP_INFO={start:'25 jun 2026',end:'25 jul 2026'};
+const CAMP_CLIENTS=[
+  ['007834','TECNOLOGIA Y SERVICIOS AMBIENTALES S.A DE C.V'],
+  ['005955','IRVING ARIEL GRANILLO GARRIDO'],
+  ['009270','PROVEEDORA DE LUBRICANTES'],
+  ['007838','NORMA PADILLA ARROYO'],
+  ['007176','REFACCIONARIA MANUEL'],
+  ['007498','MOTA CORTES JOSE JAIME'],
+  ['002199','XIMENA OROZCO GONZALEZ'],
+  ['000013','XAVIER LARA MAYORGA'],
+];
+const CAMP_LINES=['PREM','AGM','ESTANDAR','TOTAL'];
+function _normCode(c){c=String(c==null?'':c).trim().toUpperCase();return {raw:c,noz:c.replace(/^0+/,'')||c};}
+function campRecord(code){
+  const H=DB.H; const t=_normCode(code);
+  let rows=DB.rows.filter(r=>{const cc=_normCode(getCell(r,'COD CLIENTE',H));return cc.raw===t.raw||cc.noz===t.noz;});
+  if(STATE.period!=='ALL')rows=rows.filter(r=>(norm(getCell(r,'A\u00d1O',H))+'||'+norm(getCell(r,'MES',H)))===STATE.period);
+  if(!rows.length)return null;
+  rows.sort((a,b)=>periodRank(getCell(a,'A\u00d1O',H),getCell(a,'MES',H))-periodRank(getCell(b,'A\u00d1O',H),getCell(b,'MES',H)));
+  return makeRecord(rows,H);
+}
+function goCampaign(){renderCampaign();showScreen('camp');}
+function renderCampaign(){
+  const body=document.getElementById('campBody'); const pace=expectedPace();
+  const perTxt=document.getElementById('periodSel').selectedOptions[0]?.textContent||'';
+  const lines=CAMP_LINES.map(k=>LINES.find(l=>l.key===k));
+  let tot={}; CAMP_LINES.forEach(k=>tot[k]={o:null,r:null}); const add=(a,v)=>v==null?a:(a==null?v:a+v);
+  const rows=CAMP_CLIENTS.map(([code,nombre])=>{
+    const rec=campRecord(code);
+    if(!rec){return `<tr class="camp-miss"><td class="name">${esc(nombre)}</td><td>${esc(code)}</td><td>\u2014</td>${CAMP_LINES.map(()=>'<td colspan="3" class="camp-nd">Sin datos en el periodo</td>').join('')}</tr>`;}
+    const vend=rec.vendor; const cliente=rec.text('CLIENTE')||nombre;
+    const cells=lines.map((line,i)=>{const k=CAMP_LINES[i];const ld=lineData(rec,line);
+      if(ld.obj.n!=null)tot[k].o=add(tot[k].o,ld.obj.n); if(ld.real.n!=null)tot[k].r=add(tot[k].r,ld.real.n);
+      if(ld.status==='nodata')return `<td class="gsep o">\u2014</td><td class="r">\u2014</td><td class="p t-na">\u2014</td>`;
+      if(ld.status==='sinobj')return `<td class="gsep o">s/o</td><td class="r">${esc(ld.real.lit||'0')}</td><td class="p so-flag">s/obj</td>`;
+      const cls=paceClass(ld.pctN,pace);
+      return `<td class="gsep o">${esc(ld.obj.lit||'0')}</td><td class="r">${esc(ld.real.lit||'0')}</td><td class="p t-${cls}">${ld.pctN!=null?Math.round(ld.pctN)+'%':''}</td>`;
+    }).join('');
+    return `<tr><td class="name">${esc(cliente)}</td><td>${esc(code)}</td><td>${esc(vend)}</td>${cells}</tr>`;
+  }).join('');
+  const totCells=CAMP_LINES.map(k=>{const o=tot[k].o,r=tot[k].r;const p=(o!=null&&o>0&&r!=null)?Math.round(r/o*100)+'%':'';const cls=paceClass((o!=null&&o>0&&r!=null)?r/o*100:null,pace);return `<td class="gsep">${o!=null?fmtNum(o):'\u2014'}</td><td>${r!=null?fmtNum(r):'\u2014'}</td><td class="t-${cls}">${p}</td>`;}).join('');
+  const headTop=lines.map((l,i)=>`<th colspan="3" class="lh" style="--lc:${lineColor(CAMP_LINES[i])}">${esc(l.label)}</th>`).join('');
+  const headSub=CAMP_LINES.map(()=>`<th class="gsep">Obj</th><th>Real</th><th>%</th>`).join('');
+  body.innerHTML=`<div class="rd-controls">
+    <button class="btn ghost" onclick="exportExcel(document.querySelector('.camp-tbl'),'Campana_Acumuladores.xls')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Excel</button>
+  </div>
+  <div class="rd-wrap">
+    <div class="camp-strip"><span class="camp-strip-tag">Campa\u00f1a especial</span><span>${CAMP_INFO.start} \u2013 ${CAMP_INFO.end}</span><span class="camp-strip-per">Periodo de datos: <b>${esc(perTxt)}</b></span></div>
+    <div class="rep-note" style="margin:12px 0">Recuperaci\u00f3n de venta de acumuladores: objetivo vs real en <b>Premium, AGM, Est\u00e1ndar y Total</b> para los clientes clave seleccionados (de ambas organizaciones). Cambia el <b>Periodo</b> arriba para ver junio o julio.</div>
+    <div class="rd-tblwrap"><table class="rep-tbl rd-grouped hl-table camp-tbl">
+      <thead><tr><th rowspan="2" class="l">Cliente</th><th rowspan="2">COD</th><th rowspan="2">Vendedor</th>${headTop}</tr><tr>${headSub}</tr></thead>
+      <tbody>${rows}<tr class="sub"><td class="name">Totales campa\u00f1a</td><td></td><td></td>${totCells}</tr></tbody>
+    </table></div>
+  </div>`;
 }
 
 /* ---- VENDEDORES ---- */
@@ -1960,6 +2053,7 @@ document.addEventListener('click',e=>{
   const cc=e.target.closest('.cal-card');if(cc){cc.classList.toggle('open');return;}
   const rb=e.target.closest('[data-rep]');if(rb){REPORT=rb.dataset.rep;renderReportes();return;}
   const ov=e.target.closest('[data-org]');if(ov){goVend(ov.dataset.org);return;}
+  const cm=e.target.closest('[data-camp]');if(cm){goCampaign();return;}
   const vd=e.target.closest('[data-vend]');if(vd){goCli(vd.dataset.vend);return;}
   const ck=e.target.closest('[data-check]');if(ck){const id=parseInt(ck.dataset.check);if(REVIEWED.has(id))REVIEWED.delete(id);else REVIEWED.add(id);const card=ck.closest('.cli-card');if(card)card.classList.toggle('done');e.stopPropagation();return;}
   const cl=e.target.closest('[data-cli]');if(cl){goFicha(parseInt(cl.dataset.cli));return;}
@@ -2015,7 +2109,7 @@ document.addEventListener('change',e=>{
   else if(e.target.id==='a81Vend'){ACT81_VEND=e.target.value;renderAct81();}
   else if(e.target.id==='a87Vend'){ACT87_VEND=e.target.value;renderAct87();}
 });
-function rerender(){if(STATE.screen==='home')renderHome();else if(STATE.screen==='vend')renderVendors();else if(STATE.screen==='cli')renderClients();else if(STATE.screen==='rep')renderReportes();else if(STATE.screen==='ficha'){renderClients();goCli(STATE.vendor);}}
+function rerender(){if(STATE.screen==='home')renderHome();else if(STATE.screen==='vend')renderVendors();else if(STATE.screen==='cli')renderClients();else if(STATE.screen==='rep')renderReportes();else if(STATE.screen==='camp')renderCampaign();else if(STATE.screen==='ficha'){renderClients();goCli(STATE.vendor);}}
 
 /* ============================================================
    7. INICIO
