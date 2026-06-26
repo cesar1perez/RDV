@@ -549,6 +549,62 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .camp-strip-per{margin-left:auto}
 .camp-tbl .camp-nd{color:var(--muted2);font-style:italic;text-align:center}
 .camp-tbl tr.camp-miss td.name{color:var(--muted)}
+/* filtro de clientes (chips) */
+.cchip-bar{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px}
+.cchip{font-family:'Manrope';font-weight:700;font-size:12px;color:var(--muted);background:var(--bg2);border:1px solid var(--line);border-radius:20px;padding:6px 13px;cursor:pointer;transition:.14s}
+.cchip:hover{border-color:var(--accent);color:var(--txt)}
+.cchip.on{background:var(--accent);color:#07142e;border-color:var(--accent)}
+/* comparativo horizontal Ref vs Campana */
+.vs-chart{display:flex;flex-direction:column;gap:14px}
+.vs-row{display:grid;grid-template-columns:84px 1fr 54px;gap:12px;align-items:center}
+.vs-name{font-family:'Archivo';font-weight:800;font-size:13px;color:var(--lc)}
+.vs-bars{display:flex;flex-direction:column;gap:6px}
+.vs-line{display:flex;align-items:center;gap:8px}
+.vs-tag{flex:none;width:36px;font-family:'IBM Plex Mono';font-size:10px;font-weight:700;color:var(--muted2);text-transform:uppercase}
+.vs-tag.camp{color:var(--accent)}
+.vs-track{flex:1;height:16px;background:var(--bg2);border-radius:8px;overflow:hidden}
+.vs-fill{height:100%;border-radius:8px;min-width:2px;transition:width .4s cubic-bezier(.2,.8,.2,1)}
+.vs-fill.ref{background:var(--line2)}
+.vs-fill.camp{background:var(--accent)}
+.vs-val{flex:none;width:30px;text-align:right;font-family:'IBM Plex Mono';font-weight:800;font-size:13px}
+.vs-diff{font-family:'IBM Plex Mono';font-weight:800;font-size:14px;text-align:right}
+/* tira compacta por dia */
+.day-strip{display:flex;gap:8px;align-items:flex-end;overflow-x:auto;padding:6px 2px 2px;min-height:90px}
+.ds-col{flex:none;width:38px;display:flex;flex-direction:column;align-items:center;gap:3px;height:78px;justify-content:flex-end}
+.ds-bar{width:22px;background:linear-gradient(180deg,var(--accent),#caa613);border-radius:5px 5px 0 0;min-height:8px}
+.ds-v{font-family:'IBM Plex Mono';font-weight:800;font-size:12px}
+.ds-l{font-size:9.5px;color:var(--muted2);font-family:'IBM Plex Mono'}
+/* tabla comparativo mas grande */
+.strat-tbl td,.strat-tbl th{padding:11px 10px}
+.strat-tbl td.name{font-size:14.5px;font-weight:700}
+.strat-tbl td.rr{font-family:'IBM Plex Mono';font-weight:800;font-size:16px}
+.strat-tbl td.o{font-family:'IBM Plex Mono';font-size:12.5px;color:var(--muted)}
+.strat-tbl td.difcol{font-size:14px;font-weight:800}
+.strat-tbl td.dcto{font-family:'IBM Plex Mono';font-weight:800;font-size:14px;color:var(--accent)}
+.strat-tbl th.lh{font-size:13px;border-bottom:2px solid var(--lc)}
+.strat-tbl td.gsep,.strat-tbl th.gsep{border-left:2px solid var(--line2)}
+.strat-tbl tbody tr{border-bottom:1px solid var(--line)}
+/* controles filtro + toggle */
+.strat-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.strat-controls .cchip-bar{margin-bottom:0;flex:1}
+.cchip.tog{flex:none;background:var(--bg2);border-color:var(--line2);color:var(--accent);font-weight:800}
+.cchip.tog.on{background:var(--accent);color:#07142e}
+/* banda comparativo a todo el ancho */
+.vs-band{background:linear-gradient(160deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:8px}
+.vs-band .vs-chart{display:grid;grid-template-columns:1fr 1fr;gap:14px 32px}
+@media(max-width:760px){.vs-band .vs-chart{grid-template-columns:1fr}}
+/* tabla comparativo MAS grande */
+.strat-tbl{font-size:15px}
+.strat-tbl td,.strat-tbl th{padding:13px 12px}
+.strat-tbl td.name{font-size:15.5px;font-weight:700}
+.strat-tbl td.rr{font-family:'IBM Plex Mono';font-weight:800;font-size:19px}
+.strat-tbl td.o{font-family:'IBM Plex Mono';font-size:13.5px;color:var(--muted)}
+.strat-tbl td.difcol{font-size:16px;font-weight:800}
+.strat-tbl td.dcto{font-family:'IBM Plex Mono';font-weight:800;font-size:16px;color:var(--accent)}
+.strat-tbl th.lh{font-size:14px;border-bottom:2px solid var(--lc)}
+.strat-tbl td.gsep,.strat-tbl th.gsep{border-left:2px solid var(--line2)}
+.strat-tbl.only-tot td.rr,.strat-tbl.only-tot td.difcol{font-size:22px}
+.strat-tbl.only-tot th.lh{font-size:16px}
 /* boton estrategia en bienvenida */
 .wl-strat{display:flex;align-items:center;gap:16px;max-width:760px;margin:18px auto 0;padding:18px 20px;border-radius:16px;cursor:pointer;background:linear-gradient(120deg,rgba(255,210,30,.16),rgba(34,211,238,.10));border:1px solid rgba(255,210,30,.35);transition:.18s}
 .wl-strat:hover{transform:translateY(-2px);border-color:var(--accent);box-shadow:0 12px 30px rgba(0,0,0,.3)}
@@ -792,9 +848,9 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
       </div>
       <div class="wl-strat" id="accStrat">
         <div class="wl-strat-ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#07142e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg></div>
-        <div class="wl-strat-txt"><div class="wl-strat-tag">Estrategia especial \u00b7 25 jun \u2013 25 jul 2026 \u00b7 acceso libre</div>
-          <div class="wl-strat-title">Recuperaci\u00f3n de venta de Acumuladores</div>
-          <div class="wl-strat-sub">Progreso por d\u00eda, comparativo contra un periodo de referencia y apoyo otorgado \u00b7 sin contrase\u00f1a</div></div>
+        <div class="wl-strat-txt"><div class="wl-strat-tag">Estrategia especial · 25 jun – 25 jul 2026 · acceso libre</div>
+          <div class="wl-strat-title">Recuperación de venta de Acumuladores</div>
+          <div class="wl-strat-sub">Progreso por día, comparativo contra un periodo de referencia y apoyo otorgado · sin contraseña</div></div>
         <div class="wl-strat-cta">Ver estrategia <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
       </div>
       <div class="wl-priv">
@@ -809,8 +865,8 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
   <section class="screen" id="screen-strat">
     <button class="back-btn" id="stratBack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Inicio</button>
     <div class="sec-head">
-      <div class="eyebrow">Estrategia especial \u00b7 acumuladores</div>
-      <h1 class="h1 display">Recuperaci\u00f3n de venta de Acumuladores</h1>
+      <div class="eyebrow">Estrategia especial · acumuladores</div>
+      <h1 class="h1 display">Recuperación de venta de Acumuladores <span style="font-weight:600;font-size:.62em;color:var(--muted)">(de clientes seleccionados)</span></h1>
       <p class="sub">Progreso del <b>25 jun al 25 jul 2026</b> y comparativo contra el periodo de referencia que elijas en el calendario.</p>
     </div>
     <div id="stratBody"></div>
@@ -831,8 +887,8 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
   <section class="screen" id="screen-camp">
     <button class="back-btn" data-go="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Inicio</button>
     <div class="sec-head">
-      <div class="eyebrow" id="campEyebrow">Campa\u00f1a especial</div>
-      <h1 class="h1 display">Recuperaci\u00f3n de venta de Acumuladores</h1>
+      <div class="eyebrow" id="campEyebrow">Campaña especial</div>
+      <h1 class="h1 display">Recuperación de venta de Acumuladores</h1>
     </div>
     <div id="campBody"></div>
   </section>
@@ -2163,7 +2219,7 @@ function parseCampDate(s){
 function dnum(dt){return dt.getFullYear()*10000+(dt.getMonth()+1)*100+dt.getDate();}
 function fdate(dt){return dt.getDate()+' '+MESF[dt.getMonth()+1].slice(0,3).toLowerCase()+' '+dt.getFullYear();}
 const CAMP_START=new Date(2026,5,25), CAMP_END=new Date(2026,6,25);
-let STRAT={refStart:new Date(2026,4,25),refEnd:new Date(2026,5,24),calY:2026,calM:5,pick:'start'};
+let STRAT={refStart:new Date(2026,4,25),refEnd:new Date(2026,5,24),calY:2026,calM:5,pick:'start',clients:new Set()};
 function campAgg(startDt,endDt){
   const H=CAMP_DB.H, s=dnum(startDt), e=dnum(endDt);
   const out={}; CAMP_CLIENTS.forEach(([code,name])=>{out[_normCode(code).noz]={code,name,PREMIUM:0,AGM:0,ESTANDAR:0,dcto:0,days:{}};});
@@ -2178,6 +2234,17 @@ function campAgg(startDt,endDt){
   return out;
 }
 function tot4(o){return (o.PREMIUM||0)+(o.AGM||0)+(o.ESTANDAR||0);}
+function campObj(code){
+  // objetivo del cliente desde la hoja principal RDV, periodo seleccionado arriba
+  const H=DB.H, t=_normCode(code);
+  let rows=DB.rows.filter(r=>{const cc=_normCode(getCell(r,'COD CLIENTE',H));return cc.raw===t.raw||cc.noz===t.noz;});
+  if(STATE.period&&STATE.period!=='ALL')rows=rows.filter(r=>(norm(getCell(r,'A\u00d1O',H))+'||'+norm(getCell(r,'MES',H)))===STATE.period);
+  if(!rows.length)return {PREMIUM:0,AGM:0,ESTANDAR:0};
+  rows.sort((a,b)=>periodRank(getCell(a,'A\u00d1O',H),getCell(a,'MES',H))-periodRank(getCell(b,'A\u00d1O',H),getCell(b,'MES',H)));
+  const rec=makeRecord(rows,H);
+  const g=k=>{const n=rec.numLit(k).n;return n!=null?n:0;};
+  return {PREMIUM:g('OBJ PREM'),AGM:g('OBJ AGM'),ESTANDAR:g('OBJ ESTANDAR')};
+}
 function goStrategy(){
   showScreen('strat');
   const body=document.getElementById('stratBody');
@@ -2197,56 +2264,61 @@ function calMonth(){
     <div class="cal-grid cal-wd"><span>Lu</span><span>Ma</span><span>Mi</span><span>Ju</span><span>Vi</span><span>S\u00e1</span><span>Do</span></div>
     <div class="cal-grid">${cells}</div>`;
 }
+/* NOTA: el calendario de referencia (calMonth, STRAT.refStart/refEnd, click data-day/data-cmove)
+   se conserva en el codigo por si se requiere de vuelta, pero ya no se muestra. */
 function renderStrategy(){
   const body=document.getElementById('stratBody');
   if(!CAMP_DB){body.innerHTML=`<div class="empty-state">No se pudieron cargar los datos de la pesta\u00f1a <b>campania</b>.<br><span style="color:var(--muted2);font-size:12px">${esc(CAMP_ERR||'Revisa que el Codigo.gs tenga la funcion getCampania y que la pestana se llame campania.')}</span></div>`;return;}
-  const ref=campAgg(STRAT.refStart,STRAT.refEnd), camp=campAgg(CAMP_START,CAMP_END);
-  const codes=CAMP_CLIENTS.map(([c])=>_normCode(c).noz);
-  // comparativo por cliente
-  const lineCols=['PREMIUM','AGM','ESTANDAR','TOTAL'];
+  const camp=campAgg(CAMP_START,CAMP_END);
+  const onlyTot=!!STRAT.onlyTotal;
+  const lineCols=onlyTot?['TOTAL']:['PREMIUM','AGM','ESTANDAR','TOTAL'];
+  const selList=STRAT.clients.size?CAMP_CLIENTS.filter(([c])=>STRAT.clients.has(_normCode(c).noz)):CAMP_CLIENTS;
+  const perTxt=document.getElementById('periodSel').selectedOptions[0]?.textContent||'';
   const headTop=lineCols.map(k=>`<th colspan="3" class="lh" style="--lc:${ACU_COLOR[k]}">${k.charAt(0)+k.slice(1).toLowerCase()}</th>`).join('');
-  const headSub=lineCols.map(()=>`<th class="gsep">Ref</th><th>Camp</th><th>Dif</th>`).join('');
-  const diffCell=(c,rf)=>{const d=c-rf;const cls=d>0?'up':(d<0?'down':'flat');const ar=d>0?'\u25b2':(d<0?'\u25bc':'=');return `<td class="difcol delta ${cls}">${ar} ${Math.abs(d)}</td>`;};
+  const headSub=lineCols.map(()=>`<th class="gsep">Obj</th><th>Real</th><th>Avance</th>`).join('');
+  const avCell=(real,obj)=>{const pct=obj>0?Math.round(real/obj*100):null;const cls=pct==null?'na':(pct>=100?'good':(pct>=70?'mid':'low'));return `<td class="difcol t-${cls}">${pct==null?'\u2014':pct+'%'}</td>`;};
   let gT={PREMIUM:[0,0],AGM:[0,0],ESTANDAR:[0,0],TOTAL:[0,0]}, gDcto=0;
-  const rows=CAMP_CLIENTS.map(([code,name])=>{
-    const cc=_normCode(code).noz; const rf=ref[cc], cp=camp[cc];
-    const vals={PREMIUM:[rf.PREMIUM,cp.PREMIUM],AGM:[rf.AGM,cp.AGM],ESTANDAR:[rf.ESTANDAR,cp.ESTANDAR],TOTAL:[tot4(rf),tot4(cp)]};
+  const rows=selList.map(([code,name])=>{
+    const cc=_normCode(code).noz; const ob=campObj(code), cp=camp[cc];
+    const vals={PREMIUM:[ob.PREMIUM,cp.PREMIUM],AGM:[ob.AGM,cp.AGM],ESTANDAR:[ob.ESTANDAR,cp.ESTANDAR],TOTAL:[tot4(ob),tot4(cp)]};
     gDcto+=cp.dcto;
-    const cells=lineCols.map(k=>{const[r,c]=vals[k];gT[k][0]+=r;gT[k][1]+=c;return `<td class="gsep o">${r||'\u2014'}</td><td class="rr">${c||'\u2014'}</td>${diffCell(c,r)}`;}).join('');
+    ['PREMIUM','AGM','ESTANDAR','TOTAL'].forEach(k=>{gT[k][0]+=vals[k][0];gT[k][1]+=vals[k][1];});
+    const cells=lineCols.map(k=>{const[o,r]=vals[k];return `<td class="gsep o">${o||'\u2014'}</td><td class="rr">${r||'\u2014'}</td>${avCell(r,o)}`;}).join('');
     return `<tr><td class="name">${esc(cp.name||name)}</td><td>${esc(code)}</td>${cells}<td class="r dcto">${cp.dcto?acct(cp.dcto):'\u2014'}</td></tr>`;
   }).join('');
-  const totCells=lineCols.map(k=>`<td class="gsep o">${gT[k][0]||0}</td><td class="rr">${gT[k][1]||0}</td>${diffCell(gT[k][1],gT[k][0])}`).join('');
-  // por dia (campania)
-  const dayMap={};Object.values(camp).forEach(c=>{for(const dk in c.days)dayMap[dk]=(dayMap[dk]||0)+c.days[dk];});
-  const dayKeys=Object.keys(dayMap).sort();const maxDay=Math.max(1,...Object.values(dayMap));
-  const dayBars=dayKeys.length?dayKeys.map(dk=>{const v=dayMap[dk];const yy=Math.floor(dk/10000),mm=Math.floor(dk/100)%100,dd=dk%100;return `<div class="day-bar"><div class="db-fill" style="height:${Math.max(6,v/maxDay*100)}%"><span>${v}</span></div><div class="db-lbl">${dd}/${mm}</div></div>`;}).join(''):'<div class="rep-empty">Sin ventas de acumuladores registradas en la ventana de campa\u00f1a.</div>';
-  const totCampUnits=lineCols.slice(0,3).reduce((a,k)=>a+gT[k][1],0);
-  const totRefUnits=lineCols.slice(0,3).reduce((a,k)=>a+gT[k][0],0);
-  const dif=totCampUnits-totRefUnits;
+  const totCells=lineCols.map(k=>`<td class="gsep o">${gT[k][0]||0}</td><td class="rr">${gT[k][1]||0}</td>${avCell(gT[k][1],gT[k][0])}`).join('');
+  const chips=`<button class="cchip ${STRAT.clients.size===0?'on':''}" data-cchip="ALL">Todos</button>`+CAMP_CLIENTS.map(([code,name])=>{const cc=_normCode(code).noz;const sh=name.length>22?name.slice(0,22)+'\u2026':name;return `<button class="cchip ${STRAT.clients.has(cc)?'on':''}" data-cchip="${esc(cc)}" title="${esc(name)}">${esc(sh)}</button>`;}).join('');
+  // barra horizontal Objetivo vs Real por linea (siempre las 3 lineas + total)
+  const vsBars=['PREMIUM','AGM','ESTANDAR','TOTAL'].map(k=>{const o=gT[k][0],r=gT[k][1];const mx=Math.max(1,o,r);const pct=o>0?Math.round(r/o*100):null;const cls=pct==null?'na':(pct>=100?'good':(pct>=70?'mid':'low'));
+    return `<div class="vs-row"><div class="vs-name" style="--lc:${ACU_COLOR[k]}">${k.charAt(0)+k.slice(1).toLowerCase()}</div>
+      <div class="vs-bars">
+        <div class="vs-line"><span class="vs-tag">Obj</span><div class="vs-track"><div class="vs-fill ref" style="width:${o/mx*100}%"></div></div><span class="vs-val">${o}</span></div>
+        <div class="vs-line"><span class="vs-tag camp">Real</span><div class="vs-track"><div class="vs-fill camp" style="width:${r/mx*100}%;background:${ACU_COLOR[k]}"></div></div><span class="vs-val">${r}</span></div>
+      </div>
+      <div class="vs-diff t-${cls}">${pct==null?'\u2014':pct+'%'}</div></div>`;}).join('');
+  const totReal=gT.TOTAL[1], totObj=gT.TOTAL[0];
+  const dif=totReal-totObj; const avPct=totObj>0?Math.round(totReal/totObj*100):null;
+  const colCount=2+lineCols.length*3+1;
   body.innerHTML=`
   <div class="strat-kpis">
-    <div class="skpi"><div class="sk-l">Acumuladores \u00b7 campa\u00f1a</div><div class="sk-v">${totCampUnits}</div><div class="sk-s">25 jun \u2013 25 jul 2026</div></div>
-    <div class="skpi"><div class="sk-l">Acumuladores \u00b7 referencia</div><div class="sk-v">${totRefUnits}</div><div class="sk-s">${fdate(STRAT.refStart)} \u2013 ${fdate(STRAT.refEnd)}</div></div>
-    <div class="skpi ${dif>=0?'up':'down'}"><div class="sk-l">Diferencia</div><div class="sk-v">${dif>0?'+':''}${dif}</div><div class="sk-s">${dif>=0?'incremento':'d\u00e9ficit'} vs referencia${totRefUnits>0?` (${dif>=0?'+':''}${Math.round(dif/totRefUnits*100)}%)`:''}</div></div>
+    <div class="skpi"><div class="sk-l">Acumuladores facturados</div><div class="sk-v">${totReal}</div><div class="sk-s">25 jun \u2013 25 jul 2026</div></div>
+    <div class="skpi"><div class="sk-l">Objetivo total</div><div class="sk-v">${totObj}</div><div class="sk-s">de objetivos \u00b7 ${esc(perTxt)}</div></div>
+    <div class="skpi ${dif>=0?'up':'down'}"><div class="sk-l">${dif>=0?'Excedente':'Faltante'}</div><div class="sk-v">${dif>0?'+':''}${dif}</div><div class="sk-s">${avPct!=null?`avance ${avPct}% del objetivo`:'sin objetivo capturado'}</div></div>
     <div class="skpi amber"><div class="sk-l">Apoyo otorgado</div><div class="sk-v">${acct(gDcto)}</div><div class="sk-s">descuento adicional total</div></div>
   </div>
-  <div class="strat-grid">
-    <div class="strat-cal">
-      <div class="sc-title">Periodo de referencia</div>
-      <div class="sc-hint">Clic en el d\u00eda de <b>inicio</b> y luego en el de <b>fin</b>. Los d\u00edas en <span class="lg-camp">rojo</span> son la campa\u00f1a (fija). Los <span class="lg-ref">\u00e1mbar</span> son tu referencia.</div>
-      ${calMonth()}
-      <div class="sc-sel">Referencia: <b>${fdate(STRAT.refStart)}</b> \u2192 <b>${fdate(STRAT.refEnd)}</b></div>
-    </div>
-    <div class="strat-day">
-      <div class="sc-title">Ventas por d\u00eda \u00b7 campa\u00f1a</div>
-      <div class="day-chart">${dayBars}</div>
-    </div>
+  <div class="strat-controls">
+    <div class="cchip-bar">${chips}</div>
+    <button class="cchip tog ${onlyTot?'on':''}" id="stratTot">${onlyTot?'\u25a0 Ver l\u00edneas':'\u25a1 Solo totales'}</button>
   </div>
-  <div class="rd-controls" style="margin-top:18px"><button class="btn ghost" onclick="exportExcel(document.querySelector('.strat-tbl'),'Comparativo_Acumuladores.xls')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Excel</button></div>
-  <div class="rd-wrap"><div class="rep-note" style="margin-bottom:12px">Comparativo por cliente: unidades en <b>referencia</b> vs <b>campa\u00f1a</b> y su diferencia (\u25b2 incremento / \u25bc d\u00e9ficit). La \u00faltima columna es el apoyo otorgado (IMPORTE DCTO) en la campa\u00f1a.</div>
-    <div class="rd-tblwrap"><table class="rep-tbl rd-grouped hl-table strat-tbl">
+  <div class="vs-band">
+    <div class="sc-title">Objetivo vs Real por l\u00ednea \u00b7 campa\u00f1a</div>
+    <div class="vs-chart">${vsBars}</div>
+  </div>
+  <div class="rd-controls" style="margin-top:18px"><button class="btn ghost" onclick="exportExcel(document.querySelector('.strat-tbl'),'Campana_Acumuladores.xls')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Excel</button></div>
+  <div class="rd-wrap"><div class="rep-note" style="margin-bottom:12px">Objetivo (de tu hoja RDV, ${esc(perTxt)}) vs <b>facturado</b> del 25 jun al 25 jul, por cliente y l\u00ednea de acumulador. <b>Avance</b> = real / objetivo. \u00daltima columna: apoyo otorgado (IMPORTE DCTO).</div>
+    <div class="rd-tblwrap"><table class="rep-tbl rd-grouped hl-table strat-tbl ${onlyTot?'only-tot':''}">
       <thead><tr><th rowspan="2" class="l">Cliente</th><th rowspan="2">COD</th>${headTop}<th rowspan="2" class="r">Apoyo $</th></tr><tr>${headSub}</tr></thead>
-      <tbody>${rows}<tr class="sub"><td class="name">Totales</td><td></td>${totCells}<td class="r dcto">${acct(gDcto)}</td></tr></tbody>
+      <tbody>${rows||`<tr><td colspan="${colCount}" style="text-align:center;color:var(--muted2);padding:20px">Selecciona al menos un cliente.</td></tr>`}<tr class="sub"><td class="name">Totales</td><td></td>${totCells}<td class="r dcto">${acct(gDcto)}</td></tr></tbody>
     </table></div></div>`;
 }
 function logout(){showWelcome();}
@@ -2257,6 +2329,8 @@ document.addEventListener('click',e=>{
   const rb=e.target.closest('[data-rep]');if(rb){REPORT=rb.dataset.rep;renderReportes();return;}
   const ov=e.target.closest('[data-org]');if(ov){goVend(ov.dataset.org);return;}
   const cm=e.target.closest('[data-camp]');if(cm){goCampaign();return;}
+  const cch=e.target.closest('[data-cchip]');if(cch){const v=cch.dataset.cchip;if(v==='ALL')STRAT.clients.clear();else{if(STRAT.clients.has(v))STRAT.clients.delete(v);else STRAT.clients.add(v);}renderStrategy();return;}
+  const stt=e.target.closest('#stratTot');if(stt){STRAT.onlyTotal=!STRAT.onlyTotal;renderStrategy();return;}
   const sd=e.target.closest('.cal-d[data-day]');if(sd){const dn=parseInt(sd.dataset.day);const y=Math.floor(dn/10000),mo=Math.floor(dn/100)%100,dd=dn%100;const dt=new Date(y,mo-1,dd);if(STRAT.pick==='start'){STRAT.refStart=dt;STRAT.refEnd=dt;STRAT.pick='end';}else{STRAT.refEnd=dt;if(dnum(STRAT.refEnd)<dnum(STRAT.refStart)){const t=STRAT.refStart;STRAT.refStart=STRAT.refEnd;STRAT.refEnd=t;}STRAT.pick='start';}renderStrategy();return;}
   const cmv=e.target.closest('[data-cmove]');if(cmv){STRAT.calM+=parseInt(cmv.dataset.cmove);if(STRAT.calM<0){STRAT.calM=11;STRAT.calY--;}if(STRAT.calM>11){STRAT.calM=0;STRAT.calY++;}renderStrategy();return;}
   const vd=e.target.closest('[data-vend]');if(vd){goCli(vd.dataset.vend);return;}
@@ -2316,7 +2390,7 @@ document.addEventListener('change',e=>{
   else if(e.target.id==='a81Vend'){ACT81_VEND=e.target.value;renderAct81();}
   else if(e.target.id==='a87Vend'){ACT87_VEND=e.target.value;renderAct87();}
 });
-function rerender(){if(STATE.screen==='home')renderHome();else if(STATE.screen==='vend')renderVendors();else if(STATE.screen==='cli')renderClients();else if(STATE.screen==='rep')renderReportes();else if(STATE.screen==='camp')renderCampaign();else if(STATE.screen==='ficha'){renderClients();goCli(STATE.vendor);}}
+function rerender(){if(STATE.screen==='home')renderHome();else if(STATE.screen==='vend')renderVendors();else if(STATE.screen==='cli')renderClients();else if(STATE.screen==='rep')renderReportes();else if(STATE.screen==='camp')renderCampaign();else if(STATE.screen==='strat')renderStrategy();else if(STATE.screen==='ficha'){renderClients();goCli(STATE.vendor);}}
 
 /* ============================================================
    7. INICIO
