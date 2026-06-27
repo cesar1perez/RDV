@@ -584,6 +584,32 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .strat-tbl th.lh{font-size:13px;border-bottom:2px solid var(--lc)}
 .strat-tbl td.gsep,.strat-tbl th.gsep{border-left:2px solid var(--line2)}
 .strat-tbl tbody tr{border-bottom:1px solid var(--line)}
+.dash-btn{display:inline-flex;align-items:center;gap:7px;font-family:'Manrope';font-weight:800;font-size:12.5px;color:#07142e;background:linear-gradient(135deg,var(--accent),#ffdf6b);border:none;border-radius:10px;padding:8px 13px;cursor:pointer;text-decoration:none;transition:.16s;box-shadow:0 4px 12px rgba(255,210,30,.25)}
+.dash-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(255,210,30,.4)}
+@media(max-width:620px){.dash-btn span{display:none}.dash-btn{padding:8px}}
+/* filtro Dia resaltado */
+.ctrl-day label{color:var(--accent);font-weight:800}
+.ctrl-day .inp{border-color:rgba(255,210,30,.55);box-shadow:0 0 0 2px rgba(255,210,30,.12)}
+.ctrl-day .inp:focus{border-color:var(--accent)}
+/* lista compacta de comentarios (vista por linea) */
+.lr-coment.list{display:flex;flex-direction:column;gap:5px}
+.ci-row{display:grid;grid-template-columns:62px 1fr;gap:8px;align-items:start;font-size:12.5px;line-height:1.4}
+.ci-lbl{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--accent);background:rgba(255,210,30,.1);border-radius:5px;padding:2px 6px;text-align:center}
+.ci-row.ger .ci-lbl{color:var(--cyan);background:rgba(34,211,238,.12)}
+.ci-txt{color:var(--txt)}
+/* comentarios por semana en la ficha */
+.ficha-weeks{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:560px){.ficha-weeks{grid-template-columns:1fr}}
+.fw-item{background:var(--bg2);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:9px;padding:10px 12px}
+.fw-item.empty{border-left-color:var(--line2);opacity:.7}
+.fw-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--accent);margin-bottom:4px}
+.fw-item.empty .fw-lbl{color:var(--muted2)}
+.fw-txt{font-size:14px;line-height:1.45}
+.fw-item.empty .fw-txt{color:var(--muted2)}
+/* aviso selecciona la linea */
+.pick-line{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:48px 24px;background:linear-gradient(160deg,var(--panel),var(--bg2));border:1px dashed var(--line2);border-radius:16px}
+.pl-title{font-family:'Archivo';font-weight:800;font-size:19px}
+.pl-sub{font-size:13.5px;color:var(--muted);max-width:440px;line-height:1.5}
 /* controles filtro + toggle */
 .strat-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
 .strat-controls .cchip-bar{margin-bottom:0;flex:1}
@@ -817,6 +843,10 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
       <div class="ctrl"><label>Periodo</label><select class="inp" id="periodSel"></select></div>
       <div class="ctrl"><label>Corte</label><input class="inp" type="date" id="cutoffSel"></div>
       <span class="lock-tag" id="roleTag" style="display:none"></span>
+      <a class="dash-btn" id="dashGeneralBtn" href="https://cesar1perez.github.io/INTERFAZ-VTS-LLAUT/" target="_blank" rel="noopener" title="Abrir Dashboard General Tulancingo" style="display:none">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+        <span>Dashboard General</span>
+      </a>
       <button class="icon-btn" id="logoutBtn" title="Cambiar acceso / salir" style="display:none">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
       </button>
@@ -934,7 +964,7 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
         <option value="good">Progreso bueno primero</option>
       </select></div>
       <div class="ctrl"><label>Línea</label><select class="inp" id="lineSel"></select></div>
-      <div class="ctrl"><label>Día visita</label><select class="inp" id="daySel">
+      <div class="ctrl ctrl-day"><label>\u25c9 D\u00eda de visita</label><select class="inp" id="daySel">
         <option value="ALL">Todos los días</option>
         <option value="LUNES">Lunes</option><option value="MARTES">Martes</option><option value="MIERCOLES">Miércoles</option>
         <option value="JUEVES">Jueves</option><option value="VIERNES">Viernes</option><option value="SABADO">Sábado</option><option value="ESPORADICO">Esporádico</option>
@@ -1357,18 +1387,18 @@ function renderVendors(){
 }
 
 /* ---- CLIENTES ---- */
-let CLI=[], LINE_FILTER='ALL', OBJF='con', DAY_FILTER='ALL', ORDER='regular';
+let CLI=[], LINE_FILTER='NONE', OBJF='con', DAY_FILTER='ALL', ORDER='regular';
 const REVIEWED=new Set();
 function hasObjective(rec){return LINES.some(l=>{const o=rec.numLit(l.obj);return o.n!=null&&o.n>0;});}
 function hasSales(rec){return LINES.some(l=>{const r=rec.numLit(l.real);return r.n!=null&&r.n!==0;});}
-function buildLineSelector(){document.getElementById('lineSel').innerHTML=`<option value="ALL">Todas las l\u00edneas (vista general)</option>`+LINES.map(l=>`<option value="${l.key}">Por l\u00ednea \u00b7 ${esc(l.label)}</option>`).join('');document.getElementById('lineSel').value=LINE_FILTER;}
+function buildLineSelector(){document.getElementById('lineSel').innerHTML=`<option value="NONE">Selecciona la l\u00ednea\u2026</option>`+LINES.map(l=>`<option value="${l.key}">Por l\u00ednea \u00b7 ${esc(l.label)}</option>`).join('')+`<option value="ALL">Todas las l\u00edneas (vista general)</option>`;document.getElementById('lineSel').value=LINE_FILTER;}
 function renderClients(){
   const o=org(STATE.org);
   document.getElementById('cliEyebrow').textContent=o.label+' \u00b7 Vendedor';
   document.getElementById('cliTitle').textContent=STATE.vendor;
   document.getElementById('cliPace').innerHTML=paceText();
   const groups=clientGroups(STATE.org).filter(rec=>rec.vendor===STATE.vendor);
-  CLI=groups.map((rec,i)=>{const hl=lineData(rec,LINES.find(l=>l.key===HEADLINE_KEY));const inf=latestInfoRec(rec);return {rec,uid:i,code:getCell(rec.group[rec.group.length-1],'COD CLIENTE',rec.H),cliente:inf.text('CLIENTE'),negocio:inf.text('NOMBRE DE NEGOCIO'),zona:inf.text('ZONA'),giro:inf.text('GIRO'),cMid:rec.text('COMMENTARIO A MITAD DE MES')||rec.text('COMENTARIO A MITAD DE MES'),cEnd:rec.text('COMENTARIOS A FINAL DE MES')||rec.text('COMENTARIO A FINAL DE MES'),cGer:rec.text('COMENTARIO GERENTE')||rec.text('COMENTARIOS GERENTE')||rec.text('COMENTARIO DEL GERENTE')||rec.text('COMENTARIOS DEL GERENTE')||rec.text('RETROALIMENTACION GERENTE')||rec.text('RETROALIMENTACION DEL GERENTE')||rec.text('COMENTARIO GERENTE DE VENTAS')||rec.text('GERENTE DE VENTAS'),pctN:hl.pctN,hlStatus:hl.status,search:keyName([inf.text('CLIENTE'),inf.text('NOMBRE DE NEGOCIO'),rec.text('COD CLIENTE'),inf.text('ZONA'),inf.text('GIRO')].join(' '))};});
+  CLI=groups.map((rec,i)=>{const hl=lineData(rec,LINES.find(l=>l.key===HEADLINE_KEY));const inf=latestInfoRec(rec);return {rec,uid:i,code:getCell(rec.group[rec.group.length-1],'COD CLIENTE',rec.H),cliente:inf.text('CLIENTE'),negocio:inf.text('NOMBRE DE NEGOCIO'),zona:inf.text('ZONA'),giro:inf.text('GIRO'),cm:cmtObj(rec),pctN:hl.pctN,hlStatus:hl.status,search:keyName([inf.text('CLIENTE'),inf.text('NOMBRE DE NEGOCIO'),rec.text('COD CLIENTE'),inf.text('ZONA'),inf.text('GIRO')].join(' '))};});
   REVIEWED.clear();
   filterClients();
 }
@@ -1378,12 +1408,21 @@ function sortList(arr,pace,getP){
   const sec=(a,b)=>{const va=getP(a),vb=getP(b);if(va==null&&vb==null)return 0;if(va==null)return 1;if(vb==null)return -1;return sel==='good'?vb-va:va-vb;};
   return arr.sort((a,b)=>{const pa=tr(a)===sel?0:1,pb=tr(b)===sel?0:1;if(pa!==pb)return pa-pb;return sec(a,b);});
 }
-function comentInline(c){const p=[];if(!isEmpty(c.cMid))p.push(`<span class="cm-lbl">Mitad:</span> ${esc(c.cMid)}`);if(!isEmpty(c.cEnd))p.push(`<span class="cm-lbl">Final:</span> ${esc(c.cEnd)}`);return p.length?`<div class="lr-coment">${p.join('<br>')}</div>`:`<div class="lr-coment empty">Sin comentario del vendedor para este mes</div>`;}
+function comentInline(c){
+  const cm=c.cm||{};
+  const items=CMT_FIELDS.map(f=>{const v=cm[f.key];if(isEmpty(v))return '';return `<div class="ci-row ${f.cls||''}"><span class="ci-lbl">${f.short}</span><span class="ci-txt">${esc(v)}</span></div>`;}).filter(Boolean);
+  return items.length?`<div class="lr-coment list">${items.join('')}</div>`:`<div class="lr-coment empty">Sin comentarios del vendedor para este mes</div>`;
+}
 function filterClients(){
   const q=keyName(document.getElementById('cliSearch').value);
   let base=CLI.filter(c=>!q||c.search.includes(q));
   if(DAY_FILTER!=='ALL')base=base.filter(c=>!isEmpty(c.rec.text(DAY_FILTER)));
   const grid=document.getElementById('cliGrid'); const pace=expectedPace();
+  if(LINE_FILTER==='NONE'){
+    document.getElementById('cliCount').textContent=`${base.length} cliente${base.length!==1?'s':''} \u00b7 elige una l\u00ednea`;
+    grid.innerHTML=`<div class="pick-line"><svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M7 12h10M11 18h2"/></svg><div class="pl-title">Selecciona una l\u00ednea</div><div class="pl-sub">Elige una l\u00ednea de producto arriba para ver el detalle de tus clientes ordenados por avance. Si quieres la vista general con comentarios, elige <b>\u201cTodas las l\u00edneas (vista general)\u201d</b> al final de la lista.</div></div>`;
+    return;
+  }
   if(LINE_FILTER!=='ALL'){renderLineFocus(base,grid,LINES.find(l=>l.key===LINE_FILTER),pace);return;}
   // vista general filtrada por con/sin objetivo
   if(OBJF==='con')base=base.filter(c=>hasObjective(c.rec));
@@ -1419,21 +1458,32 @@ function renderMatrix(base,grid,pace,note){
   }).join('');
 }
 const CMT_OVERRIDE={};
+/* 5 campos de comentario: 4 semanas (vendedor) + gerente. Lee por nombre EXACTO con respaldos a nombres viejos. */
+const CMT_FIELDS=[
+  {key:'w1',lbl:'Primera semana',short:'1a sem',heads:['PRIMERA SEMANA'],owner:'vendedor'},
+  {key:'w2',lbl:'Segunda semana',short:'2a sem',heads:['SEGUNDA SEMANA','COMMENTARIO A MITAD DE MES','COMENTARIO A MITAD DE MES'],owner:'vendedor'},
+  {key:'w3',lbl:'Tercera semana',short:'3a sem',heads:['TERCERA SEMANA'],owner:'vendedor'},
+  {key:'cierre',lbl:'Cierre de mes',short:'Cierre',heads:['CIERRE DE MES','COMENTARIOS A FINAL DE MES','COMENTARIO A FINAL DE MES'],owner:'vendedor'},
+  {key:'ger',lbl:'Gerente de ventas',short:'Gerente',heads:['GERENTE DE VENTAS','COMENTARIO GERENTE','COMENTARIOS GERENTE','COMENTARIO DEL GERENTE','COMENTARIOS DEL GERENTE','RETROALIMENTACION GERENTE','RETROALIMENTACION DEL GERENTE','COMENTARIO GERENTE DE VENTAS'],owner:'gerente',cls:'ger'},
+];
+function cmtRead(rec,key){const f=CMT_FIELDS.find(x=>x.key===key);if(!f)return '';for(const h of f.heads){const v=rec.text(h);if(!isEmpty(v))return v;}return '';}
+function cmtObj(rec){const o={};CMT_FIELDS.forEach(f=>o[f.key]=cmtRead(rec,f.key));return o;}
 function cmtKey(uid,key){return uid+'|'+key+'|'+STATE.period;}
 function cardComments(c){
   const per=document.getElementById('periodSel'); const perTxt=per&&per.selectedOptions[0]?per.selectedOptions[0].textContent:'';
   const canMonth = STATE.period && STATE.period!=='ALL';
-  const editVend = (ROLE==='vendedor'), editGer = (ROLE==='directivo');
   const ov=(key,fallback)=>{const k=cmtKey(c.uid,key);return (k in CMT_OVERRIDE)?CMT_OVERRIDE[k]:fallback;};
-  const field=(key,lbl,val,canEdit,cls)=>{
-    val=isEmpty(val)?'':val;
+  const cm=c.cm||{};
+  const field=(f)=>{
+    const canEdit = (f.owner==='vendedor'&&ROLE==='vendedor') || (f.owner==='gerente'&&ROLE==='directivo');
+    let val=ov(f.key,cm[f.key]); val=isEmpty(val)?'':val;
     if(canEdit){
-      if(!canMonth) return `<div class="cco-row ${cls||''}"><span class="cco-lbl">${lbl}</span><span class="cco-txt" style="color:var(--muted2);font-style:italic">Selecciona un mes espec\u00edfico arriba para capturar.</span></div>`;
-      return `<div class="cco-row edit ${cls||''}"><span class="cco-lbl">${lbl}</span><div class="cco-edit"><textarea class="cco-ta" id="ta_${key}_${c.uid}" rows="2" placeholder="Escribe el comentario\u2026">${esc(val)}</textarea><button class="cco-save" data-save="${key}" data-uid="${c.uid}" data-code="${esc(c.code)}"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>Guardar</button></div></div>`;
+      if(!canMonth) return `<div class="cco-row ${f.cls||''}"><span class="cco-lbl">${f.lbl}</span><span class="cco-txt" style="color:var(--muted2);font-style:italic">Selecciona un mes espec\u00edfico arriba para capturar.</span></div>`;
+      return `<div class="cco-row edit ${f.cls||''}"><span class="cco-lbl">${f.lbl}</span><div class="cco-edit"><textarea class="cco-ta" id="ta_${f.key}_${c.uid}" rows="2" placeholder="Escribe el comentario\u2026">${esc(val)}</textarea><button class="cco-save" data-save="${f.key}" data-uid="${c.uid}" data-code="${esc(c.code)}"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>Guardar</button></div></div>`;
     }
-    return `<div class="cco-row ${cls||''} ${val?'':'sininfo'}"><span class="cco-lbl">${lbl}</span><span class="cco-txt">${val?esc(val):'Sin informaci\u00f3n'}</span></div>`;
+    return `<div class="cco-row ${f.cls||''} ${val?'':'sininfo'}"><span class="cco-lbl">${f.lbl}</span><span class="cco-txt">${val?esc(val):'Sin informaci\u00f3n'}</span></div>`;
   };
-  return `<div class="cli-coments"><div class="cco-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Comentarios${perTxt?` \u00b7 ${esc(perTxt)}`:''}</div>${field('mid','Vendedor \u00b7 mitad',ov('mid',c.cMid),editVend)}${field('end','Vendedor \u00b7 final',ov('end',c.cEnd),editVend)}${field('ger','Gerente de ventas',ov('ger',c.cGer),editGer,'ger')}</div>`;
+  return `<div class="cli-coments"><div class="cco-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Comentarios semanales${perTxt?` \u00b7 ${esc(perTxt)}`:''}</div>${CMT_FIELDS.map(field).join('')}</div>`;
 }
 async function saveComment(btn){
   const field=btn.dataset.save, uid=btn.dataset.uid, code=btn.dataset.code;
@@ -1448,9 +1498,9 @@ async function saveComment(btn){
       CMT_OVERRIDE[cmtKey(uid,field)]=texto;
       const c=CLI.find(x=>String(x.uid)===String(uid));
       if(c){
-        if(field==='mid')c.cMid=texto;else if(field==='end')c.cEnd=texto;else c.cGer=texto;
+        if(c.cm)c.cm[field]=texto;
         try{
-          const heads={mid:['COMMENTARIO A MITAD DE MES','COMENTARIO A MITAD DE MES'],end:['COMENTARIOS A FINAL DE MES','COMENTARIO A FINAL DE MES'],ger:['COMENTARIO GERENTE','COMENTARIOS GERENTE','COMENTARIO DEL GERENTE','COMENTARIOS DEL GERENTE','RETROALIMENTACION GERENTE','RETROALIMENTACION DEL GERENTE','COMENTARIO GERENTE DE VENTAS','GERENTE DE VENTAS']}[field]||[];
+          const f=CMT_FIELDS.find(x=>x.key===field); const heads=f?f.heads:[];
           const H=c.rec.H; let ci=-1; for(let j=0;j<heads.length;j++){const k=H.idx(heads[j]); if(k>=0){ci=k;break;}}
           if(ci>=0){const g=c.rec.group; g[g.length-1][ci]=texto;}
         }catch(e){}
@@ -1551,7 +1601,7 @@ function renderFicha(rec){
     return `<div class="perf-item"><div class="perf-top"><span class="perf-name">${esc(line.label)}${flag}</span><span class="perf-pct t-${cls}">${pctTxt}</span></div><div class="bar ${cls}"><i style="width:${clampW(ld.pctN)}%"></i>${mk}</div><div class="perf-nums"><span><span class="nlbl">Objetivo</span><b>${esc(ld.obj.lit||SD)}</b></span><span style="text-align:right"><span class="nlbl">Real</span><b>${esc(ld.real.lit||SD)}</b></span></div></div>`;}).join('');
   const apoyo=APOYO.map(n=>{const v=rec.text(n);const on=!isEmpty(v);const s=n.replace('MINUTA CREDITO / DESCUENTO','Minuta cr\u00e9dito/desc.').replace('MINUTA DE POP','Minuta POP').replace('EXHIBIDOR ','Exh. ').replace('ACTIVACIONES','Activaciones').replace('FACHADA','Fachada');return `<span class="chip ${on?'on':''}"><b>${esc(s)}:</b> ${esc(on?v:SD)}</span>`;}).join('');
   const desc=dl(DESCUENTOS.map(n=>[n.replace(' (HI TEC)',' (Hi-Tec)'),rec.text(n)]));
-  const cMid=rec.text('COMMENTARIO A MITAD DE MES')||rec.text('COMENTARIO A MITAD DE MES'),cEnd=rec.text('COMENTARIOS A FINAL DE MES')||rec.text('COMENTARIO A FINAL DE MES'),cGer=rec.text('COMENTARIO GERENTE')||rec.text('COMENTARIOS GERENTE')||rec.text('COMENTARIO DEL GERENTE')||rec.text('COMENTARIOS DEL GERENTE')||rec.text('RETROALIMENTACION GERENTE')||rec.text('RETROALIMENTACION DEL GERENTE')||rec.text('COMENTARIO GERENTE DE VENTAS')||rec.text('GERENTE DE VENTAS');
+  const cm=cmtObj(rec);
   document.getElementById('fichaBody').innerHTML=`
     <div class="print-head ficha-ph"><div class="ph-org">${esc(org(STATE.org).label)}</div><div class="ph-title">Ficha informativa de cliente \u00b7 ${esc(cliente||SD)}</div></div>
     <div class="ficha-head">
@@ -1574,11 +1624,10 @@ function renderFicha(rec){
       <div class="card flat" style="--sc:#a78bfa"><div class="card-title"><span class="dot"></span>Apoyo comercial (POP)</div><div class="chips">${apoyo}</div></div>
       <div class="card flat" style="--sc:#2dd4bf"><div class="card-title"><span class="dot"></span>Descuentos otorgados</div>${desc}</div>
     </div>
-    <div class="two-col section-block">
-      <div class="card flat" style="--sc:#f472b6"><div class="card-title"><span class="dot"></span>Comentario del vendedor \u00b7 mitad de mes</div><div class="coment ${isEmpty(cMid)?'empty':''}">${esc(isEmpty(cMid)?SD:cMid)}</div></div>
-      <div class="card flat" style="--sc:#fb923c"><div class="card-title"><span class="dot"></span>Comentario del vendedor \u00b7 final de mes</div><div class="coment ${isEmpty(cEnd)?'empty':''}">${esc(isEmpty(cEnd)?SD:cEnd)}</div></div>
+    <div class="card section-block" style="--sc:#f472b6"><div class="card-title"><span class="dot"></span>Comentarios del vendedor \u00b7 por semana</div>
+      <div class="ficha-weeks">${['w1','w2','w3','cierre'].map(k=>{const f=CMT_FIELDS.find(x=>x.key===k);const v=cm[k];return `<div class="fw-item ${isEmpty(v)?'empty':''}"><div class="fw-lbl">${f.lbl}</div><div class="fw-txt">${esc(isEmpty(v)?SD:v)}</div></div>`;}).join('')}</div>
     </div>
-    <div class="card section-block" style="--sc:#22d3ee"><div class="card-title"><span class="dot"></span>Retroalimentaci\u00f3n del gerente de ventas</div><div class="coment ger ${isEmpty(cGer)?'empty':''}">${esc(isEmpty(cGer)?SD:cGer)}</div></div>`;
+    <div class="card section-block" style="--sc:#22d3ee"><div class="card-title"><span class="dot"></span>Retroalimentaci\u00f3n del gerente de ventas</div><div class="coment ger ${isEmpty(cm.ger)?'empty':''}">${esc(isEmpty(cm.ger)?SD:cm.ger)}</div></div>`;
 }
 
 /* ---- REPORTES ---- */
@@ -1809,7 +1858,7 @@ function goCli(v){
   }
   _goCli(v);
 }
-function _goCli(v){STATE.vendor=v;document.getElementById('cliSearch').value='';LINE_FILTER='ALL';OBJF='con';DAY_FILTER='ALL';ORDER='regular';document.getElementById('daySel').value='ALL';document.getElementById('orderSel').value='regular';document.querySelectorAll('#objSeg .seg-btn').forEach(b=>b.classList.toggle('act',b.dataset.obj==='con'));buildLineSelector();renderClients();showScreen('cli');}
+function _goCli(v){STATE.vendor=v;document.getElementById('cliSearch').value='';LINE_FILTER='NONE';OBJF='con';DAY_FILTER='ALL';ORDER='regular';document.getElementById('daySel').value='ALL';document.getElementById('orderSel').value='regular';document.querySelectorAll('#objSeg .seg-btn').forEach(b=>b.classList.toggle('act',b.dataset.obj==='con'));buildLineSelector();renderClients();showScreen('cli');}
 function goFicha(uid){const c=CLI.find(x=>x.uid===uid);if(!c)return;renderFicha(c.rec);showScreen('ficha');}
 function goRep(){if(ROLE!=='directivo')return;renderReportes();showScreen('rep');}
 
@@ -1827,9 +1876,9 @@ function openAuth(title,sub,validator,onOk){
 function closeAuth(){document.getElementById('authModal').classList.remove('show');_authValidator=null;_authOnOk=null;}
 function submitAuth(){const v=passKey(document.getElementById('authInput').value);if(_authValidator&&_authValidator(v)){const cb=_authOnOk;closeAuth();cb&&cb();}else document.getElementById('authErr').textContent='Contrase\u00f1a incorrecta. Int\u00e9ntalo de nuevo.';}
 function setRoleUI(){
-  const tag=document.getElementById('roleTag'),out=document.getElementById('logoutBtn');
-  if(ROLE){out.style.display='';tag.style.display='';tag.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>${ROLE==='directivo'?'Directivos':'Vendedores'}`;}
-  else{out.style.display='none';tag.style.display='none';}
+  const tag=document.getElementById('roleTag'),out=document.getElementById('logoutBtn'),dash=document.getElementById('dashGeneralBtn');
+  if(ROLE){out.style.display='';tag.style.display='';if(dash)dash.style.display='';tag.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>${ROLE==='directivo'?'Directivos':'Vendedores'}`;}
+  else{out.style.display='none';tag.style.display='none';if(dash)dash.style.display='none';}
 }
 function afterLogin(){setRoleUI();goHome();}
 function gotoWelcome(){showScreen('welcome');}
@@ -2054,11 +2103,9 @@ function renderAct2(){
   const o=org(STATE.org), perTxt=document.getElementById('periodSel').selectedOptions[0]?.textContent||'';
   let list=groups.map(rec=>{
     const ld=lineData(rec,LINES.find(l=>l.key===HEADLINE_KEY));
-    const cMid=rec.text('COMMENTARIO A MITAD DE MES')||rec.text('COMENTARIO A MITAD DE MES');
-    const cEnd=rec.text('COMENTARIOS A FINAL DE MES')||rec.text('COMENTARIO A FINAL DE MES');
-    const cGer=rec.text('COMENTARIO GERENTE')||rec.text('COMENTARIOS GERENTE')||rec.text('COMENTARIO DEL GERENTE')||rec.text('COMENTARIOS DEL GERENTE')||rec.text('RETROALIMENTACION GERENTE')||rec.text('RETROALIMENTACION DEL GERENTE')||rec.text('COMENTARIO GERENTE DE VENTAS')||rec.text('GERENTE DE VENTAS');
+    const cm=cmtObj(rec);
     const days=DAYS.filter(([col])=>!isEmpty(rec.text(col))).map(([col])=>col);
-    return {rec,cliente:rec.text('CLIENTE')||SD,negocio:rec.text('NOMBRE DE NEGOCIO')||'',zona:rec.text('ZONA')||'',vendor:rec.vendor,code:disp(getCell(rec.group[rec.group.length-1],'COD CLIENTE',rec.H)),pctN:ld.pctN,status:ld.status,days,cMid,cEnd,cGer};
+    return {rec,cliente:rec.text('CLIENTE')||SD,negocio:rec.text('NOMBRE DE NEGOCIO')||'',zona:rec.text('ZONA')||'',vendor:rec.vendor,code:disp(getCell(rec.group[rec.group.length-1],'COD CLIENTE',rec.H)),pctN:ld.pctN,status:ld.status,days,cm};
   });
   if(ACT2.vend!=='ALL')list=list.filter(c=>c.vendor===ACT2.vend);
   if(ACT2.day!=='ALL')list=list.filter(c=>c.days.includes(ACT2.day));
@@ -2076,7 +2123,7 @@ function renderAct2(){
     const dias=c.days.length?c.days.map(d=>DAYFULL[d]).join(', '):'Sin d\u00eda';
     return `<div class="a2-card t-bd-${cls}">
       <div class="a2-head"><div><div class="a2-name">${esc(c.cliente)}</div><div class="a2-meta">${esc(c.negocio||'')}${c.negocio?' \u00b7 ':''}COD ${esc(c.code)} \u00b7 ${esc(c.vendor)} \u00b7 ${esc(c.zona||'\u2014')} \u00b7 ${esc(dias)}</div></div><div class="a2-avbox"><span class="a2-avlbl">Avance</span>${av}</div></div>
-      <div class="a2-cmts">${cmt('Vendedor \u00b7 mitad de mes',c.cMid)}${cmt('Vendedor \u00b7 final de mes',c.cEnd)}${cmt('Gerente de ventas',c.cGer,'ger')}</div>
+      <div class="a2-cmts">${CMT_FIELDS.map(f=>cmt(f.lbl,c.cm[f.key],f.cls)).join('')}</div>
     </div>`;
   }).join('');
   body.innerHTML=controls+`<div class="rd-wrap">
