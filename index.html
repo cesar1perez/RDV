@@ -1183,7 +1183,7 @@ function looksLikeCSV(t){if(!t)return false;const s=t.trim();const c0=s.charAt(0
 function fetchOne(r,url,ms){return new Promise((res,rej)=>{const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),ms);fetch(r.make(url),{cache:'no-store',signal:ctrl.signal}).then(x=>x.ok?x.text():Promise.reject(new Error('HTTP '+x.status+' \u00b7 '+r.label))).then(tx=>{clearTimeout(t);looksLikeCSV(tx)?res(tx):rej(new Error('no v\u00e1lida \u00b7 '+r.label));}).catch(e=>{clearTimeout(t);rej(new Error(((e&&e.message)||e)+' \u00b7 '+r.label));});});}
 async function fetchCSV(url){try{return await Promise.any(RELAYS.map(r=>fetchOne(r,url,18000)));}catch(agg){throw new Error((agg&&agg.errors)?agg.errors.map(e=>e.message).join('  |  '):String(agg));}}
 
-let DB={H:null,rows:[]}, LOAD_ERR='', DATA_TS=null;
+let DB={H:null,rows:[]}, LOAD_ERR='', DATA_TS=null, SHEET_MODIFIED=null;
 /* Modo Apps Script: si la p\u00e1gina corre dentro de Google Apps Script, lee/escribe la hoja directamente */
 const APPS = (typeof google!=='undefined' && !!(google.script && google.script.run));
 function gsRun(fn,arg){return new Promise((res,rej)=>{google.script.run.withSuccessHandler(res).withFailureHandler(rej)[fn](arg);});}
@@ -1203,13 +1203,14 @@ function getCell(row,name,H){const i=H.idx(name);return (i>=0&&i<row.length)?Str
 function getByIdx(row,i){return (i>=0&&i<row.length)?String(row[i]).trim():'';}
 
 async function loadAll(){
-  let text;
+  let text; SHEET_MODIFIED=null;
   if(APPS){ text = await gsRun('getData'); }
   else if(SAVE_URL && SAVE_URL.indexOf('http')===0){
     const r=await fetch(SAVE_URL,{method:'POST',body:JSON.stringify({action:'getData'}),redirect:'follow'});
     const j=await r.json();
     if(!j||!j.ok) throw new Error((j&&j.error)||'No se pudo leer la hoja desde Apps Script');
     text=j.csv;
+    if(j.modified){const dt=new Date(j.modified);if(!isNaN(dt.getTime()))SHEET_MODIFIED=dt;}
   } else {
     text = await fetchCSV(CONFIG.source);
   }
@@ -1230,7 +1231,17 @@ async function loadAll(){
   DATA_TS=new Date();
 }
 function fmtTS(d){if(!d)return '';const MM=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];let h=d.getHours(),m=d.getMinutes();const ap=h<12?'a.m.':'p.m.';let h12=h%12;if(h12===0)h12=12;return `${d.getDate()} ${MM[d.getMonth()]} ${d.getFullYear()}, ${h12}:${String(m).padStart(2,'0')} ${ap}`;}
-function paintDataTS(){const t=DATA_TS?('Datos actualizados: '+fmtTS(DATA_TS)):'';const el=document.getElementById('dataTS');if(el)el.textContent=t||'Datos en vivo desde Google Sheets';const ch=document.getElementById('dataTSchip');if(ch)ch.innerHTML=DATA_TS?`<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>${esc(fmtTS(DATA_TS))}`:'';}
+function paintDataTS(){
+  const real=SHEET_MODIFIED, load=DATA_TS;
+  const footTxt = real?('Hoja actualizada: '+fmtTS(real)) : (load?('Datos cargados: '+fmtTS(load)):'Datos en vivo desde Google Sheets');
+  const el=document.getElementById('dataTS'); if(el)el.textContent=footTxt;
+  const ch=document.getElementById('dataTSchip');
+  if(ch){
+    const d=real||load;
+    ch.innerHTML = d?`<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>${real?'Hoja:':'Carga:'} ${esc(fmtTS(d))}`:'';
+    ch.title = real?'\u00daltima vez que se modific\u00f3 la hoja de Google Sheets':'Momento en que el tablero ley\u00f3 los datos';
+  }
+}
 
 /* ---- resoluci\u00f3n de vendedor -> organizaci\u00f3n ---- */
 const VMAP={};
