@@ -625,6 +625,18 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .dash-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(255,210,30,.4)}
 .ts-pill{display:inline-flex;align-items:center;gap:6px;font-family:'IBM Plex Mono';font-size:10.5px;font-weight:600;color:var(--muted);background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:20px;padding:5px 11px;white-space:nowrap}
 .ts-pill:empty{display:none}
+/* grupos desplegables de lineas (Total Acum. / Total Llantas) */
+.g-chev{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:6px;background:rgba(255,210,30,.14);color:var(--accent);margin-right:7px;transition:transform .22s;flex:none}
+.lt-gwrap.open .g-chev,.ln-gwrap.open .g-chev{transform:rotate(90deg)}
+.g-count{font-family:'IBM Plex Mono';font-size:9px;font-weight:800;color:var(--accent);background:rgba(255,210,30,.13);border:1px solid rgba(255,210,30,.3);border-radius:10px;padding:1px 7px;margin-left:7px}
+.lt-row.parent,.ln-row.parent{cursor:pointer;border-radius:8px}
+.lt-row.parent:hover,.ln-row.parent:hover{background:rgba(255,210,30,.06)}
+.lt-kids,.ln-kids{display:none}
+.lt-gwrap.open .lt-kids,.ln-gwrap.open .ln-kids{display:block;margin-left:12px;padding-left:11px;border-left:2px dashed var(--line2);animation:kidsIn .22s ease}
+@keyframes kidsIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.lt-row.sub,.ln-row.sub{opacity:.95}
+.lt-row.sub .lt-nm,.ln-row.sub .ln-nm{font-size:11.5px}
+.cco-actions{display:flex;gap:8px;align-items:stretch}
 .dash-cta{display:flex;align-items:center;gap:15px;margin-top:18px;padding:16px 20px;border-radius:15px;text-decoration:none;background:linear-gradient(120deg,#0c1f44,#143a73);border:1px solid rgba(255,210,30,.35);box-shadow:0 14px 34px -20px rgba(0,0,0,.7);transition:.2s;position:relative;overflow:hidden}
 .dash-cta:hover{transform:translateY(-2px);border-color:var(--accent);box-shadow:0 20px 40px -20px rgba(0,0,0,.75)}
 .dash-cta-ic{flex:none;width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--amber),#ffdf6b);color:#07142e;display:grid;place-items:center;box-shadow:0 6px 16px rgba(255,210,30,.3)}
@@ -1342,14 +1354,18 @@ function renderCrumbs(){
   document.getElementById('crumbs').innerHTML=c.map((x,i)=>(i>0?'<span class="crumb-sep">\u203a</span>':'')+`<span class="crumb ${x.cur?'cur':''}" ${x.go?`data-go="${x.go}"`:''}${x.welcome?'data-welcome="1"':''}>${esc(x.t)}</span>`).join('');
 }
 /* fila de l\u00ednea compacta */
-function lnRow(name,objLit,realLit,pctN,status,pace,lc){
-  lc=lc||'#6b82a8';
+function lnRow(name,objLit,realLit,pctN,status,pace,lc,opts){
+  lc=lc||'#6b82a8'; opts=opts||{};
+  const chev=opts.parent?G_CHEV:'';
+  const cnt=opts.parent?`<span class="g-count">+${opts.count}</span>`:'';
   const dot=`<span class="ln-dot" style="background:${lc}"></span>`;
-  if(status==='nodata') return `<div class="ln-row noobj" style="--lc:${lc}"><div class="ln-nm">${dot}${esc(name)}</div><div class="ln-or t-na">sin objetivo a\u00fan</div><div class="ln-bar"></div><div class="ln-pc t-na">\u2014</div></div>`;
-  if(status==='sinobj') return `<div class="ln-row so" style="--lc:${lc}"><div class="ln-nm">${dot}${esc(name)}</div><div class="ln-or">REAL <b>${esc(realLit||SD)}</b></div><div class="ln-bar"></div><div class="ln-pc"><span class="so-flag">s/obj</span></div></div>`;
+  const extra=(opts.parent?' parent':'')+(opts.sub?' sub':'');
+  const attr=opts.parent?' data-lg="1"':'';
+  if(status==='nodata') return `<div class="ln-row noobj${extra}"${attr} style="--lc:${lc}"><div class="ln-nm">${chev}${dot}${esc(name)}${cnt}</div><div class="ln-or t-na">sin objetivo a\u00fan</div><div class="ln-bar"></div><div class="ln-pc t-na">\u2014</div></div>`;
+  if(status==='sinobj') return `<div class="ln-row so${extra}"${attr} style="--lc:${lc}"><div class="ln-nm">${chev}${dot}${esc(name)}${cnt}</div><div class="ln-or">REAL <b>${esc(realLit||SD)}</b></div><div class="ln-bar"></div><div class="ln-pc"><span class="so-flag">s/obj</span></div></div>`;
   const cls=paceClass(pctN,pace);
   const mk=(pace!=null)?`<span class="mk" style="left:${Math.min(100,pace)}%"></span>`:'';
-  return `<div class="ln-row" style="--lc:${lc}"><div class="ln-nm">${dot}${esc(name)}</div><div class="ln-or">OBJ <b>${esc(objLit||SD)}</b> \u00b7 REAL <b>${esc(realLit||SD)}</b></div><div class="ln-bar"><div class="bar ${cls}"><i style="width:${clampW(pctN)}%"></i>${mk}</div></div><div class="ln-pc t-${cls}">${pctN!=null?Math.round(pctN)+'%':'\u2014'}</div></div>`;
+  return `<div class="ln-row${extra}"${attr} style="--lc:${lc}"><div class="ln-nm">${chev}${dot}${esc(name)}${cnt}</div><div class="ln-or">OBJ <b>${esc(objLit||SD)}</b> \u00b7 REAL <b>${esc(realLit||SD)}</b></div><div class="ln-bar"><div class="bar ${cls}"><i style="width:${clampW(pctN)}%"></i>${mk}</div></div><div class="ln-pc t-${cls}">${pctN!=null?Math.round(pctN)+'%':'\u2014'}</div></div>`;
 }
 
 /* ---- HOME ---- */
@@ -1462,7 +1478,13 @@ function renderVendors(){
   grid.innerHTML=list.map((v,i)=>{
     const hl=v.lines[HEADLINE_KEY];
     const ini=v.name.split(/\s+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'?';
-    const rows=orderedLines().map(line=>{const L=v.lines[line.key];const status=(L.objSum==null||L.objSum===0)?((L.realSum!=null&&L.realSum!==0)?'sinobj':'nodata'):'ok';return lnRow(line.label,L.objSum!=null?fmtNum(L.objSum):'',L.realSum!=null?fmtNum(L.realSum):'',L.pct,status,pace,lineColor(line.key));}).join('');
+    const mkRow=(line,opts)=>{const L=v.lines[line.key];const status=(L.objSum==null||L.objSum===0)?((L.realSum!=null&&L.realSum!==0)?'sinobj':'nodata'):'ok';return lnRow(line.label,L.objSum!=null?fmtNum(L.objSum):'',L.realSum!=null?fmtNum(L.realSum):'',L.pct,status,pace,lineColor(line.key),opts);};
+    const rows=orderedLines().map(line=>{
+      if(GROUP_CHILDREN.has(line.key))return '';
+      const kids=LINE_GROUPS[line.key];
+      if(kids){const kR=kids.map(k=>{const kl=LINES.find(x=>x.key===k);return kl?mkRow(kl,{sub:true}):'';}).join('');return `<div class="ln-gwrap">${mkRow(line,{parent:true,count:kids.length})}<div class="ln-kids">${kR}</div></div>`;}
+      return mkRow(line);
+    }).join('');
     return `<div class="vend-card reveal" data-vend="${esc(v.name)}" style="animation-delay:${i*.04}s">
       <div class="vend-top">
         <div class="vend-avatar">${esc(ini)}</div>
@@ -1584,7 +1606,7 @@ function cardComments(c){
     let val=ov(f.key,cm[f.key]); val=isEmpty(val)?'':val;
     if(canEdit){
       if(!canMonth) return `<div class="cco-row ${f.cls||''}"><span class="cco-lbl">${f.lbl}</span><span class="cco-txt" style="color:var(--muted2);font-style:italic">Selecciona un mes espec\u00edfico arriba para capturar.</span></div>`;
-      return `<div class="cco-row edit ${f.cls||''}"><span class="cco-lbl">${f.lbl}</span><div class="cco-edit"><textarea class="cco-ta" id="ta_${f.key}_${c.uid}" rows="2" placeholder="Escribe el comentario\u2026">${esc(val)}</textarea><button class="cco-save" data-save="${f.key}" data-uid="${c.uid}" data-code="${esc(c.code)}"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>Guardar</button></div></div>`;
+      return `<div class="cco-row edit ${f.cls||''}"><span class="cco-lbl">${f.lbl}</span><div class="cco-edit"><textarea class="cco-ta" id="ta_${f.key}_${c.uid}" rows="2" placeholder="Escribe el comentario\u2026">${esc(val)}</textarea><div class="cco-actions"><button class="cco-save" data-save="${f.key}" data-uid="${c.uid}" data-code="${esc(c.code)}"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>Guardar</button><button class="lrc-mic" data-mic="ta_${f.key}_${c.uid}" type="button" title="Dictar por voz"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4"/></svg></button></div></div></div>`;
     }
     return `<div class="cco-row ${f.cls||''} ${val?'':'sininfo'}"><span class="cco-lbl">${f.lbl}</span><span class="cco-txt">${val?esc(val):'Sin informaci\u00f3n'}</span></div>`;
   };
@@ -1646,17 +1668,34 @@ function pendingChips(rec){
   return `<div class="pend-row"><span class="pend-lbl">Falta por cumplir:</span>${chips}</div>`;
 }
 /* tabla de l\u00edneas: L\u00ednea | OBJ | REAL | Avance (con color por l\u00ednea) */
+const LINE_GROUPS={TOTAL:['PREM','AGM','ESTANDAR'],LLANTAS:['AUTO','CTA','CAMION']};
+const GROUP_CHILDREN=new Set(['PREM','AGM','ESTANDAR','AUTO','CTA','CAMION']);
+const G_CHEV='<span class="g-chev"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>';
+function ltRow(rec,line,pace,opts){
+  opts=opts||{};
+  const ld=lineData(rec,line); const lc=lineColor(line.key);
+  const chev=opts.parent?G_CHEV:'';
+  const cnt=opts.parent?`<span class="g-count">+${opts.count}</span>`:'';
+  const nm=`<span class="lt-nm">${chev}<span class="lt-dot" style="background:${lc}"></span>${esc(line.label)}${cnt}</span>`;
+  const extra=(opts.parent?' parent':'')+(opts.sub?' sub':'');
+  const attr=opts.parent?' data-lg="1"':'';
+  if(ld.status==='nodata')
+    return `<div class="lt-row noobj${extra}"${attr} style="--lc:${lc}">${nm}<span class="lt-o">\u2014</span><span class="lt-r">\u2014</span><span class="lt-a t-na">sin objetivo a\u00fan</span><span class="lt-bar"></span></div>`;
+  if(ld.status==='sinobj')
+    return `<div class="lt-row so${extra}"${attr} style="--lc:${lc}">${nm}<span class="lt-o">s/obj</span><span class="lt-r hot">${esc(ld.real.lit||SD)}</span><span class="lt-a"><span class="so-flag">venta s/obj</span></span><span class="lt-bar"></span></div>`;
+  const cls=paceClass(ld.pctN,pace);
+  const mk=(pace!=null)?`<span class="mk" style="left:${Math.min(100,pace)}%"></span>`:'';
+  return `<div class="lt-row${extra}"${attr} style="--lc:${lc}">${nm}<span class="lt-o mono">${esc(ld.obj.lit||SD)}</span><span class="lt-r mono">${esc(ld.real.lit||SD)}</span><span class="lt-a mono t-${cls}">${ld.pctN!=null?Math.round(ld.pctN)+'%':'\u2014'}</span><span class="lt-bar"><span class="bar ${cls}"><i style="width:${clampW(ld.pctN)}%"></i>${mk}</span></span></div>`;
+}
 function clientLineTable(rec,lines,pace){
   const rows=lines.map(line=>{
-    const ld=lineData(rec,line); const lc=lineColor(line.key);
-    const nm=`<span class="lt-nm"><span class="lt-dot" style="background:${lc}"></span>${esc(line.label)}</span>`;
-    if(ld.status==='nodata')
-      return `<div class="lt-row noobj" style="--lc:${lc}">${nm}<span class="lt-o">\u2014</span><span class="lt-r">\u2014</span><span class="lt-a t-na">sin objetivo a\u00fan</span><span class="lt-bar"></span></div>`;
-    if(ld.status==='sinobj')
-      return `<div class="lt-row so" style="--lc:${lc}">${nm}<span class="lt-o">s/obj</span><span class="lt-r hot">${esc(ld.real.lit||SD)}</span><span class="lt-a"><span class="so-flag">venta s/obj</span></span><span class="lt-bar"></span></div>`;
-    const cls=paceClass(ld.pctN,pace);
-    const mk=(pace!=null)?`<span class="mk" style="left:${Math.min(100,pace)}%"></span>`:'';
-    return `<div class="lt-row" style="--lc:${lc}">${nm}<span class="lt-o mono">${esc(ld.obj.lit||SD)}</span><span class="lt-r mono">${esc(ld.real.lit||SD)}</span><span class="lt-a mono t-${cls}">${ld.pctN!=null?Math.round(ld.pctN)+'%':'\u2014'}</span><span class="lt-bar"><span class="bar ${cls}"><i style="width:${clampW(ld.pctN)}%"></i>${mk}</span></span></div>`;
+    if(GROUP_CHILDREN.has(line.key))return '';
+    const kids=LINE_GROUPS[line.key];
+    if(kids){
+      const kRows=kids.map(k=>{const kl=LINES.find(x=>x.key===k);return kl?ltRow(rec,kl,pace,{sub:true}):'';}).join('');
+      return `<div class="lt-gwrap">${ltRow(rec,line,pace,{parent:true,count:kids.length})}<div class="lt-kids">${kRows}</div></div>`;
+    }
+    return ltRow(rec,line,pace);
   }).join('');
   return `<div class="lt"><div class="lt-head"><span>L\u00ednea</span><span>OBJ</span><span>REAL</span><span>Avance</span><span></span></div>${rows}</div>`;
 }
@@ -2533,7 +2572,8 @@ function renderStrategy(){
 function logout(){showWelcome();}
 
 document.addEventListener('click',e=>{
-  const co=e.target.closest('.cli-coments');if(co){const sv=e.target.closest('[data-save]');if(sv)saveComment(sv);return;}
+  const lg=e.target.closest('[data-lg]');if(lg){const wr=lg.closest('.lt-gwrap,.ln-gwrap');if(wr)wr.classList.toggle('open');e.stopPropagation();return;}
+  const co=e.target.closest('.cli-coments');if(co){const mc=e.target.closest('[data-mic]');if(mc){startDictation(mc.dataset.mic,mc);return;}const sv=e.target.closest('[data-save]');if(sv)saveComment(sv);return;}
   const cc=e.target.closest('.cal-card');if(cc){cc.classList.toggle('open');return;}
   const rb=e.target.closest('[data-rep]');if(rb){REPORT=rb.dataset.rep;renderReportes();return;}
   const ov=e.target.closest('[data-org]');if(ov){goVend(ov.dataset.org);return;}
