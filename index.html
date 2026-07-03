@@ -655,6 +655,14 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .cred-tbl tr.cr-alert td:first-child{box-shadow:inset 4px 0 0 var(--low)}
 .cred-tbl tr.cr-warn td:first-child{box-shadow:inset 4px 0 0 var(--mid)}
 .cred-tbl tr.sub td.num{font-size:15px}
+.cred-tbl th.vhead{font-size:14.5px;font-weight:800;padding-top:13px;padding-bottom:13px}
+.cred-tbl th.vh1{color:var(--mid);border-bottom:3px solid var(--mid)}
+.cred-tbl th.vh2{color:var(--low);border-bottom:3px solid var(--low)}
+.cred-badge{display:inline-flex;align-items:center;gap:4px;font-family:'IBM Plex Mono';font-size:10px;font-weight:800;border-radius:14px;padding:3px 9px;white-space:nowrap;vertical-align:middle}
+.cred-badge.bad{color:#fff;background:linear-gradient(135deg,#e0444b,#b1252c);box-shadow:0 3px 10px rgba(224,68,75,.35)}
+.cred-badge.mid{color:#07142e;background:var(--mid)}
+.lr-id .cred-badge{margin-top:4px}
+.rep-tbl td.name .cred-badge{margin-left:6px;font-size:9px}
 .dash-cta{display:flex;align-items:center;gap:15px;margin-top:18px;padding:16px 20px;border-radius:15px;text-decoration:none;background:linear-gradient(120deg,#0c1f44,#143a73);border:1px solid rgba(255,210,30,.35);box-shadow:0 14px 34px -20px rgba(0,0,0,.7);transition:.2s;position:relative;overflow:hidden}
 .dash-cta:hover{transform:translateY(-2px);border-color:var(--accent);box-shadow:0 20px 40px -20px rgba(0,0,0,.75)}
 .dash-cta-ic{flex:none;width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--amber),#ffdf6b);color:#07142e;display:grid;place-items:center;box-shadow:0 6px 16px rgba(255,210,30,.3)}
@@ -1563,12 +1571,12 @@ function filterClients(){
   let base=CLI.filter(c=>!q||c.search.includes(q));
   if(DAY_FILTER!=='ALL')base=base.filter(c=>!isEmpty(c.rec.text(DAY_FILTER)));
   const grid=document.getElementById('cliGrid'); const pace=expectedPace();
-  if(LINE_FILTER==='NONE'){
+  if(LINE_FILTER==='NONE'&&!q){
     document.getElementById('cliCount').textContent=`${base.length} cliente${base.length!==1?'s':''} \u00b7 elige una l\u00ednea`;
-    grid.innerHTML=`<div class="pick-line"><svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M7 12h10M11 18h2"/></svg><div class="pl-title">Selecciona una l\u00ednea</div><div class="pl-sub">Elige una l\u00ednea de producto arriba para ver el detalle de tus clientes ordenados por avance. Si quieres la vista general con comentarios, elige <b>\u201cTodas las l\u00edneas (vista general)\u201d</b> al final de la lista.</div></div>`;
+    grid.innerHTML=`<div class="pick-line"><svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M7 12h10M11 18h2"/></svg><div class="pl-title">Selecciona una l\u00ednea</div><div class="pl-sub">Elige una l\u00ednea de producto arriba para ver el detalle de tus clientes ordenados por avance, o <b>escribe en el buscador</b> para encontrar un cliente directo. Para la vista general con comentarios, elige <b>\u201cTodas las l\u00edneas (vista general)\u201d</b> al final de la lista.</div></div>`;
     return;
   }
-  if(LINE_FILTER!=='ALL'){renderLineFocus(base,grid,LINES.find(l=>l.key===LINE_FILTER),pace);return;}
+  if(LINE_FILTER!=='ALL'&&LINE_FILTER!=='NONE'){renderLineFocus(base,grid,LINES.find(l=>l.key===LINE_FILTER),pace);return;}
   // vista general filtrada por con/sin objetivo
   if(OBJF==='con')base=base.filter(c=>hasObjective(c.rec));
   else base=base.filter(c=>!hasObjective(c.rec)&&hasSales(c.rec));
@@ -1592,7 +1600,7 @@ function renderMatrix(base,grid,pace,note){
       <button class="cli-check" data-check="${c.uid}" title="Marcar como revisado"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></button>
       <div class="cli-head">
         <div class="cli-id"><div class="code">${esc(disp(c.code))}</div><h4 class="display">${esc(c.cliente||SD)}</h4><div class="neg">${esc(c.negocio||SD)}</div></div>
-        <div class="cli-tags"><span class="tag">${esc(c.zona||'sin zona')}</span>${c.giro?`<span class="tag">${esc(c.giro)}</span>`:''}${badge}</div>
+        <div class="cli-tags"><span class="tag">${esc(c.zona||'sin zona')}</span>${c.giro?`<span class="tag">${esc(c.giro)}</span>`:''}${credBadge(c.code)}${badge}</div>
         <div class="cli-ring"><div class="big mono t-${ringCls}">${esc(ringTxt)}</div><div class="lbl">Avance Total</div></div>
       </div>
       ${cardComments(c)}
@@ -1726,14 +1734,14 @@ function renderLineFocus(base,grid,line,pace){
   const rowCon=(c,i)=>{const cls=paceClass(c.ld.pctN,pace),behind=isBehind(c.ld.pctN,pace);const mk=(pace!=null)?`<span class="mk" style="left:${Math.min(100,pace)}%"></span>`:'';const pctTxt=c.ld.pctN!=null?Math.round(c.ld.pctN)+'%':'\u2014';
     return `<div class="line-row reveal ${behind?'behind':(c.ld.pctN!=null?'aok':'')}" data-cli="${c.uid}" style="animation-delay:${Math.min(i,20)*.02}s">
       <div class="lr-rank mono">${i+1}</div>
-      <div class="lr-id"><div class="code">${esc(disp(c.code))}</div><h4 class="display">${esc(c.cliente||SD)}</h4><div class="neg">${esc(c.negocio||SD)} \u00b7 ${esc(c.zona||'sin zona')}</div></div>
+      <div class="lr-id"><div class="code">${esc(disp(c.code))}</div><h4 class="display">${esc(c.cliente||SD)}</h4><div class="neg">${esc(c.negocio||SD)} \u00b7 ${esc(c.zona||'sin zona')}</div>${credBadge(c.code)}</div>
       <div class="lr-metric"><div class="lr-or mono">OBJ <b>${esc(c.ld.obj.lit||SD)}</b> \u00b7 REAL <b>${esc(c.ld.real.lit||SD)}</b></div><div class="bar ${cls}"><i style="width:${clampW(c.ld.pctN)}%"></i>${mk}</div></div>
       <div class="lr-pct t-${cls}">${pctTxt}${behind?'<span class="badge-st behind" style="font-size:8.5px">\u25bc</span>':''}</div>
       ${comentInline(c)}
     </div>`;};
   const rowSin=(c,i)=>`<div class="line-row so reveal" data-cli="${c.uid}" style="animation-delay:${Math.min(i,20)*.02}s">
       <div class="lr-rank mono">\u2022</div>
-      <div class="lr-id"><div class="code">${esc(disp(c.code))}</div><h4 class="display">${esc(c.cliente||SD)}</h4><div class="neg">${esc(c.negocio||SD)} \u00b7 ${esc(c.zona||'sin zona')}</div></div>
+      <div class="lr-id"><div class="code">${esc(disp(c.code))}</div><h4 class="display">${esc(c.cliente||SD)}</h4><div class="neg">${esc(c.negocio||SD)} \u00b7 ${esc(c.zona||'sin zona')}</div>${credBadge(c.code)}</div>
       <div class="lr-metric"><div class="lr-or mono">REAL <b>${esc(c.ld.real.lit||SD)}</b></div></div>
       <div class="lr-pct t-na">s/obj</div>${comentInline(c)}</div>`;
   let html=`<div class="sec-divider" style="--sc:${lineColor(line.key)}"><b>Con objetivo en ${esc(line.label)}</b><span>${conObj.length} cliente${conObj.length!==1?'s':''} \u00b7 del m\u00e1s bajo al m\u00e1s alto</span></div>`;
@@ -1754,13 +1762,17 @@ function historyTable(rec){
   rows.forEach(r=>{const ano=getCell(r,'A\u00d1O',H)||getCell(r,'ANIO',H)||getCell(r,'ANO',H),mes=getCell(r,'MES',H);const key=norm(ano)+'||'+norm(mes);if(!pmap.has(key))pmap.set(key,{rank:periodRank(ano,mes),label:((mes||'\u2014')+' '+(ano||'')).trim(),row:r});});
   const periods=[...pmap.values()].sort((a,b)=>a.rank-b.rank);
   if(!periods.length)return '<div class="empty-state">Sin historial de compra registrado.</div>';
-  const head=`<th class="l">L\u00ednea</th>`+periods.map(p=>`<th>${esc(p.label)}</th>`).join('')+`<th>Total a\u00f1o</th><th>Prom/mes</th>`;
+  const now=new Date(); const curRank=now.getFullYear()*100+(now.getMonth()+1);
+  const promPeriods=periods.filter(p=>p.rank!==curRank);
+  const head=`<th class="l">L\u00ednea</th>`+periods.map(p=>`<th>${esc(p.label)}${p.rank===curRank?' \u2022':''}</th>`).join('')+`<th>Total a\u00f1o</th><th>Prom/mes</th>`;
   const body=histLines().map(line=>{
-    let tot=null;const cells=periods.map(p=>{const v=parseNum(getCell(p.row,line.real,H));if(v!=null)tot=(tot==null?0:tot)+v;return `<td>${v!=null?fmtNum(v):'\u00b7'}</td>`;}).join('');
-    const prom=tot!=null?Math.round(tot/periods.length):null;
+    let tot=null, totProm=null;
+    const cells=periods.map(p=>{const v=parseNum(getCell(p.row,line.real,H));if(v!=null){tot=(tot==null?0:tot)+v;if(p.rank!==curRank)totProm=(totProm==null?0:totProm)+v;}return `<td>${v!=null?fmtNum(v):'\u00b7'}</td>`;}).join('');
+    const prom=(promPeriods.length&&totProm!=null)?Math.round(totProm/promPeriods.length):(promPeriods.length===0&&tot!=null?Math.round(tot/periods.length):null);
     return `<tr><td class="l"><span class="lt-dot" style="background:${lineColor(line.key)}"></span>${esc(line.label)}</td>${cells}<td class="r">${tot!=null?fmtNum(tot):'\u2014'}</td><td class="prom">${prom!=null?fmtNum(prom):'\u2014'}</td></tr>`;
   }).join('');
-  return `<div class="rd-tblwrap"><table class="hist-tbl hl-table"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+  const promNote=periods.some(p=>p.rank===curRank)?`<div class="rep-note" style="margin-top:8px;font-size:11.5px">\u2022 El <b>Prom/mes</b> no considera el mes en curso (mes incompleto); el Total del a\u00f1o s\u00ed lo incluye.</div>`:'';
+  return `<div class="rd-tblwrap"><table class="hist-tbl hl-table"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>${promNote}`;
 }
 function dl(pairs){return '<dl class="dl">'+pairs.map(([k,v])=>{const e=isEmpty(v);return `<dt>${esc(k)}</dt><dd class="${e?'empty':''}">${esc(e?SD:v)}</dd>`;}).join('')+'</dl>';}
 function fotoBlock(rec){
@@ -1925,6 +1937,7 @@ function renderComparativo(){
 function renderRutaDia(){
   const vends=vendorAggregates(STATE.org);
   const body=document.getElementById('repBody');
+  if(!CRED_DB)loadCredito().then(()=>{if(REPORT==='ruta'&&STATE.screen==='rep')renderRutaDia();});
   if(!vends.length){body.innerHTML='<div class="empty-state">Sin datos para este periodo. Cambia el Periodo arriba.</div>';return;}
   if(!REP_VENDOR||!vends.find(v=>v.name===REP_VENDOR))REP_VENDOR=vends[0].name;
   const vObj=vends.find(v=>v.name===REP_VENDOR);
@@ -1952,7 +1965,7 @@ function renderRutaDia(){
       const cls=paceClass(ld.pctN,pace);
       return `<td class="gsep o">${esc(ld.obj.lit||'0')}</td><td class="r">${esc(ld.real.lit||'0')}</td><td class="p t-${cls}">${ld.pctN!=null?Math.round(ld.pctN)+'%':''}</td>`;}).join('');
     const zc=zoneColor(rec.text('ZONA')||'');
-    return `<tr><td class="name">${esc(rec.text('CLIENTE')||SD)}</td><td class="zone"><span class="rd-zonedot" style="background:${zc}"></span>${esc(rec.text('ZONA')||'\u2014')}</td>${cells}</tr>`;
+    return `<tr><td class="name">${esc(rec.text('CLIENTE')||SD)} ${credBadge(rec.text('COD CLIENTE'))}</td><td class="zone"><span class="rd-zonedot" style="background:${zc}"></span>${esc(rec.text('ZONA')||'\u2014')}</td>${cells}</tr>`;
   }).join('');
   const subCells=RUTA_LINES.map(k=>{const p=(oSum[k]!=null&&oSum[k]>0&&rSum[k]!=null)?Math.round(rSum[k]/oSum[k]*100)+'%':'';return `<td class="gsep">${oSum[k]!=null?fmtNum(oSum[k]):'\u2014'}</td><td>${rSum[k]!=null?fmtNum(rSum[k]):'\u2014'}</td><td>${p}</td>`;}).join('');
   const totalRow=dayClients.length?`<tr class="sub"><td class="name">Totales del d\u00eda</td><td></td>${subCells}</tr>`:'';
@@ -2042,7 +2055,7 @@ function goCli(v){
   }
   _goCli(v);
 }
-function _goCli(v){STATE.vendor=v;document.getElementById('cliSearch').value='';LINE_FILTER='NONE';OBJF='con';DAY_FILTER='ALL';ORDER='regular';document.getElementById('daySel').value='ALL';document.getElementById('orderSel').value='regular';document.querySelectorAll('#objSeg .seg-btn').forEach(b=>b.classList.toggle('act',b.dataset.obj==='con'));buildLineSelector();renderClients();showScreen('cli');}
+function _goCli(v){STATE.vendor=v;document.getElementById('cliSearch').value='';LINE_FILTER='NONE';OBJF='con';DAY_FILTER='ALL';ORDER='regular';document.getElementById('daySel').value='ALL';document.getElementById('orderSel').value='regular';document.querySelectorAll('#objSeg .seg-btn').forEach(b=>b.classList.toggle('act',b.dataset.obj==='con'));buildLineSelector();renderClients();showScreen('cli');if(!CRED_DB)loadCredito().then(()=>{if(STATE.screen==='cli')filterClients();});}
 function goFicha(uid){const c=CLI.find(x=>x.uid===uid);if(!c)return;renderFicha(c.rec);showScreen('ficha');}
 function goRep(){if(ROLE!=='directivo')return;renderReportes();showScreen('rep');}
 
@@ -2261,8 +2274,11 @@ function renderAct121(){
 }
 
 /* ===== CREDITO: situacion de cartera por cliente (pestana "credito") ===== */
-let CRED_DB=null, CRED_PROMISE=null, CRED_ERR='';
-let CRED={vend:'ALL',cond:'ALL',q:'',sort:null,dir:-1};
+let CRED_DB=null, CRED_PROMISE=null, CRED_ERR='', CRED_MAP=null;
+let CRED={vend:'ALL',cond:'ALL',q:'',sort:null,dir:-1,only31:false};
+function buildCredMap(){CRED_MAP={};if(!CRED_DB)return;const H=CRED_DB.H;CRED_DB.rows.forEach(r=>{const code=_normCode(getCell(r,'CODIGO',H)).noz;if(!code)return;const v31=credVencido(r,H),vAll=credVencidoTotal(r,H);const prev=CRED_MAP[code]||{v31:0,vAll:0};CRED_MAP[code]={v31:prev.v31+v31,vAll:prev.vAll+vAll};});}
+function credOf(code){if(!CRED_DB)return null;if(!CRED_MAP)buildCredMap();return CRED_MAP[_normCode(code).noz]||null;}
+function credBadge(code){const c=credOf(code);if(!c||c.vAll<=0.005)return '';const cls=c.v31>0?'bad':'mid';return `<span class="cred-badge ${cls}" title="${c.v31>0?'Tiene saldo vencido de m\u00e1s de 31 d\u00edas':'Saldo vencido de 1 a 30 d\u00edas'}">\u26a0 Vencido ${acct(c.vAll)}</span>`;}
 const CRED_COLS=[
   {h:'CODIGO',lbl:'C\u00f3digo',num:false},
   {h:'NOMBRE DEL CLIENTE',lbl:'Nombre del cliente',num:false,cls:'l name'},
@@ -2295,6 +2311,7 @@ function loadCredito(){
       let hi=0;for(let i=0;i<Math.min(grid.length,10);i++){const rn=grid[i].map(norm);if(rn.indexOf('CODIGO')>=0&&(rn.indexOf('LIMITE')>=0||rn.indexOf('NOMBRE DEL CLIENTE')>=0)){hi=i;break;}}
       const H=buildHeaderIndex(grid[hi]);
       CRED_DB={H,rows:grid.slice(hi+1).filter(r=>String(getCell(r,'CODIGO',H)).trim()!==''||String(getCell(r,'NOMBRE DEL CLIENTE',H)).trim()!=='')};
+      CRED_MAP=null;
     }catch(e){CRED_ERR=String(e.message||e);}
     CRED_PROMISE=null;
   })();
@@ -2320,6 +2337,7 @@ function renderCredito(){
   if(CRED.vend!=='ALL')list=list.filter(r=>getCell(r,'VENDEDOR',H)===CRED.vend);
   if(CRED.cond!=='ALL')list=list.filter(r=>getCell(r,'CONDICIONES',H)===CRED.cond);
   if(CRED.q){const q=keyName(CRED.q);list=list.filter(r=>keyName(getCell(r,'CODIGO',H)+' '+getCell(r,'NOMBRE DEL CLIENTE',H)+' '+getCell(r,'VENDEDOR',H)).includes(q));}
+  if(CRED.only31)list=list.filter(r=>credVencido(r,H)>0.005);
   if(CRED.sort){
     const col=CRED_COLS.find(c=>c.h===CRED.sort);
     list.sort((a,b)=>{
@@ -2331,7 +2349,7 @@ function renderCredito(){
   const tot={}; CRED_COLS.forEach(c=>{if(c.tot)tot[c.h]=0;});
   let venc31=0, vencAll=0;
   list.forEach(r=>{CRED_COLS.forEach(c=>{if(c.tot){const n=money(getCell(r,c.h,H));if(n)tot[c.h]+=n;}});venc31+=credVencido(r,H);vencAll+=credVencidoTotal(r,H);});
-  const heads=CRED_COLS.map(c=>{const on=CRED.sort===c.h;const ar=on?(CRED.dir>0?' \u25b2':' \u25bc'):'';return `<th class="${c.cls||''} sortable ${on?'on':''}" data-csort="${esc(c.h)}">${esc(c.lbl)}${ar}</th>`;}).join('');
+  const heads=CRED_COLS.map(c=>{const on=CRED.sort===c.h;const ar=on?(CRED.dir>0?' \u25b2':' \u25bc'):'';const vh=c.venc?(' vhead vh'+c.venc):'';return `<th class="${c.cls||''} sortable${vh} ${on?'on':''}" data-csort="${esc(c.h)}">${esc(c.lbl)}${ar}</th>`;}).join('');
   const rows=list.map(r=>{
     const v31=credVencido(r,H);
     const rowCls=v31>0?'cr-alert':(credVencidoTotal(r,H)>0?'cr-warn':'');
@@ -2362,6 +2380,7 @@ function renderCredito(){
     <div class="ctrl"><label>Vendedor</label><select class="inp" id="credVend">${['ALL',...vendors].map(v=>`<option value="${esc(v)}" ${CRED.vend===v?'selected':''}>${v==='ALL'?'Todos':esc(v)}</option>`).join('')}</select></div>
     <div class="ctrl"><label>Condiciones</label><select class="inp" id="credCond">${['ALL',...conds].map(v=>`<option value="${esc(v)}" ${CRED.cond===v?'selected':''}>${v==='ALL'?'Todas':esc(v)}</option>`).join('')}</select></div>
     <div class="ctrl" style="flex:1;min-width:170px"><label>Buscar</label><input class="inp" id="credQ" placeholder="Cliente, c\u00f3digo o vendedor\u2026" value="${esc(CRED.q)}"></div>
+    <button class="cchip tog ${CRED.only31?'on':''}" id="credOnly31" style="align-self:flex-end">\u26a0 Solo vencido +31 d\u00edas</button>
     <button class="btn ghost" onclick="exportExcel(document.querySelector('.cred-tbl'),'Cartera_credito.xls')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Excel</button>
   </div>
   <div class="rd-wrap"><div class="rep-note" style="margin-bottom:12px">Situaci\u00f3n de cr\u00e9dito por cliente. Haz clic en los <b>encabezados</b> para ordenar. Los saldos vencidos de <b>1-30 d\u00edas</b> se marcan en \u00e1mbar y los de <b>+31 d\u00edas</b> en rojo (los preocupantes). Si el saldo excede el l\u00edmite, se subraya.</div>
@@ -2736,6 +2755,7 @@ document.addEventListener('click',e=>{
   const fs=e.target.closest('#factSeg .seg-btn');if(fs){FACT_FILTER=fs.dataset.fact;renderFactSemanal();return;}
   const cs=e.target.closest('[data-cmpsort]');if(cs){const k=cs.dataset.cmpsort;if(CMP_SORT.key===k)CMP_SORT.dir=CMP_SORT.dir==='desc'?'asc':'desc';else{CMP_SORT.key=k;CMP_SORT.dir='desc';}renderComparativo();return;}
   const crs=e.target.closest('[data-csort]');if(crs){const k=crs.dataset.csort;if(CRED.sort===k)CRED.dir=-CRED.dir;else{CRED.sort=k;CRED.dir=-1;}renderCredito();return;}
+  const c31=e.target.closest('#credOnly31');if(c31){CRED.only31=!CRED.only31;renderCredito();return;}
   const a6=e.target.closest('#act106Seg .seg-btn');if(a6){ACT106_SCOPE=a6.dataset.sc;renderAct106();return;}
   const mp=e.target.closest('.map-pin');if(mp){document.querySelectorAll('.map-pin.sel').forEach(x=>x.classList.remove('sel'));mp.classList.add('sel');showMapInfo(parseInt(mp.dataset.pin));return;}
   const sg=e.target.closest('#objSeg .seg-btn');if(sg){OBJF=sg.dataset.obj;document.querySelectorAll('#objSeg .seg-btn').forEach(b=>b.classList.toggle('act',b===sg));filterClients();return;}
