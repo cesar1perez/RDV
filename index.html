@@ -637,6 +637,24 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .lt-row.sub,.ln-row.sub{opacity:.95}
 .lt-row.sub .lt-nm,.ln-row.sub .ln-nm{font-size:11.5px}
 .cco-actions{display:flex;gap:8px;align-items:stretch}
+/* Reporte de CREDITO */
+.btn.credbtn{background:linear-gradient(135deg,#e0444b,#b1252c);border-color:transparent;color:#fff;font-weight:800}
+.btn.credbtn:hover{filter:brightness(1.1)}
+.btn.credbtn.act{outline:2px solid var(--accent);outline-offset:1px;color:#fff}
+.cred-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:16px}
+.cred-tbl{font-size:14px}
+.cred-tbl th,.cred-tbl td{padding:11px 10px;white-space:nowrap}
+.cred-tbl td.name{font-size:14.5px;font-weight:700;white-space:normal;min-width:190px}
+.cred-tbl td.num{font-family:'IBM Plex Mono';font-weight:700;font-size:14px;text-align:right}
+.cred-tbl th.sortable{cursor:pointer;user-select:none}
+.cred-tbl th.sortable:hover{color:var(--accent)}
+.cred-tbl th.sortable.on{color:var(--accent)}
+.cred-tbl td.cr-mid{color:var(--mid);font-weight:800}
+.cred-tbl td.cr-bad{color:var(--low);font-weight:800}
+.cred-tbl td.cr-over{text-decoration:underline;text-decoration-color:var(--low);text-decoration-thickness:2px;text-underline-offset:3px}
+.cred-tbl tr.cr-alert td:first-child{box-shadow:inset 4px 0 0 var(--low)}
+.cred-tbl tr.cr-warn td:first-child{box-shadow:inset 4px 0 0 var(--mid)}
+.cred-tbl tr.sub td.num{font-size:15px}
 .dash-cta{display:flex;align-items:center;gap:15px;margin-top:18px;padding:16px 20px;border-radius:15px;text-decoration:none;background:linear-gradient(120deg,#0c1f44,#143a73);border:1px solid rgba(255,210,30,.35);box-shadow:0 14px 34px -20px rgba(0,0,0,.7);transition:.2s;position:relative;overflow:hidden}
 .dash-cta:hover{transform:translateY(-2px);border-color:var(--accent);box-shadow:0 20px 40px -20px rgba(0,0,0,.75)}
 .dash-cta-ic{flex:none;width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--amber),#ffdf6b);color:#07142e;display:grid;place-items:center;box-shadow:0 6px 16px rgba(255,210,30,.3)}
@@ -1799,6 +1817,7 @@ const RUTA_LINES=['TOTAL','LUB','MOTO','FILTRO','LLANTAS'];
 const DAYFULL={LUNES:'Lunes',MARTES:'Martes',MIERCOLES:'Mi\u00e9rcoles',JUEVES:'Jueves',VIERNES:'Viernes',SABADO:'S\u00e1bado',ESPORADICO:'Espor\u00e1dico'};
 let REPORT='act1', REP_VENDOR=null, REP_DAY='LUNES';
 const REP_TABS=[
+  ['cred','Cr\u00e9dito \u00b7 cartera'],
   ['act1','Act. 1 \u00b7 Carpeta de ruta'],
   ['act2','Act. 2-3 \u00b7 Reporte de visitas'],
   ['act4','Act. 4 \u00b7 Pedido sugerido'],
@@ -1817,11 +1836,12 @@ const REP_TABS=[
 ];
 function renderReportes(){
   document.getElementById('repEyebrow').textContent=org(STATE.org).label;
-  document.getElementById('repBar').innerHTML=REP_TABS.map(([k,lbl])=>`<button class="btn ${REPORT===k?'act':''}" data-rep="${k}">${esc(lbl)}</button>`).join('');
+  document.getElementById('repBar').innerHTML=REP_TABS.map(([k,lbl])=>`<button class="btn ${k==='cred'?'credbtn':''} ${REPORT===k?'act':''}" data-rep="${k}">${esc(lbl)}</button>`).join('');
   renderActiveReport();
 }
 function renderActiveReport(){
   if(REPORT==='ruta')renderRutaDia();
+  else if(REPORT==='cred')renderCredito();
   else if(REPORT==='fact')renderFactSemanal();
   else if(REPORT==='cmp')renderComparativo();
   else if(REPORT==='act1')renderAct1();
@@ -2240,6 +2260,117 @@ function renderAct121(){
     </div>`;
 }
 
+/* ===== CREDITO: situacion de cartera por cliente (pestana "credito") ===== */
+let CRED_DB=null, CRED_PROMISE=null, CRED_ERR='';
+let CRED={vend:'ALL',cond:'ALL',q:'',sort:null,dir:-1};
+const CRED_COLS=[
+  {h:'CODIGO',lbl:'C\u00f3digo',num:false},
+  {h:'NOMBRE DEL CLIENTE',lbl:'Nombre del cliente',num:false,cls:'l name'},
+  {h:'SALDO 1',lbl:'Saldo',num:true,tot:true},
+  {h:'LIMITE',lbl:'L\u00edmite',num:true,tot:true},
+  {h:'DIAS',lbl:'D\u00edas',num:true},
+  {h:'X VENCER',lbl:'X vencer',num:true},
+  {h:'1-15D',lbl:'1-15 d',num:true,tot:true,venc:1},
+  {h:'16-30',lbl:'16-30 d',num:true,tot:true,venc:1},
+  {h:'31-60',lbl:'31-60 d',num:true,tot:true,venc:2},
+  {h:'61-90',lbl:'61-90 d',num:true,tot:true,venc:2},
+  {h:'MAS DE 90',lbl:'+90 d',num:true,tot:true,venc:2},
+  {h:'SALDO 2',lbl:'Saldo 2',num:true,tot:true},
+  {h:'VENDEDOR',lbl:'Vendedor',num:false},
+  {h:'CONDICIONES',lbl:'Condiciones',num:false},
+];
+function money(s){s=String(s==null?'':s).replace(/[$,\s]/g,'').replace(/^\((.*)\)$/,'-$1');if(s===''||s==='-')return null;const n=parseFloat(s);return isNaN(n)?null:n;}
+function loadCredito(){
+  if(CRED_DB)return Promise.resolve();
+  if(CRED_PROMISE)return CRED_PROMISE;
+  CRED_PROMISE=(async()=>{
+    CRED_ERR='';
+    try{
+      let text;
+      if(APPS){text=await gsRun('getCredito');}
+      else if(SAVE_URL&&SAVE_URL.indexOf('http')===0){const r=await fetch(SAVE_URL,{method:'POST',body:JSON.stringify({action:'getCredito'}),redirect:'follow'});const j=await r.json();if(!j||!j.ok)throw new Error((j&&j.error)||'No se pudo leer la pesta\u00f1a credito');text=j.csv;}
+      else throw new Error('Sin fuente de datos');
+      const grid=parseCSV(text).filter(r=>r.some(c=>String(c).trim()!==''));
+      if(!grid.length)throw new Error('La pesta\u00f1a credito est\u00e1 vac\u00eda');
+      let hi=0;for(let i=0;i<Math.min(grid.length,10);i++){const rn=grid[i].map(norm);if(rn.indexOf('CODIGO')>=0&&(rn.indexOf('LIMITE')>=0||rn.indexOf('NOMBRE DEL CLIENTE')>=0)){hi=i;break;}}
+      const H=buildHeaderIndex(grid[hi]);
+      CRED_DB={H,rows:grid.slice(hi+1).filter(r=>String(getCell(r,'CODIGO',H)).trim()!==''||String(getCell(r,'NOMBRE DEL CLIENTE',H)).trim()!=='')};
+    }catch(e){CRED_ERR=String(e.message||e);}
+    CRED_PROMISE=null;
+  })();
+  return CRED_PROMISE;
+}
+function credVencido(row,H){let t=0;['31-60','61-90','MAS DE 90'].forEach(h=>{const n=money(getCell(row,h,H));if(n)t+=n;});return t;}
+function credVencidoTotal(row,H){let t=0;['1-15D','16-30','31-60','61-90','MAS DE 90'].forEach(h=>{const n=money(getCell(row,h,H));if(n)t+=n;});return t;}
+function renderCredito(){
+  const body=document.getElementById('repBody');
+  if(!CRED_DB){
+    body.innerHTML='<div class="empty-state">Cargando cartera de cr\u00e9dito\u2026</div>';
+    loadCredito().then(()=>{
+      if(REPORT!=='cred')return;
+      if(CRED_DB)renderCredito();
+      else body.innerHTML=`<div class="empty-state">No se pudo leer la pesta\u00f1a <b>credito</b>.<br><span style="color:var(--muted2);font-size:12px">${esc(CRED_ERR||'Revisa que el Codigo.gs tenga la funcion getCredito y que la pestana se llame credito.')}</span><br><button class="btn ghost" style="margin-top:12px" onclick="CRED_PROMISE=null;renderCredito()">Reintentar</button></div>`;
+    });
+    return;
+  }
+  const H=CRED_DB.H;
+  const vendors=[...new Set(CRED_DB.rows.map(r=>getCell(r,'VENDEDOR',H)).filter(x=>x))].sort();
+  const conds=[...new Set(CRED_DB.rows.map(r=>getCell(r,'CONDICIONES',H)).filter(x=>x))].sort();
+  let list=CRED_DB.rows.slice();
+  if(CRED.vend!=='ALL')list=list.filter(r=>getCell(r,'VENDEDOR',H)===CRED.vend);
+  if(CRED.cond!=='ALL')list=list.filter(r=>getCell(r,'CONDICIONES',H)===CRED.cond);
+  if(CRED.q){const q=keyName(CRED.q);list=list.filter(r=>keyName(getCell(r,'CODIGO',H)+' '+getCell(r,'NOMBRE DEL CLIENTE',H)+' '+getCell(r,'VENDEDOR',H)).includes(q));}
+  if(CRED.sort){
+    const col=CRED_COLS.find(c=>c.h===CRED.sort);
+    list.sort((a,b)=>{
+      if(col&&col.num){const na=money(getCell(a,CRED.sort,H)),nb=money(getCell(b,CRED.sort,H));return ((na==null?-Infinity:na)-(nb==null?-Infinity:nb))*CRED.dir;}
+      return String(getCell(a,CRED.sort,H)).localeCompare(String(getCell(b,CRED.sort,H)),'es')*CRED.dir;
+    });
+  }
+  // totales y KPIs
+  const tot={}; CRED_COLS.forEach(c=>{if(c.tot)tot[c.h]=0;});
+  let venc31=0, vencAll=0;
+  list.forEach(r=>{CRED_COLS.forEach(c=>{if(c.tot){const n=money(getCell(r,c.h,H));if(n)tot[c.h]+=n;}});venc31+=credVencido(r,H);vencAll+=credVencidoTotal(r,H);});
+  const heads=CRED_COLS.map(c=>{const on=CRED.sort===c.h;const ar=on?(CRED.dir>0?' \u25b2':' \u25bc'):'';return `<th class="${c.cls||''} sortable ${on?'on':''}" data-csort="${esc(c.h)}">${esc(c.lbl)}${ar}</th>`;}).join('');
+  const rows=list.map(r=>{
+    const v31=credVencido(r,H);
+    const rowCls=v31>0?'cr-alert':(credVencidoTotal(r,H)>0?'cr-warn':'');
+    const cells=CRED_COLS.map(c=>{
+      const raw=getCell(r,c.h,H);
+      if(!c.num)return `<td class="${c.cls||''}">${esc(raw||'\u2014')}</td>`;
+      const n=money(raw);
+      let cls='num';
+      if(c.venc&&n&&n>0)cls+=c.venc===2?' cr-bad':' cr-mid';
+      if(c.h==='SALDO 1'||c.h==='SALDO 2'){const lim=money(getCell(r,'LIMITE',H));if(n!=null&&lim!=null&&lim>0&&n>lim)cls+=' cr-over';}
+      return `<td class="${cls}">${n!=null?acct(n):(raw?esc(raw):'\u2014')}</td>`;
+    }).join('');
+    return `<tr class="${rowCls}">${cells}</tr>`;
+  }).join('');
+  const totCells=CRED_COLS.map(c=>{
+    if(c.h==='CODIGO')return '<td class="name">Totales</td>';
+    if(!c.tot)return '<td></td>';
+    const cls=c.venc===2?'num cr-bad':(c.venc===1?'num cr-mid':'num');
+    return `<td class="${cls}">${acct(tot[c.h])}</td>`;
+  }).join('');
+  body.innerHTML=`
+  <div class="cred-kpis">
+    <div class="skpi"><div class="sk-l">Saldo total en cartera</div><div class="sk-v">${acct(tot['SALDO 1'])}</div><div class="sk-s">${list.length} cliente(s) en el filtro</div></div>
+    <div class="skpi ${vencAll>0?'down':''}"><div class="sk-l">Total vencido</div><div class="sk-v">${acct(vencAll)}</div><div class="sk-s">suma de 1 d\u00eda a +90 d\u00edas</div></div>
+    <div class="skpi ${venc31>0?'down':''}"><div class="sk-l">Vencido +31 d\u00edas</div><div class="sk-v">${acct(venc31)}</div><div class="sk-s">preocupante: 31-60, 61-90 y +90</div></div>
+  </div>
+  <div class="rd-controls">
+    <div class="ctrl"><label>Vendedor</label><select class="inp" id="credVend">${['ALL',...vendors].map(v=>`<option value="${esc(v)}" ${CRED.vend===v?'selected':''}>${v==='ALL'?'Todos':esc(v)}</option>`).join('')}</select></div>
+    <div class="ctrl"><label>Condiciones</label><select class="inp" id="credCond">${['ALL',...conds].map(v=>`<option value="${esc(v)}" ${CRED.cond===v?'selected':''}>${v==='ALL'?'Todas':esc(v)}</option>`).join('')}</select></div>
+    <div class="ctrl" style="flex:1;min-width:170px"><label>Buscar</label><input class="inp" id="credQ" placeholder="Cliente, c\u00f3digo o vendedor\u2026" value="${esc(CRED.q)}"></div>
+    <button class="btn ghost" onclick="exportExcel(document.querySelector('.cred-tbl'),'Cartera_credito.xls')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Excel</button>
+  </div>
+  <div class="rd-wrap"><div class="rep-note" style="margin-bottom:12px">Situaci\u00f3n de cr\u00e9dito por cliente. Haz clic en los <b>encabezados</b> para ordenar. Los saldos vencidos de <b>1-30 d\u00edas</b> se marcan en \u00e1mbar y los de <b>+31 d\u00edas</b> en rojo (los preocupantes). Si el saldo excede el l\u00edmite, se subraya.</div>
+    <div class="rd-tblwrap"><table class="rep-tbl hl-table cred-tbl">
+      <thead><tr>${heads}</tr></thead>
+      <tbody>${rows||`<tr><td colspan="${CRED_COLS.length}" style="text-align:center;color:var(--muted2);padding:24px">Sin clientes para este filtro.</td></tr>`}<tr class="sub">${totCells}</tr></tbody>
+    </table></div></div>`;
+}
+
 /* ===== Reporte generico con enlace (Act. 4, 7, 89) ===== */
 function linkReport(opt){
   const body=document.getElementById('repBody');
@@ -2604,6 +2735,7 @@ document.addEventListener('click',e=>{
   const cl=e.target.closest('[data-cli]');if(cl){goFicha(parseInt(cl.dataset.cli));return;}
   const fs=e.target.closest('#factSeg .seg-btn');if(fs){FACT_FILTER=fs.dataset.fact;renderFactSemanal();return;}
   const cs=e.target.closest('[data-cmpsort]');if(cs){const k=cs.dataset.cmpsort;if(CMP_SORT.key===k)CMP_SORT.dir=CMP_SORT.dir==='desc'?'asc':'desc';else{CMP_SORT.key=k;CMP_SORT.dir='desc';}renderComparativo();return;}
+  const crs=e.target.closest('[data-csort]');if(crs){const k=crs.dataset.csort;if(CRED.sort===k)CRED.dir=-CRED.dir;else{CRED.sort=k;CRED.dir=-1;}renderCredito();return;}
   const a6=e.target.closest('#act106Seg .seg-btn');if(a6){ACT106_SCOPE=a6.dataset.sc;renderAct106();return;}
   const mp=e.target.closest('.map-pin');if(mp){document.querySelectorAll('.map-pin.sel').forEach(x=>x.classList.remove('sel'));mp.classList.add('sel');showMapInfo(parseInt(mp.dataset.pin));return;}
   const sg=e.target.closest('#objSeg .seg-btn');if(sg){OBJF=sg.dataset.obj;document.querySelectorAll('#objSeg .seg-btn').forEach(b=>b.classList.toggle('act',b===sg));filterClients();return;}
@@ -2624,6 +2756,7 @@ document.addEventListener('mouseover',e=>{
 document.getElementById('cliSearch').addEventListener('input',filterClients);
 document.addEventListener('input',e=>{
   if(e.target.id==='a2Q'){ACT2.q=e.target.value;renderAct2();const n=document.getElementById('a2Q');if(n){n.focus();const v=n.value;try{n.setSelectionRange(v.length,v.length);}catch(_){}}}
+  else if(e.target.id==='credQ'){CRED.q=e.target.value;renderCredito();const n=document.getElementById('credQ');if(n){n.focus();const v=n.value;try{n.setSelectionRange(v.length,v.length);}catch(_){}}}
 });
 document.getElementById('lineSel').addEventListener('change',e=>{LINE_FILTER=e.target.value;filterClients();});
 document.getElementById('daySel').addEventListener('change',e=>{DAY_FILTER=e.target.value;filterClients();});
@@ -2666,6 +2799,8 @@ document.addEventListener('change',e=>{
   else if(e.target.id==='a2Day'){ACT2.day=e.target.value;renderAct2();}
   else if(e.target.id==='a81Vend'){ACT81_VEND=e.target.value;renderAct81();}
   else if(e.target.id==='a87Vend'){ACT87_VEND=e.target.value;renderAct87();}
+  else if(e.target.id==='credVend'){CRED.vend=e.target.value;renderCredito();}
+  else if(e.target.id==='credCond'){CRED.cond=e.target.value;renderCredito();}
 });
 function rerender(){if(STATE.screen==='home')renderHome();else if(STATE.screen==='vend')renderVendors();else if(STATE.screen==='cli')renderClients();else if(STATE.screen==='rep')renderReportes();else if(STATE.screen==='camp')renderCampaign();else if(STATE.screen==='strat')renderStrategy();else if(STATE.screen==='ficha'){renderClients();goCli(STATE.vendor);}}
 
