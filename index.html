@@ -662,7 +662,46 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .cred-badge.bad{color:#fff;background:linear-gradient(135deg,#e0444b,#b1252c);box-shadow:0 3px 10px rgba(224,68,75,.35)}
 .cred-badge.mid{color:#07142e;background:var(--mid)}
 .lr-id .cred-badge{margin-top:4px}
-.rep-tbl td.name .cred-badge{margin-left:6px;font-size:9px}
+.rep-tbl td.name .cred-badge{margin-left:6px;font-size:10px}
+/* 1) boton Reportes y analisis destacado */
+.btn.repbtn{background:linear-gradient(135deg,var(--amber),#ffb000);color:#07142e;border:none;font-size:15px;font-weight:800;padding:13px 22px;border-radius:13px;box-shadow:0 8px 22px rgba(255,176,0,.35);letter-spacing:.2px}
+.btn.repbtn:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(255,176,0,.5);filter:brightness(1.05)}
+.btn.repbtn svg{width:18px;height:18px}
+/* 4) boton PDF en tarjeta de vendedor */
+.vend-card{position:relative}
+.vpdf{position:absolute;top:14px;right:14px;display:inline-flex;align-items:center;gap:5px;font-family:'Manrope';font-weight:800;font-size:11px;color:var(--muted);background:var(--bg2);border:1px solid var(--line2);border-radius:8px;padding:6px 11px;cursor:pointer;transition:.15s;z-index:2}
+.vpdf:hover{border-color:var(--accent);color:var(--accent)}
+/* 5) badge de vencido mas grande y visible */
+.cred-badge{font-size:12px;padding:6px 13px;border-radius:9px;gap:6px;letter-spacing:.2px}
+.cred-badge.bad{box-shadow:0 4px 14px rgba(224,68,75,.45);border:1px solid #ff8a8f}
+.cred-badge.mid{border:1px solid #d9a800;box-shadow:0 4px 12px rgba(255,200,58,.3)}
+.cli-card:has(.cred-badge.bad),.line-row:has(.cred-badge.bad){border-color:rgba(224,68,75,.55);box-shadow:inset 4px 0 0 var(--low)}
+.cli-card:has(.cred-badge.mid),.line-row:has(.cred-badge.mid){border-color:rgba(255,200,58,.5);box-shadow:inset 4px 0 0 var(--mid)}
+.lr-id .cred-badge{margin-top:6px}
+/* 3) pulido del modo claro: fondos translucidos y textos accent */
+:root[data-theme="light"] .lr-coment{background:rgba(12,31,68,.05)}
+:root[data-theme="light"] .a2-cmt.sin{background:rgba(12,31,68,.04)}
+:root[data-theme="light"] .kpi,:root[data-theme="light"] .fw-item{background:var(--kpi-bg);border-color:var(--kpi-border)}
+:root[data-theme="light"] .ts-pill{background:rgba(255,255,255,.08)}
+:root[data-theme="light"] .g-count,:root[data-theme="light"] .fw-lbl,:root[data-theme="light"] .lrc-elbl,:root[data-theme="light"] .camp-tag,:root[data-theme="light"] .camp-cta,:root[data-theme="light"] .lt-o.mono,:root[data-theme="light"] .cchip.tog{color:var(--accent-ink)}
+:root[data-theme="light"] .lrc-btn.on{color:var(--accent-ink);border-color:var(--accent-ink)}
+:root[data-theme="light"] .ci-lbl{color:var(--accent-ink);background:rgba(181,132,0,.1)}
+:root[data-theme="light"] .cco-lbl{color:#6b5500}
+:root[data-theme="light"] .cli-coments,:root[data-theme="light"] .cco-row{background:rgba(255,210,30,.08)}
+:root[data-theme="light"] .cco-row.ger{background:rgba(31,127,224,.07)}
+:root[data-theme="light"] .lrc-ta,:root[data-theme="light"] .cco-ta{background:#fff;color:var(--txt);border-color:var(--line2)}
+:root[data-theme="light"] .empty-state,:root[data-theme="light"] .pick-line{background:linear-gradient(160deg,#fff,#eef2f9)}
+:root[data-theme="light"] .bar{background:#dbe3f0}
+:root[data-theme="light"] .hl-table tbody tr:hover td{background:rgba(12,31,68,.05)}
+:root[data-theme="light"] .skpi .sk-v{color:#102a5b}
+:root[data-theme="light"] .skpi.amber .sk-v,:root[data-theme="light"] td.dcto{color:var(--accent-ink)}
+:root[data-theme="light"] .day-strip .ds-bar{background:linear-gradient(180deg,#f0b400,#c79200)}
+:root[data-theme="light"] .cred-badge.mid{color:#4a3a00}
+:root[data-theme="light"] .a2-cmt{background:rgba(255,210,30,.09)}
+:root[data-theme="light"] .a2-cmt.ger{background:rgba(31,127,224,.07)}
+:root[data-theme="light"] .a87-on{color:var(--accent-ink)}
+:root[data-theme="light"] .dash-btn{box-shadow:0 4px 12px rgba(181,132,0,.3)}
+:root[data-theme="light"] .div-card::before{mix-blend-mode:multiply}
 .dash-cta{display:flex;align-items:center;gap:15px;margin-top:18px;padding:16px 20px;border-radius:15px;text-decoration:none;background:linear-gradient(120deg,#0c1f44,#143a73);border:1px solid rgba(255,210,30,.35);box-shadow:0 14px 34px -20px rgba(0,0,0,.7);transition:.2s;position:relative;overflow:hidden}
 .dash-cta:hover{transform:translateY(-2px);border-color:var(--accent);box-shadow:0 20px 40px -20px rgba(0,0,0,.75)}
 .dash-cta-ic{flex:none;width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--amber),#ffdf6b);color:#07142e;display:grid;place-items:center;box-shadow:0 6px 16px rgba(255,210,30,.3)}
@@ -1050,7 +1089,7 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
         <h1 class="h1 display">Equipo de ventas</h1>
         <p class="sub" id="vendSub"></p>
       </div>
-      <button class="btn" id="repBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>Reportes y análisis</button>
+      <button class="btn repbtn" id="repBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>Reportes y análisis</button>
     </div>
     <div class="vend-grid" id="vendGrid"></div>
   </section>
@@ -1512,6 +1551,7 @@ function renderVendors(){
       return mkRow(line);
     }).join('');
     return `<div class="vend-card reveal" data-vend="${esc(v.name)}" style="animation-delay:${i*.04}s">
+      <button class="vpdf" data-vpdf="${esc(v.name)}" title="Descargar ficha en PDF"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15h6M9 18h4"/></svg>PDF</button>
       <div class="vend-top">
         <div class="vend-avatar">${esc(ini)}</div>
         <div><div class="vend-name display">${esc(v.name)}</div><div class="vend-meta">${v.recs.length} cliente${v.recs.length!==1?'s':''}</div></div>
@@ -2284,7 +2324,7 @@ const CRED_COLS=[
   {h:'NOMBRE DEL CLIENTE',lbl:'Nombre del cliente',num:false,cls:'l name'},
   {h:'SALDO 1',lbl:'Saldo',num:true,tot:true},
   {h:'LIMITE',lbl:'L\u00edmite',num:true,tot:true},
-  {h:'DIAS',lbl:'D\u00edas',num:true},
+  {h:'DIAS',lbl:'D\u00edas',num:true,plain:true},
   {h:'X VENCER',lbl:'X vencer',num:true},
   {h:'1-15D',lbl:'1-15 d',num:true,tot:true,venc:1},
   {h:'16-30',lbl:'16-30 d',num:true,tot:true,venc:1},
@@ -2357,6 +2397,7 @@ function renderCredito(){
       const raw=getCell(r,c.h,H);
       if(!c.num)return `<td class="${c.cls||''}">${esc(raw||'\u2014')}</td>`;
       const n=money(raw);
+      if(c.plain)return `<td class="num">${n!=null?fmtNum(n):(raw?esc(raw):'\u2014')}</td>`;
       let cls='num';
       if(c.venc&&n&&n>0)cls+=c.venc===2?' cr-bad':' cr-mid';
       if(c.h==='SALDO 1'||c.h==='SALDO 2'){const lim=money(getCell(r,'LIMITE',H));if(n!=null&&lim!=null&&lim>0&&n>lim)cls+=' cr-over';}
@@ -2536,6 +2577,67 @@ function renderAct9(){
   const items=pasos.map((p,i)=>`<div class="step9"><div class="s9-num">${i+1}</div><div class="s9-body"><div class="s9-title">${esc(p[0])}</div><div class="s9-desc">${esc(p[1])}</div></div></div>`).join('');
   body.innerHTML=`<div class="rd-wrap"><div class="rep-note" style="margin-bottom:16px">El vendedor cumple con los pasos b\u00e1sicos de visita (Act. 9).</div>
   <div class="steps9">${items}</div></div>`;
+}
+function printVendorPDF(name){
+  const vends=vendorAggregates(STATE.org);
+  const v=vends.find(x=>x.name===name); if(!v){alert('No encontr\u00e9 datos del vendedor.');return;}
+  const o=org(STATE.org); const pace=expectedPace();
+  const perTxt=document.getElementById('periodSel').selectedOptions[0]?.textContent||'';
+  const hl=v.lines[HEADLINE_KEY];
+  const rowsH=[];
+  const flat=[];
+  orderedLines().forEach(line=>{
+    if(GROUP_CHILDREN.has(line.key))return;
+    flat.push({line,sub:false});
+    const kids=LINE_GROUPS[line.key];
+    if(kids)kids.forEach(k=>{const kl=LINES.find(x=>x.key===k);if(kl)flat.push({line:kl,sub:true});});
+  });
+  flat.forEach(({line,sub})=>{
+    const L=v.lines[line.key];
+    const objTxt=L.objSum!=null?fmtNum(L.objSum):'\u2014';
+    const realTxt=L.realSum!=null?fmtNum(L.realSum):'\u2014';
+    let av='\u2014', avCls='';
+    if(L.objSum!=null&&L.objSum>0&&L.pct!=null){const p=Math.round(L.pct);av=p+'%';avCls=p>=(pace||100)?'g':(p>=(pace||100)*0.7?'m':'r');}
+    else if((L.objSum==null||L.objSum===0)&&L.realSum){av='venta s/obj';}
+    rowsH.push(`<tr class="${sub?'sub':''}"><td class="l">${sub?'&nbsp;&nbsp;&nbsp;\u2022 ':''}${esc(line.label)}</td><td>${objTxt}</td><td>${realTxt}</td><td class="${avCls}">${av}</td></tr>`);
+  });
+  const w=window.open('','_blank'); if(!w){alert('Permite las ventanas emergentes para descargar el PDF.');return;}
+  w.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Ficha ${esc(name)}</title>
+  <style>
+   @page{size:A4 portrait;margin:14mm}
+   *{box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+   body{color:#15233b;margin:0}
+   .hd{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #ffd21e;padding-bottom:9px;margin-bottom:14px}
+   .org{font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#8a6d00}
+   h1{font-size:22px;margin:2px 0 0}
+   .per{font-size:11px;color:#5a6b85}
+   .kbox{display:flex;gap:10px;margin-bottom:14px}
+   .k{flex:1;border:1px solid #d4dbe6;border-radius:8px;padding:9px 12px}
+   .kl{font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:#7c8aa3;font-weight:700}
+   .kv{font-size:21px;font-weight:800;margin-top:2px}
+   table{width:100%;border-collapse:collapse;font-size:12px}
+   th,td{border:1px solid #cdd6e4;padding:7px 9px;text-align:center}
+   td.l,th.l{text-align:left}
+   thead th{background:#15233b;color:#fff;font-size:11px}
+   tbody tr:nth-child(even){background:#f6f8fb}
+   tr.sub td{font-size:11px;color:#4a5b78;background:#fbfcfe}
+   td.g{color:#1c8a55;font-weight:800}td.m{color:#b58400;font-weight:800}td.r{color:#c2333a;font-weight:800}
+   .note{margin-top:10px;font-size:10px;color:#7c8aa3}
+   .foot{margin-top:14px;font-size:9px;color:#9aa6ba;display:flex;justify-content:space-between;border-top:1px solid #e2e8f2;padding-top:8px}
+  </style></head><body>
+  <div class="hd"><div><div class="org">${esc(o.label)} \u00b7 Reporte diario de visitas</div><h1>${esc(name)}</h1><div class="per">Ficha de progreso \u00b7 ${esc(perTxt)}</div></div><div class="per">Avance esperado al corte: <b>${pace!=null?Math.round(pace)+'%':'\u2014'}</b></div></div>
+  <div class="kbox">
+    <div class="k"><div class="kl">Clientes en cartera</div><div class="kv">${v.recs.length}</div></div>
+    <div class="k"><div class="kl">Objetivo total acumulado</div><div class="kv">${hl.objSum!=null?fmtNum(hl.objSum):'\u2014'}</div></div>
+    <div class="k"><div class="kl">Real total acumulado</div><div class="kv">${hl.realSum!=null?fmtNum(hl.realSum):'\u2014'}</div></div>
+    <div class="k"><div class="kl">Avance total</div><div class="kv">${hl.pct!=null?Math.round(hl.pct)+'%':'\u2014'}</div></div>
+  </div>
+  <table><thead><tr><th class="l">L\u00ednea de producto</th><th>Objetivo</th><th>Real</th><th>Avance</th></tr></thead><tbody>${rowsH.join('')}</tbody></table>
+  <div class="note">Verde: en meta o por encima del ritmo esperado \u00b7 \u00c1mbar: cerca del ritmo \u00b7 Rojo: rezagado. Las l\u00edneas con \u2022 son el desglose de Acumuladores y Llantas.</div>
+  <div class="foot"><span>${esc(o.label)}</span><span>Generado ${new Date().toLocaleDateString('es-MX')} \u00b7 RDV</span></div>
+  </body></html>`);
+  w.document.close();
+  setTimeout(()=>{try{w.focus();w.print();}catch(_){}},400);
 }
 function printStrategyPDF(){
   const tbl=document.querySelector('.strat-tbl'); if(!tbl)return;
@@ -2722,6 +2824,7 @@ function renderStrategy(){
 function logout(){showWelcome();}
 
 document.addEventListener('click',e=>{
+  const vp=e.target.closest('[data-vpdf]');if(vp){printVendorPDF(vp.dataset.vpdf);e.stopPropagation();return;}
   const lg=e.target.closest('[data-lg]');if(lg){const wr=lg.closest('.lt-gwrap,.ln-gwrap');if(wr)wr.classList.toggle('open');e.stopPropagation();return;}
   const co=e.target.closest('.cli-coments');if(co){const mc=e.target.closest('[data-mic]');if(mc){startDictation(mc.dataset.mic,mc);return;}const sv=e.target.closest('[data-save]');if(sv)saveComment(sv);return;}
   const cc=e.target.closest('.cal-card');if(cc){cc.classList.toggle('open');return;}
