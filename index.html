@@ -637,6 +637,17 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .lt-row.sub,.ln-row.sub{opacity:.95}
 .lt-row.sub .lt-nm,.ln-row.sub .ln-nm{font-size:11.5px}
 .cco-actions{display:flex;gap:8px;align-items:stretch}
+/* comentarios comprimidos con desglose */
+.cli-coments .cco-head{cursor:pointer;user-select:none;display:flex;align-items:center;gap:8px}
+.cli-coments .cco-head:hover{color:var(--accent)}
+.cli-coments .cco-body{display:none}
+.cli-coments.open .cco-body{display:block;animation:kidsIn .22s ease;margin-top:9px}
+.cli-coments.open .cco-head .g-chev{transform:rotate(90deg)}
+.cco-sum{font-family:'IBM Plex Mono';font-size:10px;font-weight:800;color:var(--accent);background:rgba(255,210,30,.13);border:1px solid rgba(255,210,30,.3);border-radius:10px;padding:2px 8px;margin-left:4px}
+.cco-sum.zero{color:var(--muted2);background:rgba(255,255,255,.04);border-color:var(--line2)}
+.cco-hint{margin-left:auto;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted2)}
+:root[data-theme="light"] .cco-sum{color:var(--accent-ink)}
+:root[data-theme="light"] .cco-sum.zero{background:rgba(12,31,68,.05)}
 /* Reporte de CREDITO */
 .btn.credbtn{background:linear-gradient(135deg,#e0444b,#b1252c);border-color:transparent;color:#fff;font-weight:800}
 .btn.credbtn:hover{filter:brightness(1.1)}
@@ -1662,11 +1673,14 @@ const CMT_FIELDS=[
 function cmtRead(rec,key){const f=CMT_FIELDS.find(x=>x.key===key);if(!f)return '';for(const h of f.heads){const v=rec.text(h);if(!isEmpty(v))return v;}return '';}
 function cmtObj(rec){const o={};CMT_FIELDS.forEach(f=>o[f.key]=cmtRead(rec,f.key));return o;}
 function cmtKey(uid,key){return uid+'|'+key+'|'+STATE.period;}
+let CMT_OPEN=new Set();
 function cardComments(c){
   const per=document.getElementById('periodSel'); const perTxt=per&&per.selectedOptions[0]?per.selectedOptions[0].textContent:'';
   const canMonth = STATE.period && STATE.period!=='ALL';
   const ov=(key,fallback)=>{const k=cmtKey(c.uid,key);return (k in CMT_OVERRIDE)?CMT_OVERRIDE[k]:fallback;};
   const cm=c.cm||{};
+  const filled=CMT_FIELDS.filter(f=>{const v=ov(f.key,cm[f.key]);return !isEmpty(v);}).length;
+  const isOpen=CMT_OPEN.has(String(c.uid));
   const field=(f)=>{
     const canEdit = (f.owner==='vendedor'&&ROLE==='vendedor') || (f.owner==='gerente'&&ROLE==='directivo');
     let val=ov(f.key,cm[f.key]); val=isEmpty(val)?'':val;
@@ -1676,7 +1690,7 @@ function cardComments(c){
     }
     return `<div class="cco-row ${f.cls||''} ${val?'':'sininfo'}"><span class="cco-lbl">${f.lbl}</span><span class="cco-txt">${val?esc(val):'Sin informaci\u00f3n'}</span></div>`;
   };
-  return `<div class="cli-coments"><div class="cco-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Comentarios semanales${perTxt?` \u00b7 ${esc(perTxt)}`:''}</div>${CMT_FIELDS.map(field).join('')}</div>`;
+  return `<div class="cli-coments ${isOpen?'open':''}"><div class="cco-head" data-ctoggle="${c.uid}"><span class="g-chev"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Comentarios semanales${perTxt?` \u00b7 ${esc(perTxt)}`:''}<span class="cco-sum ${filled?'':'zero'}">${filled}/${CMT_FIELDS.length}</span><span class="cco-hint">${isOpen?'ocultar':'ver'}</span></div><div class="cco-body">${CMT_FIELDS.map(field).join('')}</div></div>`;
 }
 async function saveComment(btn){
   const field=btn.dataset.save, uid=btn.dataset.uid, code=btn.dataset.code;
@@ -2826,7 +2840,7 @@ function logout(){showWelcome();}
 document.addEventListener('click',e=>{
   const vp=e.target.closest('[data-vpdf]');if(vp){printVendorPDF(vp.dataset.vpdf);e.stopPropagation();return;}
   const lg=e.target.closest('[data-lg]');if(lg){const wr=lg.closest('.lt-gwrap,.ln-gwrap');if(wr)wr.classList.toggle('open');e.stopPropagation();return;}
-  const co=e.target.closest('.cli-coments');if(co){const mc=e.target.closest('[data-mic]');if(mc){startDictation(mc.dataset.mic,mc);return;}const sv=e.target.closest('[data-save]');if(sv)saveComment(sv);return;}
+  const co=e.target.closest('.cli-coments');if(co){const tg=e.target.closest('[data-ctoggle]');if(tg){const uid=String(tg.dataset.ctoggle);const open=co.classList.toggle('open');if(open)CMT_OPEN.add(uid);else CMT_OPEN.delete(uid);const h=tg.querySelector('.cco-hint');if(h)h.textContent=open?'ocultar':'ver';return;}const mc=e.target.closest('[data-mic]');if(mc){startDictation(mc.dataset.mic,mc);return;}const sv=e.target.closest('[data-save]');if(sv)saveComment(sv);return;}
   const cc=e.target.closest('.cal-card');if(cc){cc.classList.toggle('open');return;}
   const rb=e.target.closest('[data-rep]');if(rb){REPORT=rb.dataset.rep;renderReportes();return;}
   const ov=e.target.closest('[data-org]');if(ov){goVend(ov.dataset.org);return;}
