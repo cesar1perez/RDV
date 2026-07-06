@@ -648,6 +648,35 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .cco-hint{margin-left:auto;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted2)}
 :root[data-theme="light"] .cco-sum{color:var(--accent-ink)}
 :root[data-theme="light"] .cco-sum.zero{background:rgba(12,31,68,.05)}
+/* pantalla del gerente 80/20 */
+.dash-cta.gercta{border-color:rgba(58,166,255,.4);cursor:pointer}
+.dash-cta.gercta:hover{border-color:var(--cyan)}
+.dash-cta-ic.ger{background:linear-gradient(135deg,var(--cyan),#7cc4ff);color:#07142e}
+.ger-list{display:flex;flex-direction:column;gap:15px}
+.ger-card{background:linear-gradient(160deg,var(--panel),var(--bg2));border:1px solid var(--line);border-left:5px solid var(--oc);border-radius:14px;padding:16px 18px}
+.ger-card.answered{border-left-color:var(--good)}
+.ger-head{display:flex;align-items:flex-start;gap:13px;border-bottom:1px solid var(--line);padding-bottom:11px;margin-bottom:11px}
+.ger-rank{flex:none;width:34px;height:34px;border-radius:10px;background:var(--oc);color:#07142e;font-family:'Archivo';font-weight:800;font-size:16px;display:grid;place-items:center}
+.ger-id{flex:1;min-width:0}
+.ger-name{font-family:'Archivo';font-weight:800;font-size:17px;line-height:1.15}
+.ger-meta{font-size:12px;color:var(--muted);margin-top:3px}
+.ger-org{color:var(--oc);font-weight:800}
+.ger-sales{flex:none;text-align:right}
+.ger-amt{font-family:'IBM Plex Mono';font-weight:800;font-size:18px;color:var(--accent)}
+.ger-share{font-size:10.5px;color:var(--muted2);font-family:'IBM Plex Mono'}
+.ger-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:11px}
+.gchip{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--muted);background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:4px 11px}
+.gchip i{width:8px;height:8px;border-radius:50%}
+.gchip b{font-family:'IBM Plex Mono';font-size:12px}
+.gchip.na{color:var(--muted2);font-style:italic}
+.ger-cmts{display:flex;flex-direction:column;gap:7px;margin-bottom:12px}
+.ger-editbox{background:rgba(34,211,238,.06);border:1px solid rgba(58,166,255,.3);border-radius:11px;padding:11px 13px}
+.ger-editbox.done{background:rgba(63,209,138,.07);border-color:rgba(63,209,138,.35)}
+.ger-elbl{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--cyan);margin-bottom:7px}
+.ger-editbox.done .ger-elbl{color:var(--good)}
+@media(max-width:560px){.ger-head{flex-wrap:wrap}.ger-sales{text-align:left;width:100%}}
+:root[data-theme="light"] .ger-amt{color:var(--accent-ink)}
+:root[data-theme="light"] .ger-editbox{background:rgba(31,127,224,.06)}
 /* Reporte de CREDITO */
 .btn.credbtn{background:linear-gradient(135deg,#e0444b,#b1252c);border-color:transparent;color:#fff;font-weight:800}
 .btn.credbtn:hover{filter:brightness(1.1)}
@@ -1077,8 +1106,20 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
       <div class="dash-cta-tx"><div class="dash-cta-t">Dashboard General Tulancingo</div><div class="dash-cta-s">Ver los totales y consolidados de venta · se abre en otra pestaña</div></div>
       <svg class="dash-cta-go" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>
     </a>
+    <div id="gerZone"></div>
     <div class="div-grid" id="divGrid"></div>
     <div id="campaignZone"></div>
+  </section>
+
+  <!-- RESPUESTAS DEL GERENTE (clientes clave 80/20) -->
+  <section class="screen" id="screen-ger">
+    <button class="back-btn" data-go="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Inicio</button>
+    <div class="sec-head">
+      <div class="eyebrow">Gerencia de ventas · clientes clave</div>
+      <h1 class="h1 display">Respuestas del gerente de ventas</h1>
+      <p class="sub">El grupo de clientes que concentra aproximadamente el <b>80% de la venta</b> de ambas organizaciones (regla 80/20). Responde aquí sus comentarios sin recorrer toda la cartera.</p>
+    </div>
+    <div id="gerBody"></div>
   </section>
 
   <!-- CAMPANA ESPECIAL -->
@@ -1476,6 +1517,12 @@ function renderHome(){
       <div class="camp-sub">Seguimiento enfocado de clientes clave \u00b7 Premium, AGM, Est\u00e1ndar y Total \u00b7 objetivo vs real</div></div>
     <div class="camp-cta">Ver campa\u00f1a <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
   </div>` : '';}
+  const gz=document.getElementById('gerZone');
+  if(gz){gz.innerHTML=(ROLE==='directivo'&&DB.rows.length)?`<div class="dash-cta gercta" data-gerbtn="1">
+    <div class="dash-cta-ic ger"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8M8 13h5"/></svg></div>
+    <div class="dash-cta-tx"><div class="dash-cta-t">Respuestas del gerente de ventas</div><div class="dash-cta-s">Clientes clave 80/20 de ambas organizaciones \u00b7 responde los comentarios de los vendedores en un solo lugar</div></div>
+    <svg class="dash-cta-go" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  </div>`:'';}
 }
 
 /* ===== CAMPANA: Recuperacion de Acumuladores ===== */
@@ -2592,6 +2639,74 @@ function renderAct9(){
   body.innerHTML=`<div class="rd-wrap"><div class="rep-note" style="margin-bottom:16px">El vendedor cumple con los pasos b\u00e1sicos de visita (Act. 9).</div>
   <div class="steps9">${items}</div></div>`;
 }
+/* ===== RESPUESTAS DEL GERENTE: clientes clave 80/20 ===== */
+let GER={vend:'ALL'};
+function goGerente(){renderGerente();showScreen('ger');}
+function gerParetoList(){
+  let all=[];
+  CONFIG.orgs.forEach((o,oi)=>{
+    clientGroups(o.id).forEach(rec=>{
+      const fact=rec.numLit('REAL FACT').n, tot=rec.numLit('REAL TOTAL').n;
+      const code=getCell(rec.group[rec.group.length-1],'COD CLIENTE',rec.H);
+      all.push({rec,o,oi,vendor:rec.vendor,code,cliente:rec.text('CLIENTE')||SD,negocio:rec.text('NOMBRE DE NEGOCIO')||'',fact,tot,uid:'g'+oi+'_'+(_normCode(code).noz||Math.random().toString(36).slice(2,7))});
+    });
+  });
+  const useFact=all.some(c=>c.fact!=null&&c.fact>0);
+  all.forEach(c=>{c.metric=useFact?(c.fact||0):(c.tot||0);});
+  all=all.filter(c=>c.metric>0);
+  all.sort((a,b)=>b.metric-a.metric);
+  const totalM=all.reduce((s,c)=>s+c.metric,0);
+  let acc=0; const sel=[];
+  for(const c of all){if(acc>=totalM*0.8)break;c.share=totalM>0?c.metric/totalM*100:0;sel.push(c);acc+=c.metric;}
+  return {sel,allCount:all.length,totalM,useFact,accM:acc};
+}
+function renderGerente(){
+  const body=document.getElementById('gerBody');
+  const canMonth=STATE.period&&STATE.period!=='ALL';
+  const pace=expectedPace();
+  const pr=gerParetoList(); const sel=pr.sel, allCount=pr.allCount, totalM=pr.totalM, useFact=pr.useFact, accM=pr.accM;
+  if(!sel.length){body.innerHTML='<div class="empty-state">Sin ventas registradas en este periodo. Cambia el Periodo arriba.</div>';return;}
+  const vendors=[...new Set(sel.map(c=>c.vendor))].sort();
+  const list=GER.vend==='ALL'?sel:sel.filter(c=>c.vendor===GER.vend);
+  const gval=(c)=>{const k=cmtKey(c.uid,'ger');const ov=(k in CMT_OVERRIDE)?CMT_OVERRIDE[k]:undefined;return ov!==undefined?ov:cmtRead(c.rec,'ger');};
+  const answered=list.filter(c=>!isEmpty(gval(c))).length;
+  const mfmt=v=>useFact?acct(v):fmtNum(v)+' u';
+  const cards=list.map((c,i)=>{
+    const cm=cmtObj(c.rec);
+    const chips=LINES.filter(l=>!GROUP_CHILDREN.has(l.key)).map(l=>{const ld=lineData(c.rec,l);if(ld.pctN==null)return '';const cls=paceClass(ld.pctN,pace);return `<span class="gchip"><i style="background:${lineColor(l.key)}"></i>${esc(l.label)} <b class="t-${cls}">${Math.round(ld.pctN)}%</b></span>`;}).filter(Boolean).join('')||'<span class="gchip na">Sin objetivos capturados</span>';
+    const vc=['w1','w2','w3','cierre'].map(k=>{const f=CMT_FIELDS.find(x=>x.key===k);const v=cm[k];if(isEmpty(v))return '';return `<div class="a2-cmt"><span class="a2-lbl">${f.lbl}</span><span class="a2-txt">${esc(v)}</span></div>`;}).filter(Boolean).join('')||'<div class="a2-cmt sin"><span class="a2-lbl">Vendedor</span><span class="a2-txt">Sin comentarios del vendedor este mes</span></div>';
+    const gv=gval(c); const done=!isEmpty(gv);
+    let editor;
+    if(canMonth){
+      editor=`<div class="ger-editbox ${done?'done':''}"><div class="ger-elbl">${done?'\u2713 Respuesta del gerente (puedes editarla)':'Respuesta del gerente de ventas'}</div>
+        <textarea class="cco-ta" id="ta_ger_${c.uid}" rows="2" placeholder="Escribe tu retroalimentaci\u00f3n para el vendedor\u2026">${esc(done?gv:'')}</textarea>
+        <div class="cco-actions"><button class="cco-save" data-save="ger" data-uid="${c.uid}" data-code="${esc(c.code)}"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>Guardar</button><button class="lrc-mic" data-mic="ta_ger_${c.uid}" type="button" title="Dictar por voz"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4"/></svg></button></div></div>`;
+    } else {
+      editor=`<div class="ger-editbox"><div class="ger-elbl">Respuesta del gerente</div><div class="lrc-ro" style="font-style:italic">Selecciona un mes espec\u00edfico arriba para responder.</div></div>`;
+    }
+    return `<div class="ger-card ${done?'answered':''}" style="--oc:var(--${c.o.accent==='cyan'?'cyan':'amber'})">
+      <div class="ger-head">
+        <div class="ger-rank">${i+1}</div>
+        <div class="ger-id"><div class="ger-name">${esc(c.cliente)}</div><div class="ger-meta"><span class="ger-org">${esc(c.o.label)}</span> \u00b7 <b>${esc(c.vendor)}</b> \u00b7 COD ${esc(disp(c.code))}${c.negocio?' \u00b7 '+esc(c.negocio):''}</div></div>
+        <div class="ger-sales"><div class="ger-amt">${mfmt(c.metric)}</div><div class="ger-share">${c.share!=null?c.share.toFixed(1)+'% de la venta':''}</div></div>
+      </div>
+      <div class="ger-chips">${chips}</div>
+      <div class="ger-cmts">${vc}</div>
+      ${editor}
+    </div>`;
+  }).join('');
+  body.innerHTML=`
+  <div class="strat-kpis">
+    <div class="skpi"><div class="sk-l">Clientes clave (80/20)</div><div class="sk-v">${sel.length}</div><div class="sk-s">de ${allCount} clientes con venta</div></div>
+    <div class="skpi amber"><div class="sk-l">Venta que concentran</div><div class="sk-v">${mfmt(accM)}</div><div class="sk-s">${totalM>0?Math.round(accM/totalM*100):0}% del total ${useFact?'facturado':'en unidades'}</div></div>
+    <div class="skpi ${answered>=list.length?'up':''}"><div class="sk-l">Respondidos</div><div class="sk-v">${answered}/${list.length}</div><div class="sk-s">con respuesta del gerente</div></div>
+  </div>
+  <div class="rd-controls">
+    <div class="ctrl"><label>Vendedor</label><select class="inp" id="gerVend">${['ALL',...vendors].map(v=>`<option value="${esc(v)}" ${GER.vend===v?'selected':''}>${v==='ALL'?'Todos':esc(v)}</option>`).join('')}</select></div>
+  </div>
+  <div class="rep-note" style="margin-bottom:14px">Ordenados del que <b>m\u00e1s vende al que menos</b> (${useFact?'por facturaci\u00f3n':'por unidades totales'}, con el periodo seleccionado arriba). Cada tarjeta muestra el avance por l\u00ednea, los comentarios del vendedor y tu espacio para responder; se guarda en la misma columna <b>GERENTE DE VENTAS</b> de siempre.</div>
+  <div class="ger-list">${cards}</div>`;
+}
 function printVendorPDF(name){
   const vends=vendorAggregates(STATE.org);
   const v=vends.find(x=>x.name===name); if(!v){alert('No encontr\u00e9 datos del vendedor.');return;}
@@ -2845,6 +2960,8 @@ document.addEventListener('click',e=>{
   const rb=e.target.closest('[data-rep]');if(rb){REPORT=rb.dataset.rep;renderReportes();return;}
   const ov=e.target.closest('[data-org]');if(ov){goVend(ov.dataset.org);return;}
   const cm=e.target.closest('[data-camp]');if(cm){goCampaign();return;}
+  const gb=e.target.closest('[data-gerbtn]');if(gb){goGerente();return;}
+  const gc=e.target.closest('.ger-card');if(gc){const mc=e.target.closest('[data-mic]');if(mc){startDictation(mc.dataset.mic,mc);return;}const sv=e.target.closest('[data-save]');if(sv){saveComment(sv);return;}return;}
   const cch=e.target.closest('[data-cchip]');if(cch){const v=cch.dataset.cchip;if(v==='ALL')STRAT.clients.clear();else{if(STRAT.clients.has(v))STRAT.clients.delete(v);else STRAT.clients.add(v);}renderStrategy();return;}
   const stt=e.target.closest('#stratTot');if(stt){STRAT.onlyTotal=!STRAT.onlyTotal;renderStrategy();return;}
   const sp=e.target.closest('#stratPdf');if(sp){printStrategyPDF();return;}
@@ -2938,8 +3055,9 @@ document.addEventListener('change',e=>{
   else if(e.target.id==='a87Vend'){ACT87_VEND=e.target.value;renderAct87();}
   else if(e.target.id==='credVend'){CRED.vend=e.target.value;renderCredito();}
   else if(e.target.id==='credCond'){CRED.cond=e.target.value;renderCredito();}
+  else if(e.target.id==='gerVend'){GER.vend=e.target.value;renderGerente();}
 });
-function rerender(){if(STATE.screen==='home')renderHome();else if(STATE.screen==='vend')renderVendors();else if(STATE.screen==='cli')renderClients();else if(STATE.screen==='rep')renderReportes();else if(STATE.screen==='camp')renderCampaign();else if(STATE.screen==='strat')renderStrategy();else if(STATE.screen==='ficha'){renderClients();goCli(STATE.vendor);}}
+function rerender(){if(STATE.screen==='home')renderHome();else if(STATE.screen==='vend')renderVendors();else if(STATE.screen==='cli')renderClients();else if(STATE.screen==='rep')renderReportes();else if(STATE.screen==='camp')renderCampaign();else if(STATE.screen==='strat')renderStrategy();else if(STATE.screen==='ger')renderGerente();else if(STATE.screen==='ficha'){renderClients();goCli(STATE.vendor);}}
 
 /* ============================================================
    7. INICIO
