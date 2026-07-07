@@ -715,6 +715,8 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .cred-badge{font-size:12px;padding:6px 13px;border-radius:9px;gap:6px;letter-spacing:.2px}
 .cred-badge.bad{box-shadow:0 4px 14px rgba(224,68,75,.45);border:1px solid #ff8a8f}
 .cred-badge.mid{border:1px solid #d9a800;box-shadow:0 4px 12px rgba(255,200,58,.3)}
+.cred-badge.saldo{color:var(--cyan);background:rgba(58,166,255,.1);border:1px solid rgba(58,166,255,.35);box-shadow:none;margin-left:5px}
+:root[data-theme="light"] .cred-badge.saldo{color:#1462a8;background:rgba(31,127,224,.08)}
 .cli-card:has(.cred-badge.bad),.line-row:has(.cred-badge.bad){border-color:rgba(224,68,75,.55);box-shadow:inset 4px 0 0 var(--low)}
 .cli-card:has(.cred-badge.mid),.line-row:has(.cred-badge.mid){border-color:rgba(255,200,58,.5);box-shadow:inset 4px 0 0 var(--mid)}
 .lr-id .cred-badge{margin-top:6px}
@@ -1115,9 +1117,9 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
   <section class="screen" id="screen-ger">
     <button class="back-btn" data-go="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Inicio</button>
     <div class="sec-head">
-      <div class="eyebrow">Gerencia de ventas · clientes clave</div>
+      <div class="eyebrow">Gerencia de ventas · comentarios y avances</div>
       <h1 class="h1 display">Respuestas del gerente de ventas</h1>
-      <p class="sub">El grupo de clientes que concentra aproximadamente el <b>80% de la venta</b> de ambas organizaciones (regla 80/20). Responde aquí sus comentarios sin recorrer toda la cartera.</p>
+      <p class="sub">Todos los clientes de ambas organizaciones en un solo lugar, <b>ordenados por importancia de venta</b> (elige la medida: facturación, acumuladores, lubricantes, motobaterías, filtros o llantas). Responde los comentarios de los vendedores sin recorrer pantalla por pantalla.</p>
     </div>
     <div id="gerBody"></div>
   </section>
@@ -1520,7 +1522,7 @@ function renderHome(){
   const gz=document.getElementById('gerZone');
   if(gz){gz.innerHTML=(ROLE==='directivo'&&DB.rows.length)?`<div class="dash-cta gercta" data-gerbtn="1">
     <div class="dash-cta-ic ger"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8M8 13h5"/></svg></div>
-    <div class="dash-cta-tx"><div class="dash-cta-t">Respuestas del gerente de ventas</div><div class="dash-cta-s">Clientes clave 80/20 de ambas organizaciones \u00b7 responde los comentarios de los vendedores en un solo lugar</div></div>
+    <div class="dash-cta-tx"><div class="dash-cta-t">Respuestas del gerente de ventas</div><div class="dash-cta-s">Comentarios y avances de todos los clientes de ambas organizaciones \u00b7 ordenados por importancia de venta</div></div>
     <svg class="dash-cta-go" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
   </div>`:'';}
 }
@@ -2377,9 +2379,15 @@ function renderAct121(){
 /* ===== CREDITO: situacion de cartera por cliente (pestana "credito") ===== */
 let CRED_DB=null, CRED_PROMISE=null, CRED_ERR='', CRED_MAP=null;
 let CRED={vend:'ALL',cond:'ALL',q:'',sort:null,dir:-1,only31:false};
-function buildCredMap(){CRED_MAP={};if(!CRED_DB)return;const H=CRED_DB.H;CRED_DB.rows.forEach(r=>{const code=_normCode(getCell(r,'CODIGO',H)).noz;if(!code)return;const v31=credVencido(r,H),vAll=credVencidoTotal(r,H);const prev=CRED_MAP[code]||{v31:0,vAll:0};CRED_MAP[code]={v31:prev.v31+v31,vAll:prev.vAll+vAll};});}
+function buildCredMap(){CRED_MAP={};if(!CRED_DB)return;const H=CRED_DB.H;CRED_DB.rows.forEach(r=>{const code=_normCode(getCell(r,'CODIGO',H)).noz;if(!code)return;const v31=credVencido(r,H),vAll=credVencidoTotal(r,H);const sal=money(getCell(r,'SALDO 1',H))||0;const prev=CRED_MAP[code]||{v31:0,vAll:0,saldo:0};CRED_MAP[code]={v31:prev.v31+v31,vAll:prev.vAll+vAll,saldo:prev.saldo+sal};});}
 function credOf(code){if(!CRED_DB)return null;if(!CRED_MAP)buildCredMap();return CRED_MAP[_normCode(code).noz]||null;}
-function credBadge(code){const c=credOf(code);if(!c||c.vAll<=0.005)return '';const cls=c.v31>0?'bad':'mid';return `<span class="cred-badge ${cls}" title="${c.v31>0?'Tiene saldo vencido de m\u00e1s de 31 d\u00edas':'Saldo vencido de 1 a 30 d\u00edas'}">\u26a0 Vencido ${acct(c.vAll)}</span>`;}
+function credBadge(code){
+  const c=credOf(code); if(!c)return '';
+  let out='';
+  if(c.vAll>0.005){const cls=c.v31>0?'bad':'mid';out+=`<span class="cred-badge ${cls}" title="${c.v31>0?'Tiene saldo vencido de m\u00e1s de 31 d\u00edas':'Saldo vencido de 1 a 30 d\u00edas'}">\u26a0 Vencido ${acct(c.vAll)}</span>`;}
+  if(c.saldo>0.005)out+=`<span class="cred-badge saldo" title="Saldo de cr\u00e9dito utilizado (facturado), no necesariamente vencido">Saldo ${acct(c.saldo)}</span>`;
+  return out;
+}
 const CRED_COLS=[
   {h:'CODIGO',lbl:'C\u00f3digo',num:false},
   {h:'NOMBRE DEL CLIENTE',lbl:'Nombre del cliente',num:false,cls:'l name'},
@@ -2640,41 +2648,55 @@ function renderAct9(){
   <div class="steps9">${items}</div></div>`;
 }
 /* ===== RESPUESTAS DEL GERENTE: clientes clave 80/20 ===== */
-let GER={vend:'ALL'};
-function goGerente(){renderGerente();showScreen('ger');}
+let GER={vend:'ALL',metric:'FACT'};
+const GER_METRICS=[['FACT','Importe facturado'],['TOTAL','Acumuladores'],['LUB','Lubricantes'],['MOTO','Motobater\u00edas'],['FILTRO','Filtros'],['LLANTAS','Llantas']];
+const GER_LINE_ORDER=['TOTAL','LUB','MOTO','FILTRO','LLANTAS'];
+function goGerente(){renderGerente();showScreen('ger');if(!CRED_DB)loadCredito().then(()=>{if(STATE.screen==='ger')renderGerente();});}
 function gerParetoList(){
+  const mk=GER.metric||'FACT';
+  const line=mk==='FACT'?null:LINES.find(l=>l.key===mk);
   let all=[];
   CONFIG.orgs.forEach((o,oi)=>{
     clientGroups(o.id).forEach(rec=>{
       const fact=rec.numLit('REAL FACT').n, tot=rec.numLit('REAL TOTAL').n;
+      const lineVal=line?rec.numLit(line.real).n:null;
       const code=getCell(rec.group[rec.group.length-1],'COD CLIENTE',rec.H);
-      all.push({rec,o,oi,vendor:rec.vendor,code,cliente:rec.text('CLIENTE')||SD,negocio:rec.text('NOMBRE DE NEGOCIO')||'',fact,tot,uid:'g'+oi+'_'+(_normCode(code).noz||Math.random().toString(36).slice(2,7))});
+      const days=DAYS.filter(d=>!isEmpty(rec.text(d[0]))).map(d=>d[0]);
+      all.push({rec,o,oi,vendor:rec.vendor,code,days,cliente:rec.text('CLIENTE')||SD,negocio:rec.text('NOMBRE DE NEGOCIO')||'',fact,tot,lineVal,uid:'g'+oi+'_'+(_normCode(code).noz||Math.random().toString(36).slice(2,7))});
     });
   });
-  const useFact=all.some(c=>c.fact!=null&&c.fact>0);
-  all.forEach(c=>{c.metric=useFact?(c.fact||0):(c.tot||0);});
-  all=all.filter(c=>c.metric>0);
+  let useMoney;
+  if(mk==='FACT'){
+    useMoney=all.some(c=>c.fact!=null&&c.fact>0);
+    all.forEach(c=>{c.metric=useMoney?(c.fact||0):(c.tot||0);});
+  } else {
+    useMoney=false;
+    all.forEach(c=>{c.metric=c.lineVal||0;});
+  }
   all.sort((a,b)=>b.metric-a.metric);
   const totalM=all.reduce((s,c)=>s+c.metric,0);
-  let acc=0; const sel=[];
-  for(const c of all){if(acc>=totalM*0.8)break;c.share=totalM>0?c.metric/totalM*100:0;sel.push(c);acc+=c.metric;}
-  return {sel,allCount:all.length,totalM,useFact,accM:acc};
+  all.forEach(c=>{c.share=(totalM>0&&c.metric>0)?c.metric/totalM*100:null;});
+  return {sel:all,allCount:all.length,totalM,useFact:useMoney,accM:totalM,metricLabel:(GER_METRICS.find(m=>m[0]===mk)||GER_METRICS[0])[1]};
 }
 function renderGerente(){
   const body=document.getElementById('gerBody');
   const canMonth=STATE.period&&STATE.period!=='ALL';
   const pace=expectedPace();
-  const pr=gerParetoList(); const sel=pr.sel, allCount=pr.allCount, totalM=pr.totalM, useFact=pr.useFact, accM=pr.accM;
-  if(!sel.length){body.innerHTML='<div class="empty-state">Sin ventas registradas en este periodo. Cambia el Periodo arriba.</div>';return;}
+  const pr=gerParetoList(); const sel=pr.sel, useFact=pr.useFact;
+  if(!sel.length){body.innerHTML='<div class="empty-state">Sin clientes en este periodo. Cambia el Periodo arriba.</div>';return;}
   const vendors=[...new Set(sel.map(c=>c.vendor))].sort();
-  const list=GER.vend==='ALL'?sel:sel.filter(c=>c.vendor===GER.vend);
+  let list=GER.vend==='ALL'?sel:sel.filter(c=>c.vendor===GER.vend);
+  if(GER.day&&GER.day!=='ALL')list=list.filter(c=>c.days.includes(GER.day));
   const gval=(c)=>{const k=cmtKey(c.uid,'ger');const ov=(k in CMT_OVERRIDE)?CMT_OVERRIDE[k]:undefined;return ov!==undefined?ov:cmtRead(c.rec,'ger');};
   const answered=list.filter(c=>!isEmpty(gval(c))).length;
+  const sumM=list.reduce((s,c)=>s+(c.metric||0),0);
   const mfmt=v=>useFact?acct(v):fmtNum(v)+' u';
+  const chipLines=[...GER_LINE_ORDER.map(k=>LINES.find(l=>l.key===k)).filter(Boolean),...LINES.filter(l=>!GROUP_CHILDREN.has(l.key)&&GER_LINE_ORDER.indexOf(l.key)<0)];
   const cards=list.map((c,i)=>{
     const cm=cmtObj(c.rec);
-    const chips=LINES.filter(l=>!GROUP_CHILDREN.has(l.key)).map(l=>{const ld=lineData(c.rec,l);if(ld.pctN==null)return '';const cls=paceClass(ld.pctN,pace);return `<span class="gchip"><i style="background:${lineColor(l.key)}"></i>${esc(l.label)} <b class="t-${cls}">${Math.round(ld.pctN)}%</b></span>`;}).filter(Boolean).join('')||'<span class="gchip na">Sin objetivos capturados</span>';
-    const vc=['w1','w2','w3','cierre'].map(k=>{const f=CMT_FIELDS.find(x=>x.key===k);const v=cm[k];if(isEmpty(v))return '';return `<div class="a2-cmt"><span class="a2-lbl">${f.lbl}</span><span class="a2-txt">${esc(v)}</span></div>`;}).filter(Boolean).join('')||'<div class="a2-cmt sin"><span class="a2-lbl">Vendedor</span><span class="a2-txt">Sin comentarios del vendedor este mes</span></div>';
+    const chips=chipLines.map(l=>{const ld=lineData(c.rec,l);if(ld.pctN==null)return '';const cls=paceClass(ld.pctN,pace);return `<span class="gchip"><i style="background:${lineColor(l.key)}"></i>${esc(l.label)} <b class="t-${cls}">${Math.round(ld.pctN)}%</b></span>`;}).filter(Boolean).join('')||'<span class="gchip na">Sin objetivos capturados</span>';
+    const cred=credBadge(c.code);
+    const vc=['w1','w2','w3','cierre'].map(k=>{const f=CMT_FIELDS.find(x=>x.key===k);const v=cm[k];const empty=isEmpty(v);return `<div class="a2-cmt ${empty?'sin':''}"><span class="a2-lbl">${f.lbl}</span><span class="a2-txt">${empty?'Sin comentario a\u00fan':esc(v)}</span></div>`;}).join('');
     const gv=gval(c); const done=!isEmpty(gv);
     let editor;
     if(canMonth){
@@ -2688,23 +2710,25 @@ function renderGerente(){
       <div class="ger-head">
         <div class="ger-rank">${i+1}</div>
         <div class="ger-id"><div class="ger-name">${esc(c.cliente)}</div><div class="ger-meta"><span class="ger-org">${esc(c.o.label)}</span> \u00b7 <b>${esc(c.vendor)}</b> \u00b7 COD ${esc(disp(c.code))}${c.negocio?' \u00b7 '+esc(c.negocio):''}</div></div>
-        <div class="ger-sales"><div class="ger-amt">${mfmt(c.metric)}</div><div class="ger-share">${c.share!=null?c.share.toFixed(1)+'% de la venta':''}</div></div>
+        <div class="ger-sales"><div class="ger-amt">${c.metric>0?mfmt(c.metric):'\u2014'}</div><div class="ger-share">${c.share!=null?c.share.toFixed(1)+'% de la venta':'sin venta en el periodo'}</div></div>
       </div>
-      <div class="ger-chips">${chips}</div>
+      <div class="ger-chips">${chips}${cred}</div>
       <div class="ger-cmts">${vc}</div>
       ${editor}
     </div>`;
   }).join('');
   body.innerHTML=`
   <div class="strat-kpis">
-    <div class="skpi"><div class="sk-l">Clientes clave (80/20)</div><div class="sk-v">${sel.length}</div><div class="sk-s">de ${allCount} clientes con venta</div></div>
-    <div class="skpi amber"><div class="sk-l">Venta que concentran</div><div class="sk-v">${mfmt(accM)}</div><div class="sk-s">${totalM>0?Math.round(accM/totalM*100):0}% del total ${useFact?'facturado':'en unidades'}</div></div>
-    <div class="skpi ${answered>=list.length?'up':''}"><div class="sk-l">Respondidos</div><div class="sk-v">${answered}/${list.length}</div><div class="sk-s">con respuesta del gerente</div></div>
+    <div class="skpi"><div class="sk-l">Clientes en el filtro</div><div class="sk-v">${list.length}</div><div class="sk-s">de ${sel.length} clientes en total</div></div>
+    <div class="skpi amber"><div class="sk-l">Venta del filtro</div><div class="sk-v">${mfmt(sumM)}</div><div class="sk-s">${pr.metricLabel} \u00b7 periodo seleccionado</div></div>
+    <div class="skpi ${answered>=list.length&&list.length?'up':''}"><div class="sk-l">Respondidos</div><div class="sk-v">${answered}/${list.length}</div><div class="sk-s">con respuesta del gerente</div></div>
   </div>
   <div class="rd-controls">
+    <div class="ctrl"><label>Ordenar por importancia</label><select class="inp" id="gerMetric">${GER_METRICS.map(m=>`<option value="${m[0]}" ${GER.metric===m[0]?'selected':''}>${esc(m[1])}</option>`).join('')}</select></div>
     <div class="ctrl"><label>Vendedor</label><select class="inp" id="gerVend">${['ALL',...vendors].map(v=>`<option value="${esc(v)}" ${GER.vend===v?'selected':''}>${v==='ALL'?'Todos':esc(v)}</option>`).join('')}</select></div>
+    <div class="ctrl ctrl-day"><label>\u25c9 D\u00eda de visita</label><select class="inp" id="gerDay"><option value="ALL" ${(!GER.day||GER.day==='ALL')?'selected':''}>Todos los d\u00edas</option>${DAYS.map(d=>`<option value="${d[0]}" ${GER.day===d[0]?'selected':''}>${DAYFULL[d[0]]}</option>`).join('')}</select></div>
   </div>
-  <div class="rep-note" style="margin-bottom:14px">Ordenados del que <b>m\u00e1s vende al que menos</b> (${useFact?'por facturaci\u00f3n':'por unidades totales'}, con el periodo seleccionado arriba). Cada tarjeta muestra el avance por l\u00ednea, los comentarios del vendedor y tu espacio para responder; se guarda en la misma columna <b>GERENTE DE VENTAS</b> de siempre.</div>
+  <div class="rep-note" style="margin-bottom:14px">Todos los clientes de ambas organizaciones, ordenados del que <b>m\u00e1s vende al que menos</b> seg\u00fan la medida elegida (<b>${pr.metricLabel}</b>). Cada tarjeta muestra su avance por l\u00ednea, cr\u00e9dito, los comentarios del vendedor y tu espacio para responder; se guarda en la misma columna <b>GERENTE DE VENTAS</b> de siempre.</div>
   <div class="ger-list">${cards}</div>`;
 }
 function printVendorPDF(name){
@@ -3056,6 +3080,8 @@ document.addEventListener('change',e=>{
   else if(e.target.id==='credVend'){CRED.vend=e.target.value;renderCredito();}
   else if(e.target.id==='credCond'){CRED.cond=e.target.value;renderCredito();}
   else if(e.target.id==='gerVend'){GER.vend=e.target.value;renderGerente();}
+  else if(e.target.id==='gerMetric'){GER.metric=e.target.value;renderGerente();}
+  else if(e.target.id==='gerDay'){GER.day=e.target.value;renderGerente();}
 });
 function rerender(){if(STATE.screen==='home')renderHome();else if(STATE.screen==='vend')renderVendors();else if(STATE.screen==='cli')renderClients();else if(STATE.screen==='rep')renderReportes();else if(STATE.screen==='camp')renderCampaign();else if(STATE.screen==='strat')renderStrategy();else if(STATE.screen==='ger')renderGerente();else if(STATE.screen==='ficha'){renderClients();goCli(STATE.vendor);}}
 
