@@ -717,6 +717,31 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .cred-badge.mid{border:1px solid #d9a800;box-shadow:0 4px 12px rgba(255,200,58,.3)}
 .cred-badge.saldo{color:var(--cyan);background:rgba(58,166,255,.1);border:1px solid rgba(58,166,255,.35);box-shadow:none;margin-left:5px}
 :root[data-theme="light"] .cred-badge.saldo{color:#1462a8;background:rgba(31,127,224,.08)}
+/* recuadritos de totales por linea */
+.tile-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px;margin-top:12px}
+.tile{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--lc);border-radius:11px;padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+.tile-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
+.tile-or{font-family:'IBM Plex Mono';font-size:11px;color:var(--muted2)}
+.tile-or b{color:var(--txt);font-size:13px}
+.tile-pct{font-family:'IBM Plex Mono';font-weight:800;font-size:20px;letter-spacing:-.5px}
+/* historial dentro de la tarjeta */
+.card-hist{margin-top:12px;background:rgba(255,255,255,.02);border:1px solid var(--line);border-radius:11px;padding:11px 13px}
+:root[data-theme="light"] .card-hist{background:rgba(12,31,68,.03)}
+.ch-title{display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:8px}
+.hist-tbl.hist-mini{font-size:12px;min-width:420px}
+.hist-tbl.hist-mini th{font-size:9.5px;padding:7px 8px}
+.hist-tbl.hist-mini td{font-size:12px;padding:6px 8px}
+.hist-tbl.hist-mini td.l{font-size:11.5px}
+/* filas desplegables del historial */
+.hist-tbl tr.hist-sub{display:none}
+.hist-tbl tr.hist-sub.show{display:table-row}
+.hist-tbl tr.hist-sub td{background:rgba(255,255,255,.02);color:var(--muted)}
+:root[data-theme="light"] .hist-tbl tr.hist-sub td{background:rgba(12,31,68,.03)}
+.hist-tbl tr.hist-sub td.l{padding-left:30px;font-size:11px}
+.hist-tbl tr.hist-parent{cursor:pointer}
+.hist-tbl tr.hist-parent:hover td{background:rgba(255,210,30,.05)}
+.hist-tbl tr.hist-parent .g-chev{margin-right:6px;vertical-align:middle}
+.hist-tbl tr.hist-parent.open .g-chev{transform:rotate(90deg)}
 .cli-card:has(.cred-badge.bad),.line-row:has(.cred-badge.bad){border-color:rgba(224,68,75,.55);box-shadow:inset 4px 0 0 var(--low)}
 .cli-card:has(.cred-badge.mid),.line-row:has(.cred-badge.mid){border-color:rgba(255,200,58,.5);box-shadow:inset 4px 0 0 var(--mid)}
 .lr-id .cred-badge{margin-top:6px}
@@ -1170,7 +1195,7 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
         <option value="medio">Progreso medio primero</option>
         <option value="good">Progreso bueno primero</option>
       </select></div>
-      <div class="ctrl"><label>Línea</label><select class="inp" id="lineSel"></select></div>
+      <div class="ctrl" style="display:none"><label>Línea</label><select class="inp" id="lineSel"></select></div>
       <div class="ctrl ctrl-day"><label>◉ Día de visita</label><select class="inp" id="daySel">
         <option value="ALL">Todos los días</option>
         <option value="LUNES">Lunes</option><option value="MARTES">Martes</option><option value="MIERCOLES">Miércoles</option>
@@ -1625,7 +1650,7 @@ function renderVendors(){
 }
 
 /* ---- CLIENTES ---- */
-let CLI=[], LINE_FILTER='NONE', OBJF='con', DAY_FILTER='ALL', ORDER='regular';
+let CLI=[], LINE_FILTER='ALL', OBJF='con', DAY_FILTER='ALL', ORDER='regular';
 const REVIEWED=new Set();
 function hasObjective(rec){return LINES.some(l=>{const o=rec.numLit(l.obj);return o.n!=null&&o.n>0;});}
 function hasSales(rec){return LINES.some(l=>{const r=rec.numLit(l.real);return r.n!=null&&r.n!==0;});}
@@ -1705,7 +1730,8 @@ function renderMatrix(base,grid,pace,note){
       </div>
       ${cardComments(c)}
       ${pendingChips(c.rec)}
-      ${clientLineTable(c.rec,lines,pace)}
+      ${clientTiles(c.rec,pace)}
+      <div class="card-hist"><div class="ch-title"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l3-3 3 2 4-5"/></svg>Historial de compra \u00b7 unidades reales</div>${historyTable(c.rec,true)}</div>
       <span class="cli-open">Ver ficha completa <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
     </div>`;
   }).join('');
@@ -1857,7 +1883,21 @@ function renderLineFocus(base,grid,line,pace){
 /* ---- FICHA ---- */
 const HIST_ORDER=['PREM','AGM','ESTANDAR','TOTAL','LUB','MOTO','FILTRO','AUTO','CTA','CAMION','LLANTAS'];
 function histLines(){const seen=new Set();const out=[];HIST_ORDER.forEach(k=>{const l=LINES.find(x=>x.key===k);if(l){out.push(l);seen.add(k);}});LINES.forEach(l=>{if(!seen.has(l.key))out.push(l);});return out;}
-function historyTable(rec){
+/* recuadritos compactos de totales por linea (tarjeta de cliente) */
+const TILE_DEFS=[['TOTAL','Total acumuladores'],['LUB','Total lubricantes'],['MOTO','Total motobater\u00edas'],['FILTRO','Total filtros'],['LLANTAS','Total llantas']];
+function clientTiles(rec,pace){
+  const tiles=TILE_DEFS.map(([k,lbl])=>{
+    const line=LINES.find(l=>l.key===k); if(!line)return '';
+    const ld=lineData(rec,line); const lc=lineColor(k);
+    let pctTxt,cls,obj=ld.obj.lit||'\u2014',real=ld.real.lit||'\u2014';
+    if(ld.status==='nodata'){pctTxt='\u2014';cls='na';obj='\u2014';real='\u2014';}
+    else if(ld.status==='sinobj'){pctTxt='s/obj';cls='na';obj='s/o';}
+    else{pctTxt=ld.pctN!=null?Math.round(ld.pctN)+'%':'\u2014';cls=paceClass(ld.pctN,pace);}
+    return `<div class="tile" style="--lc:${lc}"><div class="tile-lbl">${esc(lbl)}</div><div class="tile-or">OBJ <b>${esc(obj)}</b> / REAL <b>${esc(real)}</b></div><div class="tile-pct t-${cls}">${pctTxt}</div></div>`;
+  }).join('');
+  return `<div class="tile-grid">${tiles}</div>`;
+}
+function historyTable(rec,compact){
   const H=DB.H;
   const code=getCell(rec.group[rec.group.length-1],'COD CLIENTE',H)||rec.text('CLIENTE');
   const rows=DB.rows.filter(r=>(getCell(r,'COD CLIENTE',H)||getCell(r,'CLIENTE',H))===code);
@@ -1868,14 +1908,27 @@ function historyTable(rec){
   const now=new Date(); const curRank=now.getFullYear()*100+(now.getMonth()+1);
   const promPeriods=periods.filter(p=>p.rank!==curRank);
   const head=`<th class="l">L\u00ednea</th>`+periods.map(p=>`<th>${esc(p.label)}${p.rank===curRank?' \u2022':''}</th>`).join('')+`<th>Total a\u00f1o</th><th>Prom/mes</th>`;
-  const body=histLines().map(line=>{
+  const rowFor=(line,opts)=>{
+    opts=opts||{};
     let tot=null, totProm=null;
     const cells=periods.map(p=>{const v=parseNum(getCell(p.row,line.real,H));if(v!=null){tot=(tot==null?0:tot)+v;if(p.rank!==curRank)totProm=(totProm==null?0:totProm)+v;}return `<td>${v!=null?fmtNum(v):'\u00b7'}</td>`;}).join('');
     const prom=(promPeriods.length&&totProm!=null)?Math.round(totProm/promPeriods.length):(promPeriods.length===0&&tot!=null?Math.round(tot/periods.length):null);
-    return `<tr><td class="l"><span class="lt-dot" style="background:${lineColor(line.key)}"></span>${esc(line.label)}</td>${cells}<td class="r">${tot!=null?fmtNum(tot):'\u2014'}</td><td class="prom">${prom!=null?fmtNum(prom):'\u2014'}</td></tr>`;
+    const chev=opts.parent?G_CHEV:'';
+    const cnt=opts.parent?`<span class="g-count">+${opts.count}</span>`:'';
+    const attr=opts.parent?` class="hist-parent" data-hlg="${opts.key}"`:(opts.sub?` class="hist-sub hs-${opts.pkey}"`:'');
+    return `<tr${attr}><td class="l">${chev}<span class="lt-dot" style="background:${lineColor(line.key)}"></span>${esc(line.label)}${cnt}</td>${cells}<td class="r">${tot!=null?fmtNum(tot):'\u2014'}</td><td class="prom">${prom!=null?fmtNum(prom):'\u2014'}</td></tr>`;
+  };
+  const body=histLines().map(line=>{
+    if(GROUP_CHILDREN.has(line.key))return '';
+    const kids=LINE_GROUPS[line.key];
+    if(kids){
+      const kidRows=kids.map(k=>{const kl=LINES.find(x=>x.key===k);return kl?rowFor(kl,{sub:true,pkey:line.key}):'';}).join('');
+      return rowFor(line,{parent:true,key:line.key,count:kids.length})+kidRows;
+    }
+    return rowFor(line);
   }).join('');
   const promNote=periods.some(p=>p.rank===curRank)?`<div class="rep-note" style="margin-top:8px;font-size:11.5px">\u2022 El <b>Prom/mes</b> no considera el mes en curso (mes incompleto); el Total del a\u00f1o s\u00ed lo incluye.</div>`:'';
-  return `<div class="rd-tblwrap"><table class="hist-tbl hl-table"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>${promNote}`;
+  return `<div class="rd-tblwrap"><table class="hist-tbl hl-table ${compact?'hist-mini':''}"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>${promNote}`;
 }
 function dl(pairs){return '<dl class="dl">'+pairs.map(([k,v])=>{const e=isEmpty(v);return `<dt>${esc(k)}</dt><dd class="${e?'empty':''}">${esc(e?SD:v)}</dd>`;}).join('')+'</dl>';}
 function fotoBlock(rec){
@@ -2158,7 +2211,7 @@ function goCli(v){
   }
   _goCli(v);
 }
-function _goCli(v){STATE.vendor=v;document.getElementById('cliSearch').value='';LINE_FILTER='NONE';OBJF='con';DAY_FILTER='ALL';ORDER='regular';document.getElementById('daySel').value='ALL';document.getElementById('orderSel').value='regular';document.querySelectorAll('#objSeg .seg-btn').forEach(b=>b.classList.toggle('act',b.dataset.obj==='con'));buildLineSelector();renderClients();showScreen('cli');if(!CRED_DB)loadCredito().then(()=>{if(STATE.screen==='cli')filterClients();});}
+function _goCli(v){STATE.vendor=v;document.getElementById('cliSearch').value='';LINE_FILTER='ALL';OBJF='con';DAY_FILTER='ALL';ORDER='regular';document.getElementById('daySel').value='ALL';document.getElementById('orderSel').value='regular';document.querySelectorAll('#objSeg .seg-btn').forEach(b=>b.classList.toggle('act',b.dataset.obj==='con'));buildLineSelector();renderClients();showScreen('cli');if(!CRED_DB)loadCredito().then(()=>{if(STATE.screen==='cli')filterClients();});}
 function goFicha(uid){const c=CLI.find(x=>x.uid===uid);if(!c)return;renderFicha(c.rec);showScreen('ficha');}
 function goRep(){if(ROLE!=='directivo')return;renderReportes();showScreen('rep');}
 
@@ -2979,6 +3032,7 @@ function logout(){showWelcome();}
 document.addEventListener('click',e=>{
   const vp=e.target.closest('[data-vpdf]');if(vp){printVendorPDF(vp.dataset.vpdf);e.stopPropagation();return;}
   const lg=e.target.closest('[data-lg]');if(lg){const wr=lg.closest('.lt-gwrap,.ln-gwrap');if(wr)wr.classList.toggle('open');e.stopPropagation();return;}
+  const hg=e.target.closest('[data-hlg]');if(hg){const key=hg.dataset.hlg;const tb=hg.closest('tbody');if(tb){hg.classList.toggle('open');tb.querySelectorAll('.hs-'+key).forEach(r=>r.classList.toggle('show'));}e.stopPropagation();return;}
   const co=e.target.closest('.cli-coments');if(co){const tg=e.target.closest('[data-ctoggle]');if(tg){const uid=String(tg.dataset.ctoggle);const open=co.classList.toggle('open');if(open)CMT_OPEN.add(uid);else CMT_OPEN.delete(uid);const h=tg.querySelector('.cco-hint');if(h)h.textContent=open?'ocultar':'ver';return;}const mc=e.target.closest('[data-mic]');if(mc){startDictation(mc.dataset.mic,mc);return;}const sv=e.target.closest('[data-save]');if(sv)saveComment(sv);return;}
   const cc=e.target.closest('.cal-card');if(cc){cc.classList.toggle('open');return;}
   const rb=e.target.closest('[data-rep]');if(rb){REPORT=rb.dataset.rep;renderReportes();return;}
