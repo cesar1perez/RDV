@@ -649,9 +649,14 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 :root[data-theme="light"] .cco-sum{color:var(--accent-ink)}
 :root[data-theme="light"] .cco-sum.zero{background:rgba(12,31,68,.05)}
 /* pantalla del gerente 80/20 */
-.dash-cta.gercta{border-color:rgba(58,166,255,.4);cursor:pointer}
-.dash-cta.gercta:hover{border-color:var(--cyan)}
-.dash-cta-ic.ger{background:linear-gradient(135deg,var(--cyan),#7cc4ff);color:#07142e}
+.dash-cta.gercta{cursor:pointer;background:linear-gradient(120deg,#0c1f44,#132c5e);border:1px solid rgba(255,210,30,.45);box-shadow:0 14px 34px -20px rgba(0,0,0,.7)}
+.dash-cta.gercta:hover{border-color:var(--amber);transform:translateY(-2px)}
+.dash-cta-ic.ger{background:linear-gradient(135deg,#e9eef7,#c9d6ec);color:#0c1f44;box-shadow:0 6px 16px rgba(0,0,0,.25)}
+.dash-cta.gercta .dash-cta-t{color:#fff}
+.dash-cta.gercta .dash-cta-s{color:#aebfdc}
+.dash-cta.gercta .dash-cta-go{color:var(--amber)}
+.vorg-tag{position:absolute;top:14px;left:16px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--vc);border:1px solid color-mix(in srgb,var(--vc) 55%,transparent);background:color-mix(in srgb,var(--vc) 12%,transparent);border-radius:14px;padding:3px 9px;z-index:2}
+.vend-card{position:relative}
 .ger-list{display:flex;flex-direction:column;gap:15px}
 .ger-card{background:linear-gradient(160deg,var(--panel),var(--bg2));border:1px solid var(--line);border-left:5px solid var(--oc);border-radius:14px;padding:16px 18px}
 .ger-card.answered{border-left-color:var(--good)}
@@ -1603,8 +1608,9 @@ function globalCard(){
     const lc=lineColor(rw.key);
     return `<div class="glob-line"><span class="gl-nm"><span class="lt-dot" style="background:${lc}"></span>${esc(rw.lbl)}</span><span class="gl-or">OBJ <b>${fmtNum(rw.obj)}</b> \u00b7 REAL <b>${fmtNum(rw.real)}</b></span><span class="gl-bar"><span class="bar ${pc}"><i style="width:${clampW(pct)}%"></i>${pace!=null?`<span class="mk" style="left:${Math.min(100,pace)}%"></span>`:''}</span></span><span class="gl-pc mono t-${pc}">${pct!=null?Math.round(pct)+'%':'\u2014'}</span></div>`;
   }).join('');
-  return `<div class="glob-card" data-gerbtn="1" title="Ver todos los clientes de ambas organizaciones">
-    <div class="glob-head"><span class="badge" style="color:var(--accent);border-color:var(--accent)">Visi\u00f3n global \u00b7 directivos</span><h2 class="display">Ambas razones sociales</h2><div class="csub">Llanterama Tulancingo + Autoel\u00e9ctrica Roma \u00b7 avance del periodo seleccionado</div></div>
+  return `<div class="glob-card" data-globalv="1" title="Ver las fichas de progreso de todos los vendedores">
+    <div class="glob-head"><span class="badge" style="color:var(--accent);border-color:var(--accent)">Visi\u00f3n global \u00b7 directivos</span><h2 class="display">Progreso global</h2><div class="csub">Llanterama Tulancingo + Autoel\u00e9ctrica Roma \u00b7 clic para ver las fichas de todos los vendedores</div></div>
+    <div class="div-cta" style="position:absolute;top:24px;right:26px">Ver vendedores <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
     <div class="glob-cols">
       ${stats.map(x=>col(x.o.label,x.s.vend,x.s.cli,x.s.pct,`var(--${x.o.accent})`)).join('')}
       ${col('Ambas juntas',vendT,cliT,pctT,'var(--accent)')}
@@ -1614,7 +1620,7 @@ function globalCard(){
 }
 function renderHome(){
   const grid=document.getElementById('divGrid');
-  grid.innerHTML=CONFIG.orgs.map((o,i)=>{
+  grid.innerHTML=(ROLE==='directivo')?'':CONFIG.orgs.map((o,i)=>{
     if(!DB.rows.length){return `<div class="div-card reveal" style="--c:var(--${o.accent});animation-delay:${i*.08}s"><span class="badge">${esc(o.label)}</span><h2 class="display">${esc(o.label)}</h2><p class="csub" style="color:var(--low)">Sin datos cargados.</p>${LOAD_ERR?`<div class="err-detail">${esc(LOAD_ERR)}</div>`:''}</div>`;}
     const s=orgStats(o.id), pc=paceClass(s.pct,expectedPace()), cvar=`var(--${o.accent})`;
     return `<div class="div-card reveal" data-org="${o.id}" style="--c:${cvar};animation-delay:${i*.08}s">
@@ -1639,11 +1645,11 @@ function renderHome(){
   const banner=document.getElementById('dashCtaBanner');
   if(banner)banner.style.display=(ROLE==='directivo')?'none':'';
   const gz=document.getElementById('gerZone');
-  if(gz){gz.innerHTML=(ROLE==='directivo'&&DB.rows.length)?`${globalCard()}<div class="dash-cta gercta" data-gerbtn="1">
+  if(gz){gz.innerHTML=(ROLE==='directivo'&&DB.rows.length)?`<div class="dash-cta gercta" data-gerbtn="1">
     <div class="dash-cta-ic ger"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8M8 13h5"/></svg></div>
     <div class="dash-cta-tx"><div class="dash-cta-t">Respuestas del gerente de ventas</div><div class="dash-cta-s">Comentarios y avances de todos los clientes de ambas organizaciones \u00b7 ordenados por importancia de venta</div></div>
     <svg class="dash-cta-go" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-  </div>`:'';}
+  </div>${globalCard()}`:'';}
 }
 
 /* ===== CAMPANA: Recuperacion de Acumuladores ===== */
@@ -1712,8 +1718,17 @@ function vendorAggregates(orgId){
   return [...byV.values()].sort((a,b)=>a.order-b.order||(b.lines[HEADLINE_KEY].pct??-1)-(a.lines[HEADLINE_KEY].pct??-1));
 }
 function renderVendors(){
-  const o=org(STATE.org); document.getElementById('vendEyebrow').textContent=o.label;
-  const list=vendorAggregates(STATE.org); const pace=expectedPace();
+  const isGlob=(GLOBAL_VEND&&ROLE==='directivo');
+  const o=org(STATE.org);
+  document.getElementById('vendEyebrow').textContent=isGlob?'Progreso global \u00b7 ambas razones sociales':o.label;
+  let list;
+  if(isGlob){
+    list=[];
+    CONFIG.orgs.forEach(oo=>{vendorAggregates(oo.id).forEach(v=>{v._o=oo;list.push(v);});});
+  } else {
+    list=vendorAggregates(STATE.org); list.forEach(v=>{v._o=null;});
+  }
+  const pace=expectedPace();
   const totalCli=list.reduce((a,v)=>a+v.recs.length,0);
   const perEl=document.getElementById('periodSel'); const perTxt=perEl.selectedOptions[0]?perEl.selectedOptions[0].textContent:'';
   document.getElementById('vendSub').innerHTML=`% de venta real vs objetivo por l\u00ednea. <b>${list.length} vendedor${list.length!==1?'es':''} \u00b7 ${totalCli} cliente${totalCli!==1?'s':''}</b> en ${esc(perTxt)}. ${pace!=null?`Esperado al corte: <b>${Math.round(pace)}%</b>.`:''}`;
@@ -1729,7 +1744,8 @@ function renderVendors(){
       if(kids){const kR=kids.map(k=>{const kl=LINES.find(x=>x.key===k);return kl?mkRow(kl,{sub:true}):'';}).join('');return `<div class="ln-gwrap">${mkRow(line,{parent:true,count:kids.length})}<div class="ln-kids">${kR}</div></div>`;}
       return mkRow(line);
     }).join('');
-    return `<div class="vend-card reveal" data-vend="${esc(v.name)}" style="animation-delay:${i*.04}s">
+    return `<div class="vend-card reveal" data-vend="${esc(v.name)}"${v._o?` data-vorg="${v._o.id}"`:''} style="animation-delay:${i*.04}s">
+      ${v._o?`<span class="vorg-tag" style="--vc:var(--${v._o.accent})">${esc(v._o.label)}</span>`:''}
       <button class="vpdf" data-vpdf="${esc(v.name)}" title="Descargar ficha en PDF"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15h6M9 18h4"/></svg>PDF</button>
       <div class="vend-top">
         <div class="vend-avatar">${esc(ini)}</div>
@@ -2297,7 +2313,9 @@ function renderFactSemanal(){
    6. NAVEGACI\u00d3N
    ============================================================ */
 function goHome(){STATE.org=null;STATE.vendor=null;setAccent(null);renderHome();showScreen('home');}
-function goVend(id){STATE.org=id;STATE.vendor=null;setAccent(id);document.getElementById('repBtn').style.display=(ROLE==='directivo')?'':'none';renderVendors();showScreen('vend');}
+let GLOBAL_VEND=false;
+function goGlobalVend(){GLOBAL_VEND=true;STATE.org=CONFIG.orgs[0].id;STATE.vendor=null;setAccent(null);document.getElementById('repBtn').style.display=(ROLE==='directivo')?'':'none';renderVendors();showScreen('vend');}
+function goVend(id){GLOBAL_VEND=false;STATE.org=id;STATE.vendor=null;setAccent(id);document.getElementById('repBtn').style.display=(ROLE==='directivo')?'':'none';renderVendors();showScreen('vend');}
 function goCli(v){
   if(ROLE==='vendedor'&&!UNLOCKED.has(keyName(v))){
     const pass=vendorPass(v);
@@ -3222,13 +3240,14 @@ document.addEventListener('click',e=>{
   const ov=e.target.closest('[data-org]');if(ov){goVend(ov.dataset.org);return;}
   const cm=e.target.closest('[data-camp]');if(cm){goCampaign();return;}
   const gb=e.target.closest('[data-gerbtn]');if(gb){goGerente();return;}
+  const gv2=e.target.closest('[data-globalv]');if(gv2){goGlobalVend();return;}
   const gc=e.target.closest('.ger-card');if(gc){const mc=e.target.closest('[data-mic]');if(mc){startDictation(mc.dataset.mic,mc);return;}const sv=e.target.closest('[data-save]');if(sv){saveComment(sv);return;}return;}
   const cch=e.target.closest('[data-cchip]');if(cch){const v=cch.dataset.cchip;if(v==='ALL')STRAT.clients.clear();else{if(STRAT.clients.has(v))STRAT.clients.delete(v);else STRAT.clients.add(v);}renderStrategy();return;}
   const stt=e.target.closest('#stratTot');if(stt){STRAT.onlyTotal=!STRAT.onlyTotal;renderStrategy();return;}
   const sp=e.target.closest('#stratPdf');if(sp){printStrategyPDF();return;}
   const sd=e.target.closest('.cal-d[data-day]');if(sd){const dn=parseInt(sd.dataset.day);const y=Math.floor(dn/10000),mo=Math.floor(dn/100)%100,dd=dn%100;const dt=new Date(y,mo-1,dd);if(STRAT.pick==='start'){STRAT.refStart=dt;STRAT.refEnd=dt;STRAT.pick='end';}else{STRAT.refEnd=dt;if(dnum(STRAT.refEnd)<dnum(STRAT.refStart)){const t=STRAT.refStart;STRAT.refStart=STRAT.refEnd;STRAT.refEnd=t;}STRAT.pick='start';}renderStrategy();return;}
   const cmv=e.target.closest('[data-cmove]');if(cmv){STRAT.calM+=parseInt(cmv.dataset.cmove);if(STRAT.calM<0){STRAT.calM=11;STRAT.calY--;}if(STRAT.calM>11){STRAT.calM=0;STRAT.calY++;}renderStrategy();return;}
-  const vd=e.target.closest('[data-vend]');if(vd){goCli(vd.dataset.vend);return;}
+  const vd=e.target.closest('[data-vend]');if(vd){if(vd.dataset.vorg){STATE.org=vd.dataset.vorg;setAccent(vd.dataset.vorg);}goCli(vd.dataset.vend);return;}
   const ck=e.target.closest('[data-check]');if(ck){const id=parseInt(ck.dataset.check);if(REVIEWED.has(id))REVIEWED.delete(id);else REVIEWED.add(id);const card=ck.closest('.cli-card');if(card)card.classList.toggle('done');e.stopPropagation();return;}
   const lce=e.target.closest('.lr-coment.cmt-edit');
   if(lce){
@@ -3256,7 +3275,7 @@ document.addEventListener('click',e=>{
   const mp=e.target.closest('.map-pin');if(mp){document.querySelectorAll('.map-pin.sel').forEach(x=>x.classList.remove('sel'));mp.classList.add('sel');showMapInfo(parseInt(mp.dataset.pin));return;}
   const sg=e.target.closest('#objSeg .seg-btn');if(sg){OBJF=sg.dataset.obj;document.querySelectorAll('#objSeg .seg-btn').forEach(b=>b.classList.toggle('act',b===sg));filterClients();return;}
   const wc=e.target.closest('[data-welcome]');if(wc){gotoWelcome();return;}
-  const bk=e.target.closest('[data-go]');if(bk){const g=bk.dataset.go;if(g==='home')goHome();else if(g==='vend')goVend(STATE.org);else if(g==='cli')goCli(STATE.vendor);return;}
+  const bk=e.target.closest('[data-go]');if(bk){const g=bk.dataset.go;if(g==='home')goHome();else if(g==='vend'){if(GLOBAL_VEND&&ROLE==='directivo')goGlobalVend();else goVend(STATE.org);}else if(g==='cli')goCli(STATE.vendor);return;}
 });
 document.getElementById('repBtn').addEventListener('click',goRep);
 /* resaltado de columna al pasar el cursor por tablas de datos */
