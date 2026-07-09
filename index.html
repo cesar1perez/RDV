@@ -742,6 +742,17 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .hist-tbl tr.hist-parent:hover td{background:rgba(255,210,30,.05)}
 .hist-tbl tr.hist-parent .g-chev{margin-right:6px;vertical-align:middle}
 .hist-tbl tr.hist-parent.open .g-chev{transform:rotate(90deg)}
+/* reporte 80/20 */
+.p82-tbl td.num{font-family:'IBM Plex Mono';text-align:right}
+.p82-tbl td.strong{font-weight:800;color:var(--accent)}
+:root[data-theme="light"] .p82-tbl td.strong{color:var(--accent-ink)}
+.p82-tbl td.muted{color:var(--muted2)}
+.p82-tbl tr.p82-key td{background:rgba(255,210,30,.06)}
+.p82-tbl tr.p82-key td:first-child{box-shadow:inset 4px 0 0 var(--accent)}
+:root[data-theme="light"] .p82-tbl tr.p82-key td{background:rgba(181,132,0,.07)}
+.p82-star{color:var(--accent);margin-right:5px}
+:root[data-theme="light"] .p82-star{color:var(--accent-ink)}
+.p82-org{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;margin-left:6px}
 .cli-card:has(.cred-badge.bad),.line-row:has(.cred-badge.bad){border-color:rgba(224,68,75,.55);box-shadow:inset 4px 0 0 var(--low)}
 .cli-card:has(.cred-badge.mid),.line-row:has(.cred-badge.mid){border-color:rgba(255,200,58,.5);box-shadow:inset 4px 0 0 var(--mid)}
 .lr-id .cred-badge{margin-top:6px}
@@ -1986,6 +1997,7 @@ const DAYFULL={LUNES:'Lunes',MARTES:'Martes',MIERCOLES:'Mi\u00e9rcoles',JUEVES:'
 let REPORT='act1', REP_VENDOR=null, REP_DAY='LUNES';
 const REP_TABS=[
   ['cred','Cr\u00e9dito \u00b7 cartera'],
+  ['p8020','80/20 \u00b7 clientes clave'],
   ['act1','Act. 1 \u00b7 Carpeta de ruta'],
   ['act2','Act. 2-3 \u00b7 Reporte de visitas'],
   ['act4','Act. 4 \u00b7 Pedido sugerido'],
@@ -2010,6 +2022,7 @@ function renderReportes(){
 function renderActiveReport(){
   if(REPORT==='ruta')renderRutaDia();
   else if(REPORT==='cred')renderCredito();
+  else if(REPORT==='p8020')renderP8020();
   else if(REPORT==='fact')renderFactSemanal();
   else if(REPORT==='cmp')renderComparativo();
   else if(REPORT==='act1')renderAct1();
@@ -2553,6 +2566,82 @@ function renderCredito(){
     </table></div></div>`;
 }
 
+/* ===== 80/20: clientes clave por linea de producto ===== */
+let P82={org:'ALL',vend:'ALL',line:'TOTAL',mode:'period'};
+function p82Data(){
+  const orgIds=P82.org==='ALL'?CONFIG.orgs.map(o=>o.id):[P82.org];
+  const line=LINES.find(l=>l.key===P82.line)||LINES.find(l=>l.key==='TOTAL')||LINES[0];
+  const now=new Date(); const curRank=now.getFullYear()*100+(now.getMonth()+1);
+  const out=[];
+  orgIds.forEach(oid=>{
+    const o=org(oid);
+    if(P82.mode==='period'){
+      clientGroups(oid).forEach(rec=>{
+        const ld=lineData(rec,line);
+        out.push({cliente:rec.text('CLIENTE')||SD,vendor:rec.vendor,o,code:getCell(rec.group[rec.group.length-1],'COD CLIENTE',rec.H),obj:ld.obj.n,real:ld.real.n,pct:ld.pctN});
+      });
+    } else {
+      clientGroups(oid,'ALL').forEach(rec=>{
+        const H=rec.H; const pmap=new Map();
+        rec.group.forEach(r=>{
+          const ano=getCell(r,'A\u00d1O',H)||getCell(r,'ANIO',H)||getCell(r,'ANO',H), mes=getCell(r,'MES',H);
+          const rk=periodRank(ano,mes); if(rk===curRank)return;
+          const k=String(rk); const prev=pmap.get(k)||{o:null,r:null};
+          const ov=parseNum(getCell(r,line.obj,H)), rv=parseNum(getCell(r,line.real,H));
+          if(ov!=null)prev.o=(prev.o==null?0:prev.o)+ov;
+          if(rv!=null)prev.r=(prev.r==null?0:prev.r)+rv;
+          pmap.set(k,prev);
+        });
+        const n=pmap.size;
+        let so=null,sr=null; pmap.forEach(v=>{if(v.o!=null)so=(so==null?0:so)+v.o;if(v.r!=null)sr=(sr==null?0:sr)+v.r;});
+        const avgO=(n&&so!=null)?so/n:null, avgR=(n&&sr!=null)?sr/n:null;
+        out.push({cliente:rec.text('CLIENTE')||SD,vendor:rec.vendor,o,code:getCell(rec.group[rec.group.length-1],'COD CLIENTE',rec.H),obj:avgO,real:avgR,pct:(avgO!=null&&avgO>0&&avgR!=null)?avgR/avgO*100:null,nMeses:n});
+      });
+    }
+  });
+  return {list:out,line};
+}
+function renderP8020(){
+  const body=document.getElementById('repBody');
+  const d=p82Data(); const line=d.line;
+  const vendors=[...new Set(d.list.map(c=>c.vendor).filter(Boolean))].sort();
+  let list=d.list.filter(c=>c.real!=null&&c.real>0);
+  if(P82.vend!=='ALL')list=list.filter(c=>c.vendor===P82.vend);
+  list.sort((a,b)=>b.real-a.real);
+  const total=list.reduce((s,c)=>s+c.real,0);
+  let acc=0; let keyCount=0; let keySum=0;
+  list.forEach(c=>{c.share=total>0?c.real/total*100:0;const wasBelow=acc<total*0.8;acc+=c.real;c.cum=total>0?acc/total*100:0;c.key=wasBelow;if(c.key){keyCount++;keySum+=c.real;}});
+  const avgMode=P82.mode==='avg';
+  const realHead=avgMode?'Prom real/mes':'Real';
+  const objHead=avgMode?'Prom obj/mes':'Objetivo';
+  const rows=list.map((c,i)=>`<tr class="${c.key?'p82-key':''}">
+    <td class="num">${i+1}</td>
+    <td class="l name">${c.key?'<span class="p82-star">\u2605</span>':''}${esc(c.cliente)}${P82.org==='ALL'?` <span class="p82-org" style="color:var(--${c.o.accent==='cyan'?'cyan':'amber'})">${esc(c.o.label)}</span>`:''}</td>
+    <td class="l">${esc(c.vendor||'\u2014')}</td>
+    <td class="num">${c.obj!=null?fmtNum(Math.round(c.obj*10)/10):'\u2014'}</td>
+    <td class="num strong">${fmtNum(Math.round(c.real*10)/10)}</td>
+    <td class="num ${c.pct!=null?('t-'+(c.pct>=100?'good':(c.pct>=70?'mid':'low'))):''}">${c.pct!=null?Math.round(c.pct)+'%':'\u2014'}</td>
+    <td class="num">${c.share.toFixed(1)}%</td>
+    <td class="num muted">${c.cum.toFixed(1)}%</td>
+  </tr>`).join('');
+  body.innerHTML=`
+  <div class="strat-kpis">
+    <div class="skpi"><div class="sk-l">Clientes clave (\u2605)</div><div class="sk-v">${keyCount}</div><div class="sk-s">de ${list.length} con venta en ${esc(line.label)}</div></div>
+    <div class="skpi amber"><div class="sk-l">Concentran</div><div class="sk-v">${total>0?Math.round(keySum/total*100):0}%</div><div class="sk-s">${fmtNum(Math.round(keySum*10)/10)} de ${fmtNum(Math.round(total*10)/10)} unidades</div></div>
+    <div class="skpi"><div class="sk-l">Medida</div><div class="sk-v" style="font-size:16px">${esc(line.label)}</div><div class="sk-s">${avgMode?'promedio mensual, sin mes en curso':'mes seleccionado arriba'}</div></div>
+  </div>
+  <div class="rd-controls">
+    <div class="ctrl"><label>Organizaci\u00f3n</label><select class="inp" id="p82Org"><option value="ALL" ${P82.org==='ALL'?'selected':''}>Ambas</option>${CONFIG.orgs.map(o=>`<option value="${o.id}" ${P82.org===o.id?'selected':''}>${esc(o.label)}</option>`).join('')}</select></div>
+    <div class="ctrl"><label>Vendedor</label><select class="inp" id="p82Vend">${['ALL',...vendors].map(v=>`<option value="${esc(v)}" ${P82.vend===v?'selected':''}>${v==='ALL'?'Todos':esc(v)}</option>`).join('')}</select></div>
+    <div class="ctrl"><label>L\u00ednea de producto</label><select class="inp" id="p82Line">${LINES.map(l=>`<option value="${l.key}" ${P82.line===l.key?'selected':''}>${esc(l.label)}</option>`).join('')}</select></div>
+    <div class="ctrl"><label>Periodo</label><select class="inp" id="p82Mode"><option value="period" ${P82.mode==='period'?'selected':''}>Mes seleccionado (arriba)</option><option value="avg" ${P82.mode==='avg'?'selected':''}>Promedio mensual \u00b7 todos los meses</option></select></div>
+    <button class="btn ghost" onclick="exportExcel(document.querySelector('.p82-tbl'),'Clientes_8020_${line.key}.xls')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Excel</button>
+  </div>
+  <div class="rep-note" style="margin-bottom:12px">Clientes ordenados del que <b>m\u00e1s compra ${esc(line.label)}</b> al que menos. Los marcados con <span class="p82-star">\u2605</span> son los <b>clientes clave</b>: en conjunto concentran ~80% de la venta de esa l\u00ednea (regla 80/20). La columna <b>% vs Obj</b> compara contra su objetivo${avgMode?' promedio':''}.${avgMode?' El promedio mensual <b>no considera el mes en curso</b>.':''}</div>
+  ${list.length?`<div class="rd-wrap"><div class="rd-tblwrap"><table class="rep-tbl hl-table p82-tbl">
+    <thead><tr><th>#</th><th class="l">Cliente</th><th class="l">Vendedor</th><th>${objHead}</th><th>${realHead}</th><th>% vs Obj</th><th>% del total</th><th>% acum.</th></tr></thead>
+    <tbody>${rows}</tbody></table></div></div>`:'<div class="empty-state">Sin ventas de esta l\u00ednea con los filtros elegidos. Cambia la l\u00ednea, el periodo o el vendedor.</div>'}`;
+}
 /* ===== Reporte generico con enlace (Act. 4, 7, 89) ===== */
 function linkReport(opt){
   const body=document.getElementById('repBody');
@@ -3136,6 +3225,10 @@ document.addEventListener('change',e=>{
   else if(e.target.id==='gerVend'){GER.vend=e.target.value;renderGerente();}
   else if(e.target.id==='gerMetric'){GER.metric=e.target.value;renderGerente();}
   else if(e.target.id==='gerDay'){GER.day=e.target.value;renderGerente();}
+  else if(e.target.id==='p82Org'){P82.org=e.target.value;P82.vend='ALL';renderP8020();}
+  else if(e.target.id==='p82Vend'){P82.vend=e.target.value;renderP8020();}
+  else if(e.target.id==='p82Line'){P82.line=e.target.value;renderP8020();}
+  else if(e.target.id==='p82Mode'){P82.mode=e.target.value;renderP8020();}
 });
 function rerender(){if(STATE.screen==='home')renderHome();else if(STATE.screen==='vend')renderVendors();else if(STATE.screen==='cli')renderClients();else if(STATE.screen==='rep')renderReportes();else if(STATE.screen==='camp')renderCampaign();else if(STATE.screen==='strat')renderStrategy();else if(STATE.screen==='ger')renderGerente();else if(STATE.screen==='ficha'){renderClients();goCli(STATE.vendor);}}
 
