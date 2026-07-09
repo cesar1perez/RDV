@@ -763,6 +763,9 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .p82-star{color:var(--accent);margin-right:5px}
 :root[data-theme="light"] .p82-star{color:var(--accent-ink)}
 .p82-org{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;margin-left:6px}
+.p82-tbl th.sortable{cursor:pointer;user-select:none}
+.p82-tbl th.sortable:hover,.p82-tbl th.sortable.on{color:var(--accent)}
+:root[data-theme="light"] .p82-tbl th.sortable:hover,:root[data-theme="light"] .p82-tbl th.sortable.on{color:var(--accent-ink)}
 .cli-card:has(.cred-badge.bad),.line-row:has(.cred-badge.bad){border-color:rgba(224,68,75,.55);box-shadow:inset 4px 0 0 var(--low)}
 .cli-card:has(.cred-badge.mid),.line-row:has(.cred-badge.mid){border-color:rgba(255,200,58,.5);box-shadow:inset 4px 0 0 var(--mid)}
 .lr-id .cred-badge{margin-top:6px}
@@ -1618,7 +1621,7 @@ function renderCampaign(){
   const headTop=lines.map((l,i)=>`<th colspan="3" class="lh" style="--lc:${lineColor(CAMP_LINES[i])}">${esc(l.label)}</th>`).join('');
   const headSub=CAMP_LINES.map(()=>`<th class="gsep">Obj</th><th>Real</th><th>%</th>`).join('');
   body.innerHTML=`<div class="rd-controls">
-    <button class="btn ghost" onclick="exportExcel(document.querySelector('.camp-tbl'),'Campana_Acumuladores.xls')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Excel</button>
+    <button class="btn ghost" onclick="printTablePDF('.camp-tbl','Estrategia de acumuladores','Campa\u00f1a 25 jun \u2013 25 jul 2026')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15h6M9 18h4"/></svg>PDF</button>
   </div>
   <div class="rd-wrap">
     <div class="camp-strip"><span class="camp-strip-tag">Campa\u00f1a especial</span><span>${CAMP_INFO.start} \u2013 ${CAMP_INFO.end}</span><span class="camp-strip-per">Periodo de datos: <b>${esc(perTxt)}</b></span></div>
@@ -2077,7 +2080,7 @@ function renderComparativo(){
     <div class="ctrl"><label>Vendedor</label><select class="inp" id="cmpVendSel">${vends.map(v=>`<option ${v.name===CMP_VENDOR?'selected':''}>${esc(v.name)}</option>`).join('')}</select></div>
     <div class="ctrl"><label>Mes A</label><select class="inp" id="cmpA">${opts(CMP_A)}</select></div>
     <div class="ctrl"><label>Mes B</label><select class="inp" id="cmpB">${opts(CMP_B)}</select></div>
-    <button class="btn ghost" onclick="exportCmp()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13l6 6M15 13l-6 6"/></svg>Excel</button>
+    <button class="btn ghost" onclick="exportCmp()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15h6M9 18h4"/></svg>PDF</button>
   </div>`;
   // mapas por periodo
   const mapA=new Map(),mapB=new Map();
@@ -2130,7 +2133,7 @@ function renderRutaDia(){
     <div class="ctrl"><label>Vendedor</label><select class="inp" id="repVendSel">${vends.map(v=>`<option ${v.name===REP_VENDOR?'selected':''}>${esc(v.name)}</option>`).join('')}</select></div>
     <div class="ctrl"><label>D\u00eda de visita</label><select class="inp" id="repDaySel">${DAYS.map(([col])=>`<option value="${col}" ${col===REP_DAY?'selected':''}>${DAYFULL[col]}</option>`).join('')}</select></div>
     <button class="btn" onclick="printRoute()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></svg>Exportar PDF (carta horizontal)</button>
-    <button class="btn ghost" onclick="exportRuta()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13l6 6M15 13l-6 6"/></svg>Excel</button>
+    <button class="btn ghost" onclick="exportRuta()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15h6M9 18h4"/></svg>PDF</button>
   </div>`;
 
   const headTop=RUTA_LINES.map(k=>{const l=LINES.find(x=>x.key===k);return `<th colspan="3" class="lh" style="--lc:${lineColor(k)}">${esc(l.label)}</th>`;}).join('');
@@ -2261,16 +2264,45 @@ function gotoWelcome(){showScreen('welcome');}
 function injectPage(orient){let s=document.getElementById('pageStyle');if(!s){s=document.createElement('style');s.id='pageStyle';document.head.appendChild(s);}s.textContent=`@page{size:Letter ${orient};margin:${orient==='landscape'?'7mm':'11mm'}}`;}
 function printRoute(){injectPage('landscape');document.body.classList.add('print-route');window.print();setTimeout(()=>document.body.classList.remove('print-route'),400);}
 function printFicha(){injectPage('portrait');document.body.classList.add('print-ficha');window.print();setTimeout(()=>document.body.classList.remove('print-ficha'),400);}
+function printTablePDF(sel,title,sub){
+  const t=document.querySelector(sel); if(!t){alert('No encontr\u00e9 la tabla para imprimir.');return;}
+  const w=window.open('','_blank'); if(!w){alert('Permite las ventanas emergentes para generar el PDF.');return;}
+  const o=STATE.org?org(STATE.org):null;
+  const clone=t.cloneNode(true);
+  clone.querySelectorAll('svg').forEach(x=>x.remove());
+  w.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${esc(title)}</title><style>
+  @page{size:letter landscape;margin:10mm}
+  *{box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+  body{color:#15233b;margin:0}
+  .hd{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #ffd21e;padding-bottom:8px;margin-bottom:10px}
+  h1{font-size:17px;margin:0}
+  .sub{font-size:10px;color:#5a6b85;margin-top:3px}
+  table{width:100%;border-collapse:collapse;font-size:8.5px;table-layout:auto}
+  th,td{border:1px solid #cdd6e4;padding:3.5px 5px;text-align:right;word-wrap:break-word;max-width:150px}
+  th{background:#15233b;color:#fff;font-size:8px;text-transform:uppercase;letter-spacing:.3px}
+  td:first-child,th:first-child{text-align:left}
+  td.l,th.l,td.name,th.name,td.zone{text-align:left}
+  tbody tr:nth-child(even){background:#f6f8fb}
+  thead{display:table-header-group}
+  tr{page-break-inside:avoid}
+  .foot{margin-top:9px;font-size:8px;color:#9aa6ba;display:flex;justify-content:space-between;border-top:1px solid #e2e8f2;padding-top:6px}
+  </style></head><body>
+  <div class="hd"><div><h1>${esc(title)}</h1><div class="sub">${esc(sub||'')}</div></div><div class="sub">${o?esc(o.label)+' \u00b7 ':''}RDV</div></div>
+  ${clone.outerHTML}
+  <div class="foot"><span>Reporte diario de visitas \u00b7 uso interno</span><span>Generado ${new Date().toLocaleDateString('es-MX')}</span></div>
+  </body></html>`);
+  w.document.close(); setTimeout(()=>{try{w.focus();w.print();}catch(_){}},400);
+}
 function exportExcel(tableEl,filename){
   if(!tableEl){alert('No hay tabla para exportar.');return;}
   const html='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"><style>td,th{border:1px solid #ccc;padding:4px 6px;font-family:Arial;font-size:11px}</style></head><body>'+tableEl.outerHTML+'</body></html>';
   const blob=new Blob(['\ufeff'+html],{type:'application/vnd.ms-excel'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},600);
 }
-function exportRuta(){exportExcel(document.querySelector('#printArea .rd-tbl'),`Ruta_${(REP_VENDOR||'').replace(/\s+/g,'_')}_${REP_DAY}.xls`);}
-function exportCmp(){exportExcel(document.querySelector('.cmp-tbl'),`Comparativo_${(CMP_VENDOR||'').replace(/\s+/g,'_')}.xls`);}
-function exportAct106(){exportExcel(document.querySelector('.act106-tbl'),`Objetivos_${ACT106_SCOPE}.xls`);}
-function exportAct121(){exportExcel(document.querySelector('.act121-altas'),`Altas_clientes.xls`);}
+function exportRuta(){printTablePDF('#printArea .rd-tbl','Ruta fija \u00b7 '+(REP_VENDOR||''),'D\u00eda: '+(DAYFULL[REP_DAY]||REP_DAY));}
+function exportCmp(){printTablePDF('.cmp-tbl','Comparativo mensual \u00b7 '+(CMP_VENDOR||''),'Objetivo vs real por l\u00ednea');}
+function exportAct106(){printTablePDF('.act106-tbl','Objetivos por l\u00ednea','Act. 10.6 \u00b7 '+ACT106_SCOPE);}
+function exportAct121(){printTablePDF('.act121-altas','Altas de clientes','Act. 12.1');}
 
 /* ===== ACT. 1 - Carpeta de evidencia (Drive) ===== */
 function renderAct1(){
@@ -2322,7 +2354,7 @@ function renderAct106(){
   const grand=lines.reduce((a,l)=>a+totLine[l.key],0);
   const head=lines.map(l=>`<th style="--lc:${lineColor(l.key)}">${esc(l.label)}</th>`).join('');
   body.innerHTML=`<div class="rd-controls">${seg}
-    <button class="btn ghost" onclick="exportAct106()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Excel</button></div>
+    <button class="btn ghost" onclick="exportAct106()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15h6M9 18h4"/></svg>PDF</button></div>
     <div class="rd-wrap"><div class="rep-note" style="margin-bottom:12px">Suma de <b>objetivos por l\u00ednea de producto</b> de cada vendedor \u00b7 <b>${scopeLbl}</b>. Apoya la definici\u00f3n de estrategias para lograr los objetivos planteados (Act. 106).</div>
     <div class="rd-tblwrap"><table class="rep-tbl hl-table act106-tbl">
       <thead><tr><th class="l">Vendedor</th>${head}<th class="r">Total</th></tr></thead>
@@ -2436,7 +2468,7 @@ function renderAct121(){
   for(let i=1;i<presence.length;i++){const prev=presence[i-1],cur=presence[i];prev.set.forEach(code=>{if(!cur.set.has(code)){const info=byCode[code]||{cliente:code,vendor:'\u2014'};bajas.push({cliente:info.cliente,vendor:info.vendor,visto:prev.p.label,baja:cur.p.label});}});}
   const bajasRows=bajas.length?bajas.map(b=>`<tr><td class="name">${esc(b.cliente)}</td><td>${esc(b.vendor)}</td><td>${esc(b.visto)}</td><td>${esc(b.baja)}</td></tr>`).join('')
     :`<tr><td colspan="4" style="text-align:center;color:var(--muted2);padding:18px">No se detectaron bajas (ning\u00fan cliente desapareci\u00f3 entre meses).</td></tr>`;
-  body.innerHTML=`<div class="rd-controls"><button class="btn ghost" onclick="exportAct121()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Excel (altas)</button></div>
+  body.innerHTML=`<div class="rd-controls"><button class="btn ghost" onclick="exportAct121()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15h6M9 18h4"/></svg>PDF (altas)</button></div>
     <div class="rd-wrap">
     <div class="rep-note" style="margin-bottom:12px">Revisi\u00f3n anual de ruta (Act. 121). <b>Altas</b> por mes seg\u00fan la fecha de alta del cliente, y <b>bajas</b> detectadas (clientes que aparec\u00edan un mes y desaparecen al siguiente).</div>
     <div class="act121-block"><div class="act121-h">Altas de clientes por mes y vendedor</div>
@@ -2567,7 +2599,7 @@ function renderCredito(){
     <div class="ctrl"><label>Condiciones</label><select class="inp" id="credCond">${['ALL',...conds].map(v=>`<option value="${esc(v)}" ${CRED.cond===v?'selected':''}>${v==='ALL'?'Todas':esc(v)}</option>`).join('')}</select></div>
     <div class="ctrl" style="flex:1;min-width:170px"><label>Buscar</label><input class="inp" id="credQ" placeholder="Cliente, c\u00f3digo o vendedor\u2026" value="${esc(CRED.q)}"></div>
     <button class="cchip tog ${CRED.only31?'on':''}" id="credOnly31" style="align-self:flex-end">\u26a0 Solo vencido +31 d\u00edas</button>
-    <button class="btn ghost" onclick="exportExcel(document.querySelector('.cred-tbl'),'Cartera_credito.xls')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Excel</button>
+    <button class="btn ghost" onclick="printTablePDF('.cred-tbl','Cartera de cr\u00e9dito','Situaci\u00f3n de cr\u00e9dito por cliente')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15h6M9 18h4"/></svg>PDF</button>
   </div>
   <div class="rd-wrap"><div class="rep-note" style="margin-bottom:12px">Situaci\u00f3n de cr\u00e9dito por cliente. Haz clic en los <b>encabezados</b> para ordenar. Los saldos vencidos de <b>1-30 d\u00edas</b> se marcan en \u00e1mbar y los de <b>+31 d\u00edas</b> en rojo (los preocupantes). Si el saldo excede el l\u00edmite, se subraya.</div>
     <div class="rd-tblwrap"><table class="rep-tbl hl-table cred-tbl">
@@ -2577,35 +2609,28 @@ function renderCredito(){
 }
 
 /* ===== 80/20: clientes clave por linea de producto ===== */
-let P82={org:'ALL',vend:'ALL',line:'TOTAL',mode:'period'};
+let P82={org:'ALL',vend:'ALL',line:'TOTAL',mode:'period',giro:'ALL',sort:'real',dir:-1};
 function p82Data(){
   const orgIds=P82.org==='ALL'?CONFIG.orgs.map(o=>o.id):[P82.org];
   const line=LINES.find(l=>l.key===P82.line)||LINES.find(l=>l.key==='TOTAL')||LINES[0];
-  const now=new Date(); const curRank=now.getFullYear()*100+(now.getMonth()+1);
   const out=[];
   orgIds.forEach(oid=>{
     const o=org(oid);
     if(P82.mode==='period'){
       clientGroups(oid).forEach(rec=>{
-        const ld=lineData(rec,line);
-        out.push({cliente:rec.text('CLIENTE')||SD,vendor:rec.vendor,o,code:getCell(rec.group[rec.group.length-1],'COD CLIENTE',rec.H),obj:ld.obj.n,real:ld.real.n,pct:ld.pctN});
+        const ld=lineData(rec,line); const inf=latestInfoRec(rec);
+        out.push({cliente:inf.text('CLIENTE')||SD,vendor:rec.vendor,o,giro:inf.text('GIRO')||'',code:getCell(rec.group[rec.group.length-1],'COD CLIENTE',rec.H),obj:ld.obj.n,real:ld.real.n,pct:ld.pctN});
       });
     } else {
       clientGroups(oid,'ALL').forEach(rec=>{
-        const H=rec.H; const pmap=new Map();
+        const H=rec.H; const inf=latestInfoRec(rec);
+        let so=null,sr=null;
         rec.group.forEach(r=>{
-          const ano=getCell(r,'A\u00d1O',H)||getCell(r,'ANIO',H)||getCell(r,'ANO',H), mes=getCell(r,'MES',H);
-          const rk=periodRank(ano,mes); if(rk===curRank)return;
-          const k=String(rk); const prev=pmap.get(k)||{o:null,r:null};
           const ov=parseNum(getCell(r,line.obj,H)), rv=parseNum(getCell(r,line.real,H));
-          if(ov!=null)prev.o=(prev.o==null?0:prev.o)+ov;
-          if(rv!=null)prev.r=(prev.r==null?0:prev.r)+rv;
-          pmap.set(k,prev);
+          if(ov!=null)so=(so==null?0:so)+ov;
+          if(rv!=null)sr=(sr==null?0:sr)+rv;
         });
-        const n=pmap.size;
-        let so=null,sr=null; pmap.forEach(v=>{if(v.o!=null)so=(so==null?0:so)+v.o;if(v.r!=null)sr=(sr==null?0:sr)+v.r;});
-        const avgO=(n&&so!=null)?so/n:null, avgR=(n&&sr!=null)?sr/n:null;
-        out.push({cliente:rec.text('CLIENTE')||SD,vendor:rec.vendor,o,code:getCell(rec.group[rec.group.length-1],'COD CLIENTE',rec.H),obj:avgO,real:avgR,pct:(avgO!=null&&avgO>0&&avgR!=null)?avgR/avgO*100:null,nMeses:n});
+        out.push({cliente:inf.text('CLIENTE')||SD,vendor:rec.vendor,o,giro:inf.text('GIRO')||'',code:getCell(rec.group[rec.group.length-1],'COD CLIENTE',rec.H),obj:so,real:sr,pct:(so!=null&&so>0&&sr!=null)?sr/so*100:null});
       });
     }
   });
@@ -2615,42 +2640,48 @@ function renderP8020(){
   const body=document.getElementById('repBody');
   const d=p82Data(); const line=d.line;
   const vendors=[...new Set(d.list.map(c=>c.vendor).filter(Boolean))].sort();
-  let list=d.list.filter(c=>c.real!=null&&c.real>0);
+  const giros=[...new Set(d.list.map(c=>c.giro).filter(Boolean))].sort();
+  let list=d.list.filter(c=>(c.real!=null&&c.real>0)||(c.obj!=null&&c.obj>0));
   if(P82.vend!=='ALL')list=list.filter(c=>c.vendor===P82.vend);
-  list.sort((a,b)=>b.real-a.real);
-  const total=list.reduce((s,c)=>s+c.real,0);
-  let acc=0; let keyCount=0; let keySum=0;
-  list.forEach(c=>{c.share=total>0?c.real/total*100:0;const wasBelow=acc<total*0.8;acc+=c.real;c.cum=total>0?acc/total*100:0;c.key=wasBelow;if(c.key){keyCount++;keySum+=c.real;}});
-  const avgMode=P82.mode==='avg';
-  const realHead=avgMode?'Prom real/mes':'Real';
-  const objHead=avgMode?'Prom obj/mes':'Objetivo';
-  const rows=list.map((c,i)=>`<tr class="${c.key?'p82-key':''}">
-    <td class="num">${i+1}</td>
-    <td class="l name">${c.key?'<span class="p82-star">\u2605</span>':''}${esc(c.cliente)}${P82.org==='ALL'?` <span class="p82-org" style="color:var(--${c.o.accent==='cyan'?'cyan':'amber'})">${esc(c.o.label)}</span>`:''}</td>
+  if(P82.giro!=='ALL')list=list.filter(c=>c.giro===P82.giro);
+  const sk=P82.sort, dir=P82.dir;
+  list.sort((a,b)=>{
+    if(sk==='cliente'||sk==='vendor'||sk==='giro')return String(a[sk]||'').localeCompare(String(b[sk]||''),'es')*dir;
+    if(sk==='org')return String(a.o.label).localeCompare(String(b.o.label),'es')*dir;
+    const va=a[sk]==null?-Infinity:a[sk], vb=b[sk]==null?-Infinity:b[sk];
+    return (va-vb)*dir;
+  });
+  const totalReal=list.reduce((s,c)=>s+(c.real||0),0);
+  const avgMode=P82.mode==='year';
+  const ar=(k)=>P82.sort===k?(P82.dir>0?' \u25b2':' \u25bc'):'';
+  const on=(k)=>P82.sort===k?'on':'';
+  const rows=list.map(c=>`<tr>
+    <td class="l name">${esc(c.cliente)}</td>
+    <td class="l"><span class="p82-org" style="color:var(--${c.o.accent==='cyan'?'cyan':'amber'})">${esc(c.o.label)}</span></td>
     <td class="l">${esc(c.vendor||'\u2014')}</td>
-    <td class="num">${c.obj!=null?fmtNum(Math.round(c.obj*10)/10):'\u2014'}</td>
-    <td class="num strong">${fmtNum(Math.round(c.real*10)/10)}</td>
+    <td class="l">${esc(c.giro||'\u2014')}</td>
+    <td class="num">${c.obj!=null?fmtNum(c.obj):'\u2014'}</td>
+    <td class="num strong">${c.real!=null?fmtNum(c.real):'\u2014'}</td>
     <td class="num ${c.pct!=null?('t-'+(c.pct>=100?'good':(c.pct>=70?'mid':'low'))):''}">${c.pct!=null?Math.round(c.pct)+'%':'\u2014'}</td>
-    <td class="num">${c.share.toFixed(1)}%</td>
-    <td class="num muted">${c.cum.toFixed(1)}%</td>
   </tr>`).join('');
   body.innerHTML=`
   <div class="strat-kpis">
-    <div class="skpi"><div class="sk-l">Clientes clave (\u2605)</div><div class="sk-v">${keyCount}</div><div class="sk-s">de ${list.length} con venta en ${esc(line.label)}</div></div>
-    <div class="skpi amber"><div class="sk-l">Concentran</div><div class="sk-v">${total>0?Math.round(keySum/total*100):0}%</div><div class="sk-s">${fmtNum(Math.round(keySum*10)/10)} de ${fmtNum(Math.round(total*10)/10)} unidades</div></div>
-    <div class="skpi"><div class="sk-l">Medida</div><div class="sk-v" style="font-size:16px">${esc(line.label)}</div><div class="sk-s">${avgMode?'promedio mensual, sin mes en curso':'mes seleccionado arriba'}</div></div>
+    <div class="skpi"><div class="sk-l">Clientes listados</div><div class="sk-v">${list.length}</div><div class="sk-s">con objetivo o venta en ${esc(line.label)}</div></div>
+    <div class="skpi amber"><div class="sk-l">Real ${avgMode?'del a\u00f1o':'del mes'}</div><div class="sk-v">${fmtNum(Math.round(totalReal*10)/10)}</div><div class="sk-s">unidades de ${esc(line.label)} en el filtro</div></div>
+    <div class="skpi"><div class="sk-l">Periodo</div><div class="sk-v" style="font-size:16px">${avgMode?'Todo el a\u00f1o':'Mes seleccionado'}</div><div class="sk-s">${avgMode?'acumulado de todos los meses':'el elegido arriba'}</div></div>
   </div>
   <div class="rd-controls">
     <div class="ctrl"><label>Organizaci\u00f3n</label><select class="inp" id="p82Org"><option value="ALL" ${P82.org==='ALL'?'selected':''}>Ambas</option>${CONFIG.orgs.map(o=>`<option value="${o.id}" ${P82.org===o.id?'selected':''}>${esc(o.label)}</option>`).join('')}</select></div>
     <div class="ctrl"><label>Vendedor</label><select class="inp" id="p82Vend">${['ALL',...vendors].map(v=>`<option value="${esc(v)}" ${P82.vend===v?'selected':''}>${v==='ALL'?'Todos':esc(v)}</option>`).join('')}</select></div>
     <div class="ctrl"><label>L\u00ednea de producto</label><select class="inp" id="p82Line">${LINES.map(l=>`<option value="${l.key}" ${P82.line===l.key?'selected':''}>${esc(l.label)}</option>`).join('')}</select></div>
-    <div class="ctrl"><label>Periodo</label><select class="inp" id="p82Mode"><option value="period" ${P82.mode==='period'?'selected':''}>Mes seleccionado (arriba)</option><option value="avg" ${P82.mode==='avg'?'selected':''}>Promedio mensual \u00b7 todos los meses</option></select></div>
-    <button class="btn ghost" onclick="exportExcel(document.querySelector('.p82-tbl'),'Clientes_8020_${line.key}.xls')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Excel</button>
+    <div class="ctrl"><label>Giro del cliente</label><select class="inp" id="p82Giro"><option value="ALL" ${P82.giro==='ALL'?'selected':''}>Todos</option>${giros.map(g=>`<option value="${esc(g)}" ${P82.giro===g?'selected':''}>${esc(g)}</option>`).join('')}</select></div>
+    <div class="ctrl"><label>Periodo</label><select class="inp" id="p82Mode"><option value="period" ${P82.mode==='period'?'selected':''}>Mes seleccionado (arriba)</option><option value="year" ${P82.mode==='year'?'selected':''}>Todo el a\u00f1o \u00b7 acumulado</option></select></div>
+    <button class="btn ghost" onclick="printTablePDF('.p82-tbl','Clientes 80/20 \u00b7 ${esc(line.label)}','${avgMode?'Todo el a\u00f1o (acumulado)':'Mes seleccionado'} \u00b7 ${P82.org==='ALL'?'Ambas organizaciones':esc(org(P82.org).label)}')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15h6M9 18h4"/></svg>PDF</button>
   </div>
-  <div class="rep-note" style="margin-bottom:12px">Clientes ordenados del que <b>m\u00e1s compra ${esc(line.label)}</b> al que menos. Los marcados con <span class="p82-star">\u2605</span> son los <b>clientes clave</b>: en conjunto concentran ~80% de la venta de esa l\u00ednea (regla 80/20). La columna <b>% vs Obj</b> compara contra su objetivo${avgMode?' promedio':''}.${avgMode?' El promedio mensual <b>no considera el mes en curso</b>.':''}</div>
+  <div class="rep-note" style="margin-bottom:12px">Clientes con su <b>${esc(line.label)}</b>: objetivo, real ${avgMode?'acumulado del a\u00f1o':'del mes'} y % de cumplimiento. Haz clic en los <b>encabezados</b> para ordenar de mayor a menor (y viceversa).</div>
   ${list.length?`<div class="rd-wrap"><div class="rd-tblwrap"><table class="rep-tbl hl-table p82-tbl">
-    <thead><tr><th>#</th><th class="l">Cliente</th><th class="l">Vendedor</th><th>${objHead}</th><th>${realHead}</th><th>% vs Obj</th><th>% del total</th><th>% acum.</th></tr></thead>
-    <tbody>${rows}</tbody></table></div></div>`:'<div class="empty-state">Sin ventas de esta l\u00ednea con los filtros elegidos. Cambia la l\u00ednea, el periodo o el vendedor.</div>'}`;
+    <thead><tr><th class="l sortable ${on('cliente')}" data-p82sort="cliente">Cliente${ar('cliente')}</th><th class="l sortable ${on('org')}" data-p82sort="org">Organizaci\u00f3n${ar('org')}</th><th class="l sortable ${on('vendor')}" data-p82sort="vendor">Vendedor${ar('vendor')}</th><th class="l sortable ${on('giro')}" data-p82sort="giro">Giro${ar('giro')}</th><th class="sortable ${on('obj')}" data-p82sort="obj">Objetivo${ar('obj')}</th><th class="sortable ${on('real')}" data-p82sort="real">Real${ar('real')}</th><th class="sortable ${on('pct')}" data-p82sort="pct">% vs Obj${ar('pct')}</th></tr></thead>
+    <tbody>${rows}</tbody></table></div></div>`:'<div class="empty-state">Sin datos de esta l\u00ednea con los filtros elegidos. Cambia la l\u00ednea, el giro, el periodo o el vendedor.</div>'}`;
 }
 /* ===== Reporte generico con enlace (Act. 4, 7, 89) ===== */
 function linkReport(opt){
@@ -2729,7 +2760,7 @@ function renderAct81(){
   const tot=list.length?`<tr class="sub"><td class="name">Totales AGM</td><td></td><td></td><td></td><td>${fmtNum(oSum)}</td><td>${fmtNum(rSum)}</td><td class="r">${tp}</td></tr>`:'';
   const controls=`<div class="rd-controls">
     <div class="ctrl"><label>Vendedor</label><select class="inp" id="a81Vend">${['ALL',...vendors].map(v=>`<option value="${esc(v)}" ${ACT81_VEND===v?'selected':''}>${v==='ALL'?'Todos':esc(v)}</option>`).join('')}</select></div>
-    <button class="btn ghost" onclick="exportExcel(document.querySelector('.act81-tbl'),'Objetivos_AGM.xls')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Excel</button>
+    <button class="btn ghost" onclick="printTablePDF('.act81-tbl','Objetivos AGM','Act. 8.1')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15h6M9 18h4"/></svg>PDF</button>
   </div>`;
   body.innerHTML=controls+`<div class="rd-wrap"><div class="rep-note" style="margin-bottom:12px">Objetivo y avance de la l\u00ednea <b>Bater\u00edas AGM</b> por cliente (Act. 8.1), ordenado por menor avance. El color del avance indica el ritmo esperado al corte.</div>
     <div class="rd-tblwrap"><table class="rep-tbl hl-table act81-tbl">
@@ -2754,7 +2785,7 @@ function renderAct87(){
   const head=ACT87_COLS.map(([,lbl])=>`<th>${esc(lbl)}</th>`).join('');
   const controls=`<div class="rd-controls">
     <div class="ctrl"><label>Vendedor</label><select class="inp" id="a87Vend">${['ALL',...vendors].map(v=>`<option value="${esc(v)}" ${ACT87_VEND===v?'selected':''}>${v==='ALL'?'Todos':esc(v)}</option>`).join('')}</select></div>
-    <button class="btn ghost" onclick="exportExcel(document.querySelector('.act87-tbl'),'Plan_comercializacion.xls')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Excel</button>
+    <button class="btn ghost" onclick="printTablePDF('.act87-tbl','Plan de comercializaci\u00f3n','Act. 8.7')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15h6M9 18h4"/></svg>PDF</button>
   </div>`;
   body.innerHTML=controls+`<div class="rd-wrap"><div class="rep-note" style="margin-bottom:12px">Plan de comercializaci\u00f3n por cliente (Act. 87): fachada, exhibidores, activaciones y minutas. Las celdas con dato resaltan en \u00e1mbar.</div>
     <div class="rd-tblwrap"><table class="rep-tbl hl-table act87-tbl">
@@ -2799,88 +2830,70 @@ function renderAct9(){
   body.innerHTML=`<div class="rd-wrap"><div class="rep-note" style="margin-bottom:16px">El vendedor cumple con los pasos b\u00e1sicos de visita (Act. 9).</div>
   <div class="steps9">${items}</div></div>`;
 }
-/* ===== RESPUESTAS DEL GERENTE: clientes clave 80/20 ===== */
-let GER={vend:'ALL',metric:'FACT'};
-const GER_METRICS=[['FACT','Importe facturado'],['TOTAL','Acumuladores'],['LUB','Lubricantes'],['MOTO','Motobater\u00edas'],['FILTRO','Filtros'],['LLANTAS','Llantas']];
-const GER_LINE_ORDER=['TOTAL','LUB','MOTO','FILTRO','LLANTAS'];
+/* ===== RESPUESTAS DEL GERENTE: todos los clientes, estilo lista a detalle ===== */
+let GER={vend:'ALL',day:'ALL',range:'ALL'};
+const GER_RANGES=[['ALL','Todos los avances'],['R1','0% a 44%'],['R2','45% a 69%'],['R3','70% o m\u00e1s'],['SINOBJ','Sin objetivo'],['ESP','Espor\u00e1dicos (sin d\u00eda de visita)']];
 function goGerente(){renderGerente();showScreen('ger');if(!CRED_DB)loadCredito().then(()=>{if(STATE.screen==='ger')renderGerente();});}
-function gerParetoList(){
-  const mk=GER.metric||'FACT';
-  const line=mk==='FACT'?null:LINES.find(l=>l.key===mk);
-  let all=[];
+function gerList(){
+  const out=[];
   CONFIG.orgs.forEach((o,oi)=>{
     clientGroups(o.id).forEach(rec=>{
-      const fact=rec.numLit('REAL FACT').n, tot=rec.numLit('REAL TOTAL').n;
-      const lineVal=line?rec.numLit(line.real).n:null;
+      const hl=lineData(rec,LINES.find(l=>l.key===HEADLINE_KEY));
+      const inf=latestInfoRec(rec);
       const code=getCell(rec.group[rec.group.length-1],'COD CLIENTE',rec.H);
-      const days=DAYS.filter(d=>!isEmpty(rec.text(d[0]))).map(d=>d[0]);
-      all.push({rec,o,oi,vendor:rec.vendor,code,days,cliente:rec.text('CLIENTE')||SD,negocio:rec.text('NOMBRE DE NEGOCIO')||'',fact,tot,lineVal,uid:'g'+oi+'_'+(_normCode(code).noz||Math.random().toString(36).slice(2,7))});
+      const days=DAYS.filter(dd=>!isEmpty(rec.text(dd[0]))).map(dd=>dd[0]);
+      out.push({rec,o,vendor:rec.vendor,code,days,cliente:inf.text('CLIENTE')||SD,negocio:inf.text('NOMBRE DE NEGOCIO')||'',zona:inf.text('ZONA')||'',giro:inf.text('GIRO')||'',cm:cmtObj(rec),pctN:hl.pctN,hlStatus:hl.status,uid:'g'+oi+'_'+(_normCode(code).noz||Math.random().toString(36).slice(2,7))});
     });
   });
-  let useMoney;
-  if(mk==='FACT'){
-    useMoney=all.some(c=>c.fact!=null&&c.fact>0);
-    all.forEach(c=>{c.metric=useMoney?(c.fact||0):(c.tot||0);});
-  } else {
-    useMoney=false;
-    all.forEach(c=>{c.metric=c.lineVal||0;});
-  }
-  all.sort((a,b)=>b.metric-a.metric);
-  const totalM=all.reduce((s,c)=>s+c.metric,0);
-  all.forEach(c=>{c.share=(totalM>0&&c.metric>0)?c.metric/totalM*100:null;});
-  return {sel:all,allCount:all.length,totalM,useFact:useMoney,accM:totalM,metricLabel:(GER_METRICS.find(m=>m[0]===mk)||GER_METRICS[0])[1]};
+  return out;
 }
 function renderGerente(){
   const body=document.getElementById('gerBody');
-  const canMonth=STATE.period&&STATE.period!=='ALL';
   const pace=expectedPace();
-  const pr=gerParetoList(); const sel=pr.sel, useFact=pr.useFact;
-  if(!sel.length){body.innerHTML='<div class="empty-state">Sin clientes en este periodo. Cambia el Periodo arriba.</div>';return;}
-  const vendors=[...new Set(sel.map(c=>c.vendor))].sort();
-  let list=GER.vend==='ALL'?sel:sel.filter(c=>c.vendor===GER.vend);
+  const all=gerList();
+  if(!all.length){body.innerHTML='<div class="empty-state">Sin clientes en este periodo. Cambia el Periodo arriba.</div>';return;}
+  const vendors=[...new Set(all.map(c=>c.vendor).filter(Boolean))].sort();
+  let list=all.slice();
+  if(GER.vend!=='ALL')list=list.filter(c=>c.vendor===GER.vend);
   if(GER.day&&GER.day!=='ALL')list=list.filter(c=>c.days.includes(GER.day));
+  if(GER.range==='R1')list=list.filter(c=>c.hlStatus==='ok'&&c.pctN!=null&&c.pctN<45);
+  else if(GER.range==='R2')list=list.filter(c=>c.hlStatus==='ok'&&c.pctN!=null&&c.pctN>=45&&c.pctN<70);
+  else if(GER.range==='R3')list=list.filter(c=>c.hlStatus==='ok'&&c.pctN!=null&&c.pctN>=70);
+  else if(GER.range==='SINOBJ')list=list.filter(c=>c.hlStatus!=='ok');
+  else if(GER.range==='ESP')list=list.filter(c=>!c.days.length);
+  list.sort((a,b)=>{const pa=(a.hlStatus==='ok'&&a.pctN!=null)?a.pctN:Infinity;const pb=(b.hlStatus==='ok'&&b.pctN!=null)?b.pctN:Infinity;return pa-pb;});
   const gval=(c)=>{const k=cmtKey(c.uid,'ger');const ov=(k in CMT_OVERRIDE)?CMT_OVERRIDE[k]:undefined;return ov!==undefined?ov:cmtRead(c.rec,'ger');};
   const answered=list.filter(c=>!isEmpty(gval(c))).length;
-  const sumM=list.reduce((s,c)=>s+(c.metric||0),0);
-  const mfmt=v=>useFact?acct(v):fmtNum(v)+' u';
-  const chipLines=[...GER_LINE_ORDER.map(k=>LINES.find(l=>l.key===k)).filter(Boolean),...LINES.filter(l=>!GROUP_CHILDREN.has(l.key)&&GER_LINE_ORDER.indexOf(l.key)<0)];
   const cards=list.map((c,i)=>{
-    const cm=cmtObj(c.rec);
-    const chips=chipLines.map(l=>{const ld=lineData(c.rec,l);if(ld.pctN==null)return '';const cls=paceClass(ld.pctN,pace);return `<span class="gchip"><i style="background:${lineColor(l.key)}"></i>${esc(l.label)} <b class="t-${cls}">${Math.round(ld.pctN)}%</b></span>`;}).filter(Boolean).join('')||'<span class="gchip na">Sin objetivos capturados</span>';
-    const cred=credBadge(c.code);
-    const vc=['w1','w2','w3','cierre'].map(k=>{const f=CMT_FIELDS.find(x=>x.key===k);const v=cm[k];const empty=isEmpty(v);return `<div class="a2-cmt ${empty?'sin':''}"><span class="a2-lbl">${f.lbl}</span><span class="a2-txt">${empty?'Sin comentario a\u00fan':esc(v)}</span></div>`;}).join('');
-    const gv=gval(c); const done=!isEmpty(gv);
-    let editor;
-    if(canMonth){
-      editor=`<div class="ger-editbox ${done?'done':''}"><div class="ger-elbl">${done?'\u2713 Respuesta del gerente (puedes editarla)':'Respuesta del gerente de ventas'}</div>
-        <textarea class="cco-ta" id="ta_ger_${c.uid}" rows="2" placeholder="Escribe tu retroalimentaci\u00f3n para el vendedor\u2026">${esc(done?gv:'')}</textarea>
-        <div class="cco-actions"><button class="cco-save" data-save="ger" data-uid="${c.uid}" data-code="${esc(c.code)}"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>Guardar</button><button class="lrc-mic" data-mic="ta_ger_${c.uid}" type="button" title="Dictar por voz"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4"/></svg></button></div></div>`;
-    } else {
-      editor=`<div class="ger-editbox"><div class="ger-elbl">Respuesta del gerente</div><div class="lrc-ro" style="font-style:italic">Selecciona un mes espec\u00edfico arriba para responder.</div></div>`;
-    }
-    return `<div class="ger-card ${done?'answered':''}" style="--oc:var(--${c.o.accent==='cyan'?'cyan':'amber'})">
-      <div class="ger-head">
-        <div class="ger-rank">${i+1}</div>
-        <div class="ger-id"><div class="ger-name">${esc(c.cliente)}</div><div class="ger-meta"><span class="ger-org">${esc(c.o.label)}</span> \u00b7 <b>${esc(c.vendor)}</b> \u00b7 COD ${esc(disp(c.code))}${c.negocio?' \u00b7 '+esc(c.negocio):''}</div></div>
-        <div class="ger-sales"><div class="ger-amt">${c.metric>0?mfmt(c.metric):'\u2014'}</div><div class="ger-share">${c.share!=null?c.share.toFixed(1)+'% de la venta':'sin venta en el periodo'}</div></div>
+    const tr=tier(c.pctN,pace), info=TIER_INFO[tr];
+    let ringTxt,ringCls;
+    if(c.hlStatus==='sinobj'){ringTxt='s/obj';ringCls='na';}else if(c.pctN==null){ringTxt='\u2014';ringCls='na';}else{ringTxt=Math.round(c.pctN)+'%';ringCls=info.ring;}
+    const badge=(c.hlStatus==='ok'&&info.txt)?`<span class="badge-st ${info.card}">${info.txt}</span>`:'';
+    const done=!isEmpty(gval(c));
+    return `<div class="cli-card reveal ${c.hlStatus==='ok'?info.card:''}" style="animation-delay:${Math.min(i,16)*.03}s">
+      <span class="cli-num">${i+1}</span>
+      <div class="cli-head">
+        <div class="cli-id"><div class="code">${esc(disp(c.code))}</div><h4 class="display">${esc(c.cliente)}</h4><div class="neg"><span style="color:var(--${c.o.accent==='cyan'?'cyan':'amber'});font-weight:800">${esc(c.o.label)}</span> \u00b7 <b>${esc(c.vendor)}</b>${c.negocio?' \u00b7 '+esc(c.negocio):''}</div></div>
+        <div class="cli-tags"><span class="tag">${esc(c.zona||'sin zona')}</span>${c.giro?`<span class="tag">${esc(c.giro)}</span>`:''}${c.days.length?'':'<span class="tag" style="color:var(--cyan);border-color:var(--cyan)">espor\u00e1dico</span>'}${credBadge(c.code)}${done?'<span class="tag" style="color:var(--good);border-color:var(--good)">\u2713 respondido</span>':''}${badge}</div>
+        <div class="cli-ring"><div class="big mono t-${ringCls}">${esc(ringTxt)}</div><div class="lbl">Avance Total</div></div>
       </div>
-      <div class="ger-chips">${chips}${cred}</div>
-      <div class="ger-cmts">${vc}</div>
-      ${editor}
+      ${cardComments({uid:c.uid,cm:c.cm,code:c.code,rec:c.rec})}
+      ${clientTiles(c.rec,pace)}
+      <div class="card-hist ${HIST_OPEN.has(String(c.uid))?'open':''}"><div class="ch-title" data-htoggle="${c.uid}"><span class="g-chev"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l3-3 3 2 4-5"/></svg>Historial de compra \u00b7 unidades reales<span class="cco-hint">${HIST_OPEN.has(String(c.uid))?'ocultar':'ver'}</span></div><div class="ch-body">${historyTable(c.rec,true)}</div></div>
     </div>`;
   }).join('');
   body.innerHTML=`
   <div class="strat-kpis">
-    <div class="skpi"><div class="sk-l">Clientes en el filtro</div><div class="sk-v">${list.length}</div><div class="sk-s">de ${sel.length} clientes en total</div></div>
-    <div class="skpi amber"><div class="sk-l">Venta del filtro</div><div class="sk-v">${mfmt(sumM)}</div><div class="sk-s">${pr.metricLabel} \u00b7 periodo seleccionado</div></div>
+    <div class="skpi"><div class="sk-l">Clientes en el filtro</div><div class="sk-v">${list.length}</div><div class="sk-s">de ${all.length} clientes en total</div></div>
     <div class="skpi ${answered>=list.length&&list.length?'up':''}"><div class="sk-l">Respondidos</div><div class="sk-v">${answered}/${list.length}</div><div class="sk-s">con respuesta del gerente</div></div>
+    <div class="skpi amber"><div class="sk-l">Sin responder</div><div class="sk-v">${list.length-answered}</div><div class="sk-s">pendientes de retroalimentaci\u00f3n</div></div>
   </div>
   <div class="rd-controls">
-    <div class="ctrl"><label>Ordenar por importancia</label><select class="inp" id="gerMetric">${GER_METRICS.map(m=>`<option value="${m[0]}" ${GER.metric===m[0]?'selected':''}>${esc(m[1])}</option>`).join('')}</select></div>
+    <div class="ctrl"><label>Rango de avance</label><select class="inp" id="gerRange">${GER_RANGES.map(r=>`<option value="${r[0]}" ${GER.range===r[0]?'selected':''}>${esc(r[1])}</option>`).join('')}</select></div>
     <div class="ctrl"><label>Vendedor</label><select class="inp" id="gerVend">${['ALL',...vendors].map(v=>`<option value="${esc(v)}" ${GER.vend===v?'selected':''}>${v==='ALL'?'Todos':esc(v)}</option>`).join('')}</select></div>
     <div class="ctrl ctrl-day"><label>\u25c9 D\u00eda de visita</label><select class="inp" id="gerDay"><option value="ALL" ${(!GER.day||GER.day==='ALL')?'selected':''}>Todos los d\u00edas</option>${DAYS.map(d=>`<option value="${d[0]}" ${GER.day===d[0]?'selected':''}>${DAYFULL[d[0]]}</option>`).join('')}</select></div>
   </div>
-  <div class="rep-note" style="margin-bottom:14px">Todos los clientes de ambas organizaciones, ordenados del que <b>m\u00e1s vende al que menos</b> seg\u00fan la medida elegida (<b>${pr.metricLabel}</b>). Cada tarjeta muestra su avance por l\u00ednea, cr\u00e9dito, los comentarios del vendedor y tu espacio para responder; se guarda en la misma columna <b>GERENTE DE VENTAS</b> de siempre.</div>
+  <div class="rep-note" style="margin-bottom:14px">Ordenados por <b>rango de avance</b>: primero los m\u00e1s rezagados (0\u201344%), luego 45\u201369% y al final 70% o m\u00e1s; los <b>sin objetivo</b> van al final. Responde en el recuadro de <b>Gerente</b> dentro de los comentarios de cada cliente; se guarda en la misma columna de siempre.</div>
   <div class="ger-list">${cards}</div>`;
 }
 function printVendorPDF(name){
@@ -3168,6 +3181,7 @@ document.addEventListener('click',e=>{
   const cs=e.target.closest('[data-cmpsort]');if(cs){const k=cs.dataset.cmpsort;if(CMP_SORT.key===k)CMP_SORT.dir=CMP_SORT.dir==='desc'?'asc':'desc';else{CMP_SORT.key=k;CMP_SORT.dir='desc';}renderComparativo();return;}
   const crs=e.target.closest('[data-csort]');if(crs){const k=crs.dataset.csort;if(CRED.sort===k)CRED.dir=-CRED.dir;else{CRED.sort=k;CRED.dir=-1;}renderCredito();return;}
   const c31=e.target.closest('#credOnly31');if(c31){CRED.only31=!CRED.only31;renderCredito();return;}
+  const ps=e.target.closest('[data-p82sort]');if(ps){const k=ps.dataset.p82sort;if(P82.sort===k)P82.dir=-P82.dir;else{P82.sort=k;P82.dir=-1;}renderP8020();return;}
   const a6=e.target.closest('#act106Seg .seg-btn');if(a6){ACT106_SCOPE=a6.dataset.sc;renderAct106();return;}
   const mp=e.target.closest('.map-pin');if(mp){document.querySelectorAll('.map-pin.sel').forEach(x=>x.classList.remove('sel'));mp.classList.add('sel');showMapInfo(parseInt(mp.dataset.pin));return;}
   const sg=e.target.closest('#objSeg .seg-btn');if(sg){OBJF=sg.dataset.obj;document.querySelectorAll('#objSeg .seg-btn').forEach(b=>b.classList.toggle('act',b===sg));filterClients();return;}
@@ -3234,11 +3248,12 @@ document.addEventListener('change',e=>{
   else if(e.target.id==='credVend'){CRED.vend=e.target.value;renderCredito();}
   else if(e.target.id==='credCond'){CRED.cond=e.target.value;renderCredito();}
   else if(e.target.id==='gerVend'){GER.vend=e.target.value;renderGerente();}
-  else if(e.target.id==='gerMetric'){GER.metric=e.target.value;renderGerente();}
+  else if(e.target.id==='gerRange'){GER.range=e.target.value;renderGerente();}
   else if(e.target.id==='gerDay'){GER.day=e.target.value;renderGerente();}
   else if(e.target.id==='p82Org'){P82.org=e.target.value;P82.vend='ALL';renderP8020();}
   else if(e.target.id==='p82Vend'){P82.vend=e.target.value;renderP8020();}
   else if(e.target.id==='p82Line'){P82.line=e.target.value;renderP8020();}
+  else if(e.target.id==='p82Giro'){P82.giro=e.target.value;renderP8020();}
   else if(e.target.id==='p82Mode'){P82.mode=e.target.value;renderP8020();}
 });
 function rerender(){if(STATE.screen==='home')renderHome();else if(STATE.screen==='vend')renderVendors();else if(STATE.screen==='cli')renderClients();else if(STATE.screen==='rep')renderReportes();else if(STATE.screen==='camp')renderCampaign();else if(STATE.screen==='strat')renderStrategy();else if(STATE.screen==='ger')renderGerente();else if(STATE.screen==='ficha'){renderClients();goCli(STATE.vendor);}}
