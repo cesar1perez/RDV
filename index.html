@@ -655,7 +655,8 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .dash-cta.gercta .dash-cta-t{color:#fff}
 .dash-cta.gercta .dash-cta-s{color:#aebfdc}
 .dash-cta.gercta .dash-cta-go{color:var(--amber)}
-.vorg-tag{position:absolute;top:14px;left:16px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--vc);border:1px solid color-mix(in srgb,var(--vc) 55%,transparent);background:color-mix(in srgb,var(--vc) 12%,transparent);border-radius:14px;padding:3px 9px;z-index:2}
+.vend-card.gcol{border-left:5px solid var(--vc)}
+.vend-card.gcol .vend-avatar{background:color-mix(in srgb,var(--vc) 22%,transparent);color:var(--vc);border:1.5px solid color-mix(in srgb,var(--vc) 55%,transparent)}
 .vend-card{position:relative}
 .ger-list{display:flex;flex-direction:column;gap:15px}
 .ger-card{background:linear-gradient(160deg,var(--panel),var(--bg2));border:1px solid var(--line);border-left:5px solid var(--oc);border-radius:14px;padding:16px 18px}
@@ -768,6 +769,20 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .p82-star{color:var(--accent);margin-right:5px}
 :root[data-theme="light"] .p82-star{color:var(--accent-ink)}
 .p82-org{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;margin-left:6px}
+.p82-expcol{width:38px;text-align:center}
+.p82-exp{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;border:1px solid var(--line2);background:var(--bg2);color:var(--muted);cursor:pointer;transition:.15s}
+.p82-exp:hover{border-color:var(--accent);color:var(--accent)}
+.p82-exp.open{background:var(--accent);color:#07142e;border-color:var(--accent)}
+.p82-exp.open svg{transform:rotate(180deg)}
+tr.p82-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--line2)}
+:root[data-theme="light"] tr.p82-det td{background:rgba(181,132,0,.05)}
+.p82-months{display:flex;flex-wrap:wrap;gap:7px;align-items:center;padding:4px 2px;text-align:left}
+.pm-lbl{font-size:11px;color:var(--muted);margin-right:4px;white-space:nowrap}
+.pm{display:inline-flex;align-items:center;gap:6px;font-family:'IBM Plex Mono';font-size:11px;font-weight:700;color:var(--txt);background:var(--bg2);border:1px solid var(--line);border-radius:9px;padding:5px 10px;white-space:nowrap}
+.pm b{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--accent);font-family:'Manrope'}
+:root[data-theme="light"] .pm b{color:var(--accent-ink)}
+.pm i{font-style:normal;font-weight:800}
+.pm.dim{opacity:.45}
 .p82-tbl th.sortable{cursor:pointer;user-select:none}
 .p82-tbl th.sortable:hover,.p82-tbl th.sortable.on{color:var(--accent)}
 :root[data-theme="light"] .p82-tbl th.sortable:hover,:root[data-theme="light"] .p82-tbl th.sortable.on{color:var(--accent-ink)}
@@ -1744,8 +1759,8 @@ function renderVendors(){
       if(kids){const kR=kids.map(k=>{const kl=LINES.find(x=>x.key===k);return kl?mkRow(kl,{sub:true}):'';}).join('');return `<div class="ln-gwrap">${mkRow(line,{parent:true,count:kids.length})}<div class="ln-kids">${kR}</div></div>`;}
       return mkRow(line);
     }).join('');
-    return `<div class="vend-card reveal" data-vend="${esc(v.name)}"${v._o?` data-vorg="${v._o.id}"`:''} style="animation-delay:${i*.04}s">
-      ${v._o?`<span class="vorg-tag" style="--vc:var(--${v._o.accent})">${esc(v._o.label)}</span>`:''}
+    const vAcc=v._o?((/\bMARTIN\b/.test(keyName(v.name)))?'cyan':v._o.accent):null;
+    return `<div class="vend-card reveal ${v._o?'gcol':''}" data-vend="${esc(v.name)}"${v._o?` data-vorg="${v._o.id}"`:''} style="animation-delay:${i*.04}s${v._o?`;--vc:var(--${vAcc})`:''}">
       <button class="vpdf" data-vpdf="${esc(v.name)}" title="Descargar ficha en PDF"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15h6M9 18h4"/></svg>PDF</button>
       <div class="vend-top">
         <div class="vend-avatar">${esc(ini)}</div>
@@ -2357,7 +2372,7 @@ function printTablePDF(sel,title,sub){
   const w=window.open('','_blank'); if(!w){alert('Permite las ventanas emergentes para generar el PDF.');return;}
   const o=STATE.org?org(STATE.org):null;
   const clone=t.cloneNode(true);
-  clone.querySelectorAll('svg').forEach(x=>x.remove());
+  clone.querySelectorAll('svg').forEach(x=>x.remove());clone.querySelectorAll('.p82-det,.p82-expcol').forEach(x=>x.remove());
   w.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${esc(title)}</title><style>
   @page{size:letter landscape;margin:10mm}
   *{box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
@@ -2724,6 +2739,29 @@ function p82Data(){
   });
   return {list:out,line};
 }
+function p82MonthDetail(code){
+  const H=DB.H;
+  const line=LINES.find(l=>l.key===P82.line)||LINES.find(l=>l.key==='TOTAL')||LINES[0];
+  const rows=DB.rows.filter(r=>(getCell(r,'COD CLIENTE',H)||getCell(r,'CLIENTE',H))===code);
+  const pmap=new Map();
+  rows.forEach(r=>{
+    const ano=getCell(r,'A\u00d1O',H)||getCell(r,'ANIO',H)||getCell(r,'ANO',H), mes=getCell(r,'MES',H);
+    const k=norm(ano)+'||'+norm(mes);
+    if(!pmap.has(k))pmap.set(k,{rank:periodRank(ano,mes),label:((mes||'\u2014')+' '+(ano||'')).trim(),o:null,r:null});
+    const e=pmap.get(k);
+    const ov=parseNum(getCell(r,line.obj,H)), rv=parseNum(getCell(r,line.real,H));
+    if(ov!=null)e.o=(e.o==null?0:e.o)+ov;
+    if(rv!=null)e.r=(e.r==null?0:e.r)+rv;
+  });
+  const per=[...pmap.values()].sort((a,b)=>a.rank-b.rank);
+  if(!per.length)return '<div class="p82-months"><span class="pm dim">Sin historial registrado.</span></div>';
+  const chips=per.map(pp=>{
+    const has=pp.r!=null&&pp.r>0;
+    const pct=(pp.o!=null&&pp.o>0&&pp.r!=null)?Math.round(pp.r/pp.o*100):null;
+    return `<span class="pm ${has?'':'dim'}"><b>${esc(pp.label)}</b>${pp.r!=null?fmtNum(pp.r):'0'} u${pct!=null?` \u00b7 <i class="t-${pct>=100?'good':(pct>=70?'mid':'low')}">${pct}%</i>`:''}</span>`;
+  }).join('');
+  return `<div class="p82-months"><span class="pm-lbl">Venta de <b>${esc(line.label)}</b> por mes:</span>${chips}</div>`;
+}
 function renderP8020(){
   const body=document.getElementById('repBody');
   const d=p82Data(); const line=d.line;
@@ -2752,6 +2790,7 @@ function renderP8020(){
     <td class="num">${c.obj!=null?fmtNum(c.obj):'\u2014'}</td>
     <td class="num strong">${c.real!=null?fmtNum(c.real):'\u2014'}</td>
     <td class="num ${c.pct!=null?('t-'+(c.pct>=100?'good':(c.pct>=70?'mid':'low'))):''}">${c.pct!=null?Math.round(c.pct)+'%':'\u2014'}</td>
+    <td class="p82-expcol"><button class="p82-exp" data-p82exp="${esc(c.code)}" title="Ver venta por mes"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button></td>
   </tr>`).join('');
   body.innerHTML=`
   <div class="strat-kpis">
@@ -2768,7 +2807,7 @@ function renderP8020(){
   </div>
   <div class="rep-note" style="margin-bottom:12px">Clientes con su <b>${esc(line.label)}</b>: objetivo, real ${avgMode?'acumulado del a\u00f1o':'del mes'} y % de cumplimiento. Los marcados con <span class="p82-star">\u2605</span> son los <b>clientes clave</b>: el grupo que concentra ~80% de la venta de esa l\u00ednea. Haz clic en los <b>encabezados</b> para ordenar de mayor a menor (y viceversa).</div>
   ${list.length?`<div class="rd-wrap"><div class="rd-tblwrap"><table class="rep-tbl hl-table p82-tbl">
-    <thead><tr><th class="l sortable ${on('cliente')}" data-p82sort="cliente">Cliente${ar('cliente')}</th><th class="l sortable ${on('org')}" data-p82sort="org">Organizaci\u00f3n${ar('org')}</th><th class="l sortable ${on('vendor')}" data-p82sort="vendor">Vendedor${ar('vendor')}</th><th class="sortable ${on('obj')}" data-p82sort="obj">Objetivo${ar('obj')}</th><th class="sortable ${on('real')}" data-p82sort="real">Real${ar('real')}</th><th class="sortable ${on('pct')}" data-p82sort="pct">% vs Obj${ar('pct')}</th></tr></thead>
+    <thead><tr><th class="l sortable ${on('cliente')}" data-p82sort="cliente">Cliente${ar('cliente')}</th><th class="l sortable ${on('org')}" data-p82sort="org">Organizaci\u00f3n${ar('org')}</th><th class="l sortable ${on('vendor')}" data-p82sort="vendor">Vendedor${ar('vendor')}</th><th class="sortable ${on('obj')}" data-p82sort="obj">Objetivo${ar('obj')}</th><th class="sortable ${on('real')}" data-p82sort="real">Real${ar('real')}</th><th class="sortable ${on('pct')}" data-p82sort="pct">% vs Obj${ar('pct')}</th><th class="p82-expcol"></th></tr></thead>
     <tbody>${rows}</tbody></table></div></div>`:'<div class="empty-state">Sin datos de esta l\u00ednea con los filtros elegidos. Cambia la l\u00ednea, el giro, el periodo o el vendedor.</div>'}`;
 }
 /* ===== Reporte generico con enlace (Act. 4, 7, 89) ===== */
@@ -3271,6 +3310,7 @@ document.addEventListener('click',e=>{
   const crs=e.target.closest('[data-csort]');if(crs){const k=crs.dataset.csort;if(CRED.sort===k)CRED.dir=-CRED.dir;else{CRED.sort=k;CRED.dir=-1;}renderCredito();return;}
   const c31=e.target.closest('#credOnly31');if(c31){CRED.only31=!CRED.only31;renderCredito();return;}
   const ps=e.target.closest('[data-p82sort]');if(ps){const k=ps.dataset.p82sort;if(P82.sort===k)P82.dir=-P82.dir;else{P82.sort=k;P82.dir=-1;}renderP8020();return;}
+  const pe=e.target.closest('[data-p82exp]');if(pe){const tr=pe.closest('tr');const nxt=tr.nextElementSibling;if(nxt&&nxt.classList.contains('p82-det')){nxt.remove();pe.classList.remove('open');}else{const det=document.createElement('tr');det.className='p82-det';det.innerHTML=`<td colspan="${tr.cells.length}">${p82MonthDetail(pe.dataset.p82exp)}</td>`;tr.after(det);pe.classList.add('open');}return;}
   const a6=e.target.closest('#act106Seg .seg-btn');if(a6){ACT106_SCOPE=a6.dataset.sc;renderAct106();return;}
   const mp=e.target.closest('.map-pin');if(mp){document.querySelectorAll('.map-pin.sel').forEach(x=>x.classList.remove('sel'));mp.classList.add('sel');showMapInfo(parseInt(mp.dataset.pin));return;}
   const sg=e.target.closest('#objSeg .seg-btn');if(sg){OBJF=sg.dataset.obj;document.querySelectorAll('#objSeg .seg-btn').forEach(b=>b.classList.toggle('act',b===sg));filterClients();return;}
