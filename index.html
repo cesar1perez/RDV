@@ -727,6 +727,16 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 /* historial dentro de la tarjeta */
 .card-hist{margin-top:12px;background:rgba(255,255,255,.02);border:1px solid var(--line);border-radius:11px;padding:11px 13px}
 :root[data-theme="light"] .card-hist{background:rgba(12,31,68,.03)}
+.card-hist .ch-body{display:none}
+.card-hist.open .ch-body{display:block;margin-top:9px;animation:kidsIn .22s ease}
+.card-hist .ch-title{cursor:pointer;user-select:none;margin-bottom:0}
+.card-hist .ch-title:hover{color:var(--accent)}
+.card-hist.open .ch-title .g-chev{transform:rotate(90deg)}
+.card-hist .cco-hint{margin-left:auto}
+.tile-or b:nth-of-type(1){color:var(--cyan)}
+.tile-or b:nth-of-type(2){color:var(--accent)}
+:root[data-theme="light"] .tile-or b:nth-of-type(1){color:#1462a8}
+:root[data-theme="light"] .tile-or b:nth-of-type(2){color:var(--accent-ink)}
 .ch-title{display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:8px}
 .hist-tbl.hist-mini{font-size:12px;min-width:420px}
 .hist-tbl.hist-mini th{font-size:9.5px;padding:7px 8px}
@@ -1740,9 +1750,8 @@ function renderMatrix(base,grid,pace,note){
         <div class="cli-ring"><div class="big mono t-${ringCls}">${esc(ringTxt)}</div><div class="lbl">Avance Total</div></div>
       </div>
       ${cardComments(c)}
-      ${pendingChips(c.rec)}
       ${clientTiles(c.rec,pace)}
-      <div class="card-hist"><div class="ch-title"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l3-3 3 2 4-5"/></svg>Historial de compra \u00b7 unidades reales</div>${historyTable(c.rec,true)}</div>
+      <div class="card-hist ${HIST_OPEN.has(String(c.uid))?'open':''}"><div class="ch-title" data-htoggle="${c.uid}"><span class="g-chev"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l3-3 3 2 4-5"/></svg>Historial de compra \u00b7 unidades reales<span class="cco-hint">${HIST_OPEN.has(String(c.uid))?'ocultar':'ver'}</span></div><div class="ch-body">${historyTable(c.rec,true)}</div></div>
       <span class="cli-open">Ver ficha completa <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
     </div>`;
   }).join('');
@@ -1760,6 +1769,7 @@ function cmtRead(rec,key){const f=CMT_FIELDS.find(x=>x.key===key);if(!f)return '
 function cmtObj(rec){const o={};CMT_FIELDS.forEach(f=>o[f.key]=cmtRead(rec,f.key));return o;}
 function cmtKey(uid,key){return uid+'|'+key+'|'+STATE.period;}
 let CMT_OPEN=new Set();
+let HIST_OPEN=new Set();
 function cardComments(c){
   const per=document.getElementById('periodSel'); const perTxt=per&&per.selectedOptions[0]?per.selectedOptions[0].textContent:'';
   const canMonth = STATE.period && STATE.period!=='ALL';
@@ -3122,6 +3132,7 @@ document.addEventListener('click',e=>{
   const vp=e.target.closest('[data-vpdf]');if(vp){printVendorPDF(vp.dataset.vpdf);e.stopPropagation();return;}
   const lg=e.target.closest('[data-lg]');if(lg){const wr=lg.closest('.lt-gwrap,.ln-gwrap');if(wr)wr.classList.toggle('open');e.stopPropagation();return;}
   const hg=e.target.closest('[data-hlg]');if(hg){const key=hg.dataset.hlg;const tb=hg.closest('tbody');if(tb){hg.classList.toggle('open');tb.querySelectorAll('.hs-'+key).forEach(r=>r.classList.toggle('show'));}e.stopPropagation();return;}
+  const ht=e.target.closest('[data-htoggle]');if(ht){const uid=String(ht.dataset.htoggle);const box=ht.closest('.card-hist');if(box){const open=box.classList.toggle('open');if(open)HIST_OPEN.add(uid);else HIST_OPEN.delete(uid);const h=ht.querySelector('.cco-hint');if(h)h.textContent=open?'ocultar':'ver';}e.stopPropagation();return;}
   const co=e.target.closest('.cli-coments');if(co){const tg=e.target.closest('[data-ctoggle]');if(tg){const uid=String(tg.dataset.ctoggle);const open=co.classList.toggle('open');if(open)CMT_OPEN.add(uid);else CMT_OPEN.delete(uid);const h=tg.querySelector('.cco-hint');if(h)h.textContent=open?'ocultar':'ver';return;}const mc=e.target.closest('[data-mic]');if(mc){startDictation(mc.dataset.mic,mc);return;}const sv=e.target.closest('[data-save]');if(sv)saveComment(sv);return;}
   const cc=e.target.closest('.cal-card');if(cc){cc.classList.toggle('open');return;}
   const rb=e.target.closest('[data-rep]');if(rb){REPORT=rb.dataset.rep;renderReportes();return;}
