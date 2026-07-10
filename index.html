@@ -1321,7 +1321,7 @@ const CONFIG = {
     { id:'llanterama', label:'Llanterama Tulancingo', legal:'Llanterama Tulancingo S.A. de C.V.', sub:'Llantas y servicio', initial:'LL', accent:'amber',
       vendors:['Enrique R.','Carlos C.','Ruben L.','Miguel L'] },
     { id:'autoelectrica', label:'Autoel\u00e9ctrica Roma', legal:'Autoel\u00e9ctrica Roma S.A. de C.V.', sub:'Bater\u00edas y el\u00e9ctrico', initial:'AE', accent:'cyan',
-      vendors:['Celene S.','Colosio-Mayoreo','Oscar F.','Martin L.'] },
+      vendors:['Celene S.','Colosio-Mayoreo','Oscar F.','Jose L.'] },
   ]
 };
 
@@ -1356,7 +1356,7 @@ function lineColor(k){return LINE_COLORS[k]||'#6b82a8';}
 const DIRECTIVO_PASS='roma2026';
 const VENDOR_PASS={
   'Enrique R.':'rquique2026','Carlos C.':'carlitos2026','Ruben L.':'rleon2026','Miguel L':'lozadam2026',
-  'Celene S.':'celesoto2026','Oscar F.':'floresosc2026','Colosio-Mayoreo':'pcecil2026','Martin L.':'josel2026'
+  'Celene S.':'celesoto2026','Oscar F.':'floresosc2026','Colosio-Mayoreo':'pcecil2026','Jose L.':'josel2026'
 };
 function passKey(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');}
 let _VPASS=null;
@@ -1759,7 +1759,7 @@ function renderVendors(){
       if(kids){const kR=kids.map(k=>{const kl=LINES.find(x=>x.key===k);return kl?mkRow(kl,{sub:true}):'';}).join('');return `<div class="ln-gwrap">${mkRow(line,{parent:true,count:kids.length})}<div class="ln-kids">${kR}</div></div>`;}
       return mkRow(line);
     }).join('');
-    const vAcc=v._o?((/\bMARTIN\b/.test(keyName(v.name)))?'cyan':v._o.accent):null;
+    const vAcc=v._o?v._o.accent:null;
     return `<div class="vend-card reveal ${v._o?'gcol':''}" data-vend="${esc(v.name)}"${v._o?` data-vorg="${v._o.id}"`:''} style="animation-delay:${i*.04}s${v._o?`;--vc:var(--${vAcc})`:''}">
       <button class="vpdf" data-vpdf="${esc(v.name)}" title="Descargar ficha en PDF"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15h6M9 18h4"/></svg>PDF</button>
       <div class="vend-top">
