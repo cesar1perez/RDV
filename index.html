@@ -800,6 +800,15 @@ tr.p82-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--line
 .ckd.mid{color:var(--mid);border-color:var(--mid)}
 .ckd.bad{color:var(--low);border-color:var(--low)}
 .ckd.fut{color:var(--muted2);opacity:.6}
+.chk-tbl td.ck-click{cursor:pointer;position:relative}
+.chk-tbl td.ck-click:hover{background:rgba(255,210,30,.07)}
+.ck-caret{font-size:9px;color:var(--muted2);margin-left:4px}
+.chk-tbl td.ck-open{background:rgba(255,210,30,.1);box-shadow:inset 0 -3px 0 var(--accent)}
+tr.chk-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--line2);text-align:left}
+:root[data-theme="light"] tr.chk-det td{background:rgba(181,132,0,.05)}
+.ck-days.big{display:flex;flex-wrap:wrap;gap:7px;align-items:center;padding:6px 4px}
+.ck-days.big .ckd{font-size:11px;padding:5px 10px;border-radius:8px}
+.ck-days.big .pm-lbl{width:100%;margin-bottom:2px}
 .p82-tbl th.sortable{cursor:pointer;user-select:none}
 .p82-tbl th.sortable:hover,.p82-tbl th.sortable.on{color:var(--accent)}
 :root[data-theme="light"] .p82-tbl th.sortable:hover,:root[data-theme="light"] .p82-tbl th.sortable.on{color:var(--accent-ink)}
@@ -3013,6 +3022,33 @@ function gerList(){
 }
 const CHK_FIELDS=['w1','w2','w3','cierre'];
 const CHK_LBL=['1a semana','2a semana','3a semana','Cierre'];
+let CHK_ROWS=null, CHK_CTX=null;
+const CHK_DSHORT={LUNES:'Lun',MARTES:'Mar',MIERCOLES:'Mi\u00e9',JUEVES:'Jue',VIERNES:'Vie',SABADO:'S\u00e1b',ESP:'Espor\u00e1dicos'};
+function chkDetailHTML(vi,fi){
+  const e=CHK_ROWS[vi]; const ctx=CHK_CTX;
+  const cols=[...DAYS.slice(0,6).map(dd=>dd[0]),'ESP'];
+  const ws=ctx.fm+fi*7;
+  const chips=cols.map((col,k)=>{
+    const st=(e.byDay&&e.byDay[fi]&&e.byDay[fi][col])||null;
+    const isDay=col!=='ESP';
+    const dateN=isDay?(ws+k):null;
+    const lbl=CHK_DSHORT[col]+(isDay?' '+dateN:'');
+    if(!st)return isDay?`<span class="ckd fut">${lbl} \u00b7 sin clientes</span>`:'';
+    // vencido?: semanas pasadas todo vencido; semana en curso solo dias transcurridos; futuras nada
+    let dueDay=false;
+    if(!ctx.pre){
+      if(fi<ctx.due)dueDay=isDay||true;
+      else if(fi===ctx.due)dueDay=isDay?ctx.dueDays.some(dd=>dd.col===col):false;
+    }
+    const miss=st.tot-st.ok;
+    let cls='fut';
+    if(dueDay)cls=miss===0?'ok':(st.ok>0?'mid':'bad');
+    else if(st.ok>0)cls='ok';
+    const tail=dueDay?(miss>0?` \u00b7 faltan ${miss}`:' \u2713'):(st.ok>0?'':' \u00b7 a\u00fan no toca');
+    return `<span class="ckd ${cls}">${lbl} ${st.ok}/${st.tot}${tail}</span>`;
+  }).filter(Boolean).join('');
+  return `<div class="ck-days big"><span class="pm-lbl"><b>${esc(e.v)}</b> \u00b7 ${CHK_LBL[fi]}: comentarios por d\u00eda de ruta</span>${chips}</div>`;
+}
 function chkFirstMonday(y,m){const d=new Date(y,m,1);const dow=d.getDay();return 1+((1-dow+7)%7);}
 function chkWeekRange(fm,idx,y,m){
   const last=new Date(y,m+1,0).getDate();
@@ -3044,7 +3080,17 @@ function gerChecklistHTML(){
       if(!byV.has(v))byV.set(v,{v,o,tot:0,cnt:[0,0,0,0],days:{},exp:0,expOk:0});
       const e=byV.get(v); e.tot++;
       const cm=cmtObj(rec);
-      CHK_FIELDS.forEach((f,i)=>{if(!isEmpty(cm[f]))e.cnt[i]++;});
+      if(!e.byDay)e.byDay=CHK_FIELDS.map(()=>({}));
+      const realDays=DAYS.slice(0,6).filter(dd=>!isEmpty(rec.text(dd[0]))).map(dd=>dd[0]);
+      CHK_FIELDS.forEach((f,i)=>{
+        const filled=!isEmpty(cm[f]);
+        if(filled)e.cnt[i]++;
+        const buckets=realDays.length?realDays:['ESP'];
+        buckets.forEach(col=>{
+          if(!e.byDay[i][col])e.byDay[i][col]={tot:0,ok:0};
+          e.byDay[i][col].tot++; if(filled)e.byDay[i][col].ok++;
+        });
+      });
       if(!pre){
         const curF=CHK_FIELDS[due];
         const cliDays=DAYS.filter(dd=>!isEmpty(rec.text(dd[0]))).map(dd=>dd[0]);
@@ -3069,16 +3115,16 @@ function gerChecklistHTML(){
   });
   rowsV.sort((a,b)=>b.pend-a.pend);
   const DSHORT={LUNES:'Lun',MARTES:'Mar',MIERCOLES:'Mi\u00e9',JUEVES:'Jue',VIERNES:'Vie',SABADO:'S\u00e1b'};
-  const rows=rowsV.map(e=>{
+  CHK_ROWS=rowsV; CHK_CTX={due,pre,fm,y,mo,dueDays};
+  const rows=rowsV.map((e,vi)=>{
     const cells=CHK_FIELDS.map((f,i)=>{
       const full=e.cnt[i]>=e.tot&&e.tot>0;
       let cls;
       if(pre||i>due)cls='ck-fut';
       else if(i<due)cls=full?'ck-ok':'ck-bad';
       else cls=(e.exp>0?(e.expOk>=e.exp?'ck-ok':(e.expOk>0?'ck-mid':'ck-bad')):'ck-fut');
-      const dayChips=(i===due&&!pre)?`<div class="ck-days">${dueDays.map(dd=>{const st=e.days[dd.col];if(!st)return `<span class="ckd fut">${DSHORT[dd.col]||dd.col} \u2014</span>`;const ok=st.ok>=st.tot;return `<span class="ckd ${ok?'ok':(st.ok>0?'mid':'bad')}">${DSHORT[dd.col]||dd.col} ${st.ok}/${st.tot}</span>`;}).join('')}</div>`:'';
       const main=(i===due&&!pre)?`${e.expOk}/${e.exp} \u25c9`:`${e.cnt[i]}/${e.tot}`;
-      return `<td class="num ${cls}">${main}${dayChips}</td>`;
+      return `<td class="num ${cls} ck-click" data-ckd="${vi}|${i}" title="Clic para ver el desglose por d\u00eda de ruta">${main}<span class="ck-caret">\u25be</span></td>`;
     }).join('');
     let st,stc;
     if(pre){st='La 1a semana inicia el '+fm;stc='ck-fut';}
@@ -3104,7 +3150,7 @@ function gerChecklistHTML(){
   <div class="rd-wrap"><div class="rd-tblwrap"><table class="rep-tbl hl-table chk-tbl">
     <thead><tr><th class="l">Vendedor</th><th>Clientes</th>${CHK_LBL.map((l,i)=>{const r=(!pre)?chkWeekRange(fm,i,y,mo):null;return `<th class="${i===due&&!pre?'ck-due':''}">${l}<br><span style="font-weight:600;font-size:8.5px;opacity:.7">${r?r.label:''}</span></th>`;}).join('')}<th class="l">Estado</th></tr></thead>
     <tbody>${rows}</tbody></table></div></div>
-  <div class="rep-note" style="margin-top:10px;font-size:11px">En la semana en curso, la celda muestra <b>llenados/esperados</b> de los d\u00edas de ruta ya transcurridos, con el detalle por d\u00eda abajo (Lun 4/4, Mar 2/5\u2026). Los clientes <b>espor\u00e1dicos</b> (sin d\u00eda de visita) solo cuentan para el total semanal, no por d\u00eda.</div>`;
+  <div class="rep-note" style="margin-top:10px;font-size:11px">Haz <b>clic en cualquier celda</b> para desglosar esa semana por <b>d\u00eda de ruta</b> (qu\u00e9 d\u00edas ya llenaron y cu\u00e1les faltan). En la semana en curso, la celda muestra <b>llenados/esperados</b> de los d\u00edas ya transcurridos. Los clientes <b>espor\u00e1dicos</b> (sin d\u00eda de visita) aparecen como grupo aparte en el desglose.</div>`;
 }
 function renderGerente(){
   if(GER.check){
@@ -3420,6 +3466,16 @@ document.addEventListener('click',e=>{
   const gv2=e.target.closest('[data-globalv]');if(gv2){goGlobalVend();return;}
   const ckb=e.target.closest('#gerCheckBtn');if(ckb){GER.check=true;renderGerente();return;}
   const ckk=e.target.closest('#gerCheckBack');if(ckk){GER.check=false;renderGerente();return;}
+  const ckd=e.target.closest('[data-ckd]');if(ckd){
+    const key=ckd.dataset.ckd; const tr=ckd.closest('tr');
+    const nxt=tr.nextElementSibling;
+    const was=nxt&&nxt.classList.contains('chk-det');
+    const same=was&&nxt.dataset.key===key;
+    if(was)nxt.remove();
+    tr.parentElement.querySelectorAll('td.ck-open').forEach(x=>x.classList.remove('ck-open'));
+    if(!same){const parts=key.split('|');const det=document.createElement('tr');det.className='chk-det';det.dataset.key=key;det.innerHTML=`<td colspan="${tr.cells.length}">${chkDetailHTML(parseInt(parts[0]),parseInt(parts[1]))}</td>`;tr.after(det);ckd.classList.add('ck-open');}
+    return;
+  }
   const gc=e.target.closest('.ger-card');if(gc){const mc=e.target.closest('[data-mic]');if(mc){startDictation(mc.dataset.mic,mc);return;}const sv=e.target.closest('[data-save]');if(sv){saveComment(sv);return;}return;}
   const cch=e.target.closest('[data-cchip]');if(cch){const v=cch.dataset.cchip;if(v==='ALL')STRAT.clients.clear();else{if(STRAT.clients.has(v))STRAT.clients.delete(v);else STRAT.clients.add(v);}renderStrategy();return;}
   const stt=e.target.closest('#stratTot');if(stt){STRAT.onlyTotal=!STRAT.onlyTotal;renderStrategy();return;}
