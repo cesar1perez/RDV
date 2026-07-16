@@ -1383,6 +1383,15 @@ function clientHL(rec){
     else if(ld.status==='sinobj')anyReal=true;
   });
   if(n>0)return {pctN:sum/n,status:'ok'};
+  // respaldo: objetivo en lineas fuera de las 5 principales (Premium, AGM, Estandar, Usado, Alcalinas, etc.)
+  let sum2=0,n2=0;
+  LINES.forEach(l=>{
+    if(CLIENT_AVG_KEYS.includes(l.key))return;
+    const ld=lineData(rec,l);
+    if(ld.status==='ok'&&ld.pctN!=null){sum2+=ld.pctN;n2++;}
+    else if(ld.status==='sinobj')anyReal=true;
+  });
+  if(n2>0)return {pctN:sum2/n2,status:'ok'};
   if(anyReal)return {pctN:null,status:'sinobj'};
   return {pctN:null,status:'nodata'};
 }
