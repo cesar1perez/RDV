@@ -794,6 +794,12 @@ tr.p82-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--line
 .ck-bad{color:var(--low) !important}
 .ck-fut{color:var(--muted2) !important;opacity:.6}
 .chk-tbl td.name{display:flex;align-items:center;gap:8px;font-weight:800}
+.ck-days{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin-top:5px}
+.ckd{font-family:'IBM Plex Mono';font-size:9px;font-weight:800;border-radius:6px;padding:2px 6px;border:1px solid var(--line2);white-space:nowrap}
+.ckd.ok{color:var(--good);border-color:var(--good)}
+.ckd.mid{color:var(--mid);border-color:var(--mid)}
+.ckd.bad{color:var(--low);border-color:var(--low)}
+.ckd.fut{color:var(--muted2);opacity:.6}
 .p82-tbl th.sortable{cursor:pointer;user-select:none}
 .p82-tbl th.sortable:hover,.p82-tbl th.sortable.on{color:var(--accent)}
 :root[data-theme="light"] .p82-tbl th.sortable:hover,:root[data-theme="light"] .p82-tbl th.sortable.on{color:var(--accent-ink)}
@@ -2986,6 +2992,12 @@ function renderAct9(){
 let GER={vend:'ALL',day:'ALL',range:'ALL',check:false};
 const GER_RANGES=[['ALL','Todos los avances'],['R1','0% a 44%'],['R2','45% a 69%'],['R3','70% o m\u00e1s'],['SINOBJ','Sin objetivo'],['ESP','Espor\u00e1dicos (sin d\u00eda de visita)']];
 function goGerente(){renderGerente();showScreen('ger');if(!CRED_DB)loadCredito().then(()=>{if(STATE.screen==='ger')renderGerente();});}
+function goFichaFromGer(orgId,vendor,code){
+  STATE.org=orgId; setAccent(orgId);
+  goCli(vendor);
+  const idx=CLI.findIndex(x=>_normCode(x.code).noz===_normCode(code).noz);
+  if(idx>=0)goFicha(idx);
+}
 function gerList(){
   const out=[];
   CONFIG.orgs.forEach((o,oi)=>{
@@ -3001,56 +3013,98 @@ function gerList(){
 }
 const CHK_FIELDS=['w1','w2','w3','cierre'];
 const CHK_LBL=['1a semana','2a semana','3a semana','Cierre'];
-const CHK_RANGE=['d\u00edas 1-7','d\u00edas 8-14','d\u00edas 15-21','d\u00eda 22 al fin de mes'];
-function chkDueIdx(day){return day<=7?0:(day<=14?1:(day<=21?2:3));}
+function chkFirstMonday(y,m){const d=new Date(y,m,1);const dow=d.getDay();return 1+((1-dow+7)%7);}
+function chkWeekRange(fm,idx,y,m){
+  const last=new Date(y,m+1,0).getDate();
+  const a=fm+idx*7, b=Math.min(a+5,last);
+  return {a,b,label:`del ${a} al ${b}`};
+}
 function gerChecklistHTML(){
-  const now=new Date(); const day=now.getDate();
-  const due=chkDueIdx(day);
-  const curRank=now.getFullYear()*100+(now.getMonth()+1);
+  const now=new Date(); const day=now.getDate(), y=now.getFullYear(), mo=now.getMonth();
+  const MM=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const WD=['domingo','lunes','martes','mi\u00e9rcoles','jueves','viernes','s\u00e1bado'];
+  const fm=chkFirstMonday(y,mo);
+  const curRank=y*100+(mo+1);
   const per=PERIODS.find(pp=>pp.rank===curRank);
   const perKey=per?per.key:STATE.period;
   const perNote=per?'':'<div class="rep-note" style="margin-bottom:12px">\u26a0 A\u00fan no hay filas del <b>mes en curso</b> en la hoja; se muestra el periodo seleccionado arriba.</div>';
+  const pre=day<fm; // el mes empezo pero aun no arranca la 1a semana completa
+  const due=pre?-1:Math.min(3,Math.floor((day-fm)/7));
+  // dias de ruta ya transcurridos de la semana en curso (se llenan en la noche; se revisan al dia siguiente)
+  const dueDays=[]; // [{col:'LUNES',date:13}]
+  if(!pre){
+    const ws=fm+due*7;
+    for(let k=0;k<6;k++){const dk=ws+k;if(dk<day&&k<DAYS.length)dueDays.push({col:DAYS[k][0],date:dk});}
+  }
   const rowsV=[];
   CONFIG.orgs.forEach(o=>{
     const byV=new Map();
     clientGroups(o.id,perKey).forEach(rec=>{
-      const v=rec.vendor; if(!byV.has(v))byV.set(v,{v,o,tot:0,cnt:[0,0,0,0]});
+      const v=rec.vendor;
+      if(!byV.has(v))byV.set(v,{v,o,tot:0,cnt:[0,0,0,0],days:{},exp:0,expOk:0});
       const e=byV.get(v); e.tot++;
       const cm=cmtObj(rec);
       CHK_FIELDS.forEach((f,i)=>{if(!isEmpty(cm[f]))e.cnt[i]++;});
+      if(!pre){
+        const curF=CHK_FIELDS[due];
+        const cliDays=DAYS.filter(dd=>!isEmpty(rec.text(dd[0]))).map(dd=>dd[0]);
+        dueDays.forEach(dd=>{
+          if(cliDays.includes(dd.col)){
+            if(!e.days[dd.col])e.days[dd.col]={tot:0,ok:0};
+            e.days[dd.col].tot++; e.exp++;
+            if(!isEmpty(cm[curF])){e.days[dd.col].ok++; e.expOk++;}
+          }
+        });
+      }
     });
     byV.forEach(e=>rowsV.push(e));
   });
   if(!rowsV.length)return perNote+'<div class="empty-state">Sin clientes registrados para este periodo.</div>';
-  rowsV.forEach(e=>{let pend=0;for(let i=0;i<=due;i++)pend+=e.tot-e.cnt[i];e.pend=pend;});
+  rowsV.forEach(e=>{
+    let pend=0;
+    for(let i=0;i<due;i++)pend+=(e.tot-e.cnt[i])*2; // semanas pasadas pesan doble
+    pend+=e.exp-e.expOk;
+    e.pend=pend;
+    e.pastOk=CHK_FIELDS.slice(0,Math.max(0,due)).every((f,i)=>e.cnt[i]>=e.tot);
+  });
   rowsV.sort((a,b)=>b.pend-a.pend);
+  const DSHORT={LUNES:'Lun',MARTES:'Mar',MIERCOLES:'Mi\u00e9',JUEVES:'Jue',VIERNES:'Vie',SABADO:'S\u00e1b'};
   const rows=rowsV.map(e=>{
     const cells=CHK_FIELDS.map((f,i)=>{
       const full=e.cnt[i]>=e.tot&&e.tot>0;
       let cls;
-      if(i<due)cls=full?'ck-ok':'ck-bad';
-      else if(i===due)cls=full?'ck-ok':(e.cnt[i]>0?'ck-mid':'ck-bad');
-      else cls='ck-fut';
-      return `<td class="num ${cls}">${e.cnt[i]}/${e.tot}${i===due?' \u25c9':''}</td>`;
+      if(pre||i>due)cls='ck-fut';
+      else if(i<due)cls=full?'ck-ok':'ck-bad';
+      else cls=(e.exp>0?(e.expOk>=e.exp?'ck-ok':(e.expOk>0?'ck-mid':'ck-bad')):'ck-fut');
+      const dayChips=(i===due&&!pre)?`<div class="ck-days">${dueDays.map(dd=>{const st=e.days[dd.col];if(!st)return `<span class="ckd fut">${DSHORT[dd.col]||dd.col} \u2014</span>`;const ok=st.ok>=st.tot;return `<span class="ckd ${ok?'ok':(st.ok>0?'mid':'bad')}">${DSHORT[dd.col]||dd.col} ${st.ok}/${st.tot}</span>`;}).join('')}</div>`:'';
+      const main=(i===due&&!pre)?`${e.expOk}/${e.exp} \u25c9`:`${e.cnt[i]}/${e.tot}`;
+      return `<td class="num ${cls}">${main}${dayChips}</td>`;
     }).join('');
     let st,stc;
-    const dueFull=e.cnt[due]>=e.tot, pastOk=CHK_FIELDS.slice(0,due).every((f,i)=>e.cnt[i]>=e.tot);
-    if(dueFull&&pastOk){st='\u2713 Al d\u00eda';stc='ck-ok';}
-    else if(e.cnt[due]===0){st='\u2717 Sin llenar la semana';stc='ck-bad';}
+    if(pre){st='La 1a semana inicia el '+fm;stc='ck-fut';}
+    else if(!e.pastOk){st='\u2717 Semana(s) pasada(s) incompleta(s)';stc='ck-bad';}
+    else if(e.exp===0){st='Sin d\u00edas de ruta vencidos';stc='ck-fut';}
+    else if(e.expOk>=e.exp){st='\u2713 Al d\u00eda';stc='ck-ok';}
+    else if(e.expOk===0){st='\u2717 Sin llenar d\u00edas vencidos';stc='ck-bad';}
     else{st='Parcial';stc='ck-mid';}
     return `<tr><td class="l name"><span class="lt-dot" style="background:var(--${e.o.accent})"></span>${esc(e.v)}</td><td class="num">${e.tot}</td>${cells}<td class="l ${stc}" style="font-weight:800">${st}</td></tr>`;
   }).join('');
-  const MM=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const wr=due>=0?chkWeekRange(fm,due,y,mo):null;
+  const atrisk=rowsV.filter(e=>!pre&&((e.exp>0&&e.expOk<e.exp)||!e.pastOk)).length;
+  const dueTxt=pre
+    ? `Las semanas de comentarios son <b>completas (lunes a s\u00e1bado)</b>. La <b>1a semana</b> de ${MM[mo]} inicia el <b>lunes ${fm}</b>; a\u00fan no hay d\u00edas por revisar.`
+    : `Semanas completas de lunes a s\u00e1bado: la <b>1a semana</b> de ${MM[mo]} va del <b>${fm} al ${fm+5}</b>. Hoy es <b>${WD[now.getDay()]} ${day}</b>: cada vendedor debe tener llenados los <b>d\u00edas de ruta ya transcurridos</b> de la <b>${CHK_LBL[due]}</b> (${wr.label}) \u2014 el comentario se llena en la noche del d\u00eda de visita y se revisa al d\u00eda siguiente. Las semanas anteriores deben estar completas al 100%.`;
   return `${perNote}
   <div class="strat-kpis">
-    <div class="skpi"><div class="sk-l">Hoy</div><div class="sk-v" style="font-size:17px">${day} de ${MM[now.getMonth()]} ${now.getFullYear()}</div><div class="sk-s">la fecha se toma en vivo del dispositivo</div></div>
-    <div class="skpi amber"><div class="sk-l">Semana que corresponde llenar</div><div class="sk-v" style="font-size:17px">${CHK_LBL[due]}</div><div class="sk-s">${CHK_RANGE[due]}</div></div>
-    <div class="skpi ${rowsV.some(e=>e.cnt[due]===0)?'down':'up'}"><div class="sk-l">Vendedores sin llenar la semana</div><div class="sk-v">${rowsV.filter(e=>e.cnt[due]===0).length}/${rowsV.length}</div><div class="sk-s">con 0 comentarios de ${CHK_LBL[due]}</div></div>
+    <div class="skpi"><div class="sk-l">Hoy</div><div class="sk-v" style="font-size:17px">${WD[now.getDay()]} ${day} de ${MM[mo]}</div><div class="sk-s">fecha en vivo del dispositivo</div></div>
+    <div class="skpi amber"><div class="sk-l">Semana en curso</div><div class="sk-v" style="font-size:17px">${pre?'A\u00fan no inicia':CHK_LBL[due]}</div><div class="sk-s">${pre?('1a semana desde el lunes '+fm):wr.label+' \u00b7 d\u00edas vencidos: '+(dueDays.map(dd=>DSHORT[dd.col]).join(', ')||'ninguno a\u00fan')}</div></div>
+    <div class="skpi ${atrisk?'down':'up'}"><div class="sk-l">Vendedores con pendientes</div><div class="sk-v">${atrisk}/${rowsV.length}</div><div class="sk-s">con d\u00edas vencidos o semanas pasadas sin llenar</div></div>
   </div>
-  <div class="rep-note" style="margin-bottom:12px">Cada celda muestra <b>clientes con comentario / clientes totales</b> del vendedor en el mes en curso. El \u25c9 marca la semana que corresponde hoy. <span class="ck-ok" style="font-weight:800">Verde</span>: completa \u00b7 <span class="ck-mid" style="font-weight:800">\u00c1mbar</span>: parcial \u00b7 <span class="ck-bad" style="font-weight:800">Rojo</span>: sin llenar (o semana pasada incompleta) \u00b7 gris: semanas futuras. Ordenados: primero quien m\u00e1s pendientes tiene.</div>
+  <div class="rep-note" style="margin-bottom:12px">${dueTxt}</div>
   <div class="rd-wrap"><div class="rd-tblwrap"><table class="rep-tbl hl-table chk-tbl">
-    <thead><tr><th class="l">Vendedor</th><th>Clientes</th>${CHK_LBL.map((l,i)=>`<th class="${i===due?'ck-due':''}">${l}<br><span style="font-weight:600;font-size:8.5px;opacity:.7">${CHK_RANGE[i]}</span></th>`).join('')}<th class="l">Estado</th></tr></thead>
-    <tbody>${rows}</tbody></table></div></div>`;
+    <thead><tr><th class="l">Vendedor</th><th>Clientes</th>${CHK_LBL.map((l,i)=>{const r=(!pre)?chkWeekRange(fm,i,y,mo):null;return `<th class="${i===due&&!pre?'ck-due':''}">${l}<br><span style="font-weight:600;font-size:8.5px;opacity:.7">${r?r.label:''}</span></th>`;}).join('')}<th class="l">Estado</th></tr></thead>
+    <tbody>${rows}</tbody></table></div></div>
+  <div class="rep-note" style="margin-top:10px;font-size:11px">En la semana en curso, la celda muestra <b>llenados/esperados</b> de los d\u00edas de ruta ya transcurridos, con el detalle por d\u00eda abajo (Lun 4/4, Mar 2/5\u2026). Los clientes <b>espor\u00e1dicos</b> (sin d\u00eda de visita) solo cuentan para el total semanal, no por d\u00eda.</div>`;
 }
 function renderGerente(){
   if(GER.check){
@@ -3080,7 +3134,7 @@ function renderGerente(){
     if(c.hlStatus==='sinobj'){ringTxt='s/obj';ringCls='na';}else if(c.pctN==null){ringTxt='\u2014';ringCls='na';}else{ringTxt=Math.round(c.pctN)+'%';ringCls=info.ring;}
     const badge=(c.hlStatus==='ok'&&info.txt)?`<span class="badge-st ${info.card}">${info.txt}</span>`:'';
     const done=!isEmpty(gval(c));
-    return `<div class="cli-card reveal ${c.hlStatus==='ok'?info.card:''}" style="animation-delay:${Math.min(i,16)*.03}s">
+    return `<div class="cli-card reveal ${c.hlStatus==='ok'?info.card:''}" data-gficha="${c.o.id}|${esc(c.vendor)}|${esc(c.code)}" style="animation-delay:${Math.min(i,16)*.03}s">
       <span class="cli-num">${i+1}</span>
       <div class="cli-head">
         <div class="cli-id"><div class="code">${esc(disp(c.code))}</div><h4 class="display">${esc(c.cliente)}</h4><div class="neg"><span style="color:var(--${c.o.accent==='cyan'?'cyan':'amber'});font-weight:800">${esc(c.o.label)}</span> \u00b7 <b>${esc(c.vendor)}</b>${c.negocio?' \u00b7 '+esc(c.negocio):''}</div></div>
@@ -3390,6 +3444,7 @@ document.addEventListener('click',e=>{
     }
     e.stopPropagation();return; // clic dentro del editor: no abrir ficha
   }
+  const gf=e.target.closest('[data-gficha]');if(gf){const parts=gf.dataset.gficha.split('|');goFichaFromGer(parts[0],parts[1],parts.slice(2).join('|'));return;}
   const cl=e.target.closest('[data-cli]');if(cl){goFicha(parseInt(cl.dataset.cli));return;}
   const fs=e.target.closest('#factSeg .seg-btn');if(fs){FACT_FILTER=fs.dataset.fact;renderFactSemanal();return;}
   const cs=e.target.closest('[data-cmpsort]');if(cs){const k=cs.dataset.cmpsort;if(CMP_SORT.key===k)CMP_SORT.dir=CMP_SORT.dir==='desc'?'asc':'desc';else{CMP_SORT.key=k;CMP_SORT.dir='desc';}renderComparativo();return;}
