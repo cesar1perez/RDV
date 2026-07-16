@@ -783,6 +783,17 @@ tr.p82-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--line
 :root[data-theme="light"] .pm b{color:var(--accent-ink)}
 .pm i{font-style:normal;font-weight:800}
 .pm.dim{opacity:.45}
+/* checklist de llenado */
+.btn.checkbtn{background:linear-gradient(135deg,#13a85f,#0d7f47);color:#fff;border:none;font-weight:800}
+.btn.checkbtn:hover{filter:brightness(1.1)}
+.chk-tbl td.num{font-family:'IBM Plex Mono';font-weight:800;text-align:center}
+.chk-tbl th.ck-due{color:var(--accent);border-bottom:3px solid var(--accent)}
+:root[data-theme="light"] .chk-tbl th.ck-due{color:var(--accent-ink);border-bottom-color:var(--accent-ink)}
+.ck-ok{color:var(--good) !important}
+.ck-mid{color:var(--mid) !important}
+.ck-bad{color:var(--low) !important}
+.ck-fut{color:var(--muted2) !important;opacity:.6}
+.chk-tbl td.name{display:flex;align-items:center;gap:8px;font-weight:800}
 .p82-tbl th.sortable{cursor:pointer;user-select:none}
 .p82-tbl th.sortable:hover,.p82-tbl th.sortable.on{color:var(--accent)}
 :root[data-theme="light"] .p82-tbl th.sortable:hover,:root[data-theme="light"] .p82-tbl th.sortable.on{color:var(--accent-ink)}
@@ -1204,12 +1215,12 @@ tr.p82-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--line
     <div id="campaignZone"></div>
   </section>
 
-  <!-- RESPUESTAS DEL GERENTE (clientes clave 80/20) -->
+  <!-- RESPUESTAS DEL SUPERVISOR DE VENTAS -->
   <section class="screen" id="screen-ger">
     <button class="back-btn" data-go="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Inicio</button>
     <div class="sec-head">
-      <div class="eyebrow">Gerencia de ventas · comentarios y avances</div>
-      <h1 class="h1 display">Respuestas del gerente de ventas</h1>
+      <div class="eyebrow">Supervisión de ventas · comentarios y avances</div>
+      <h1 class="h1 display">Respuestas del supervisor de ventas</h1>
       <p class="sub">Todos los clientes de ambas organizaciones en un solo lugar, <b>ordenados por importancia de venta</b> (elige la medida: facturación, acumuladores, lubricantes, motobaterías, filtros o llantas). Responde los comentarios de los vendedores sin recorrer pantalla por pantalla.</p>
     </div>
     <div id="gerBody"></div>
@@ -1341,6 +1352,20 @@ const LINES = [
   {key:'ALCALIN',label:'Alcalina',obj:'OBJ ALCALIN',real:'REAL ALCALIN'},
 ];
 const HEADLINE_KEY='TOTAL';
+/* avance general del cliente: PROMEDIO de sus lineas (Acum, Lub, Moto, Filtro, Llantas) */
+const CLIENT_AVG_KEYS=['TOTAL','LUB','MOTO','FILTRO','LLANTAS'];
+function clientHL(rec){
+  let sum=0,n=0,anyReal=false;
+  CLIENT_AVG_KEYS.forEach(k=>{
+    const line=LINES.find(l=>l.key===k); if(!line)return;
+    const ld=lineData(rec,line);
+    if(ld.status==='ok'&&ld.pctN!=null){sum+=ld.pctN;n++;}
+    else if(ld.status==='sinobj')anyReal=true;
+  });
+  if(n>0)return {pctN:sum/n,status:'ok'};
+  if(anyReal)return {pctN:null,status:'sinobj'};
+  return {pctN:null,status:'nodata'};
+}
 /* orden prioritario para la vista general: Total acum., Lubricantes, Motos, Total llantas, Filtros, Alcalina, luego el resto */
 const GEN_PRIORITY=['TOTAL','LUB','MOTO','LLANTAS','FILTRO','ALCALIN'];
 function orderedLines(){const pri=GEN_PRIORITY.map(k=>LINES.find(l=>l.key===k)).filter(Boolean);const rest=LINES.filter(l=>!GEN_PRIORITY.includes(l.key));return pri.concat(rest);}
@@ -1662,7 +1687,7 @@ function renderHome(){
   const gz=document.getElementById('gerZone');
   if(gz){gz.innerHTML=(ROLE==='directivo'&&DB.rows.length)?`<div class="dash-cta gercta" data-gerbtn="1">
     <div class="dash-cta-ic ger"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8M8 13h5"/></svg></div>
-    <div class="dash-cta-tx"><div class="dash-cta-t">Respuestas del gerente de ventas</div><div class="dash-cta-s">Comentarios y avances de todos los clientes de ambas organizaciones \u00b7 ordenados por importancia de venta</div></div>
+    <div class="dash-cta-tx"><div class="dash-cta-t">Respuestas del supervisor de ventas</div><div class="dash-cta-s">Comentarios y avances de todos los clientes de ambas organizaciones \u00b7 ordenados por importancia de venta</div></div>
     <svg class="dash-cta-go" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
   </div>${globalCard()}`:'';}
 }
@@ -1786,7 +1811,7 @@ function renderClients(){
   document.getElementById('cliTitle').textContent=STATE.vendor;
   document.getElementById('cliPace').innerHTML=paceText();
   const groups=clientGroups(STATE.org).filter(rec=>rec.vendor===STATE.vendor);
-  CLI=groups.map((rec,i)=>{const hl=lineData(rec,LINES.find(l=>l.key===HEADLINE_KEY));const inf=latestInfoRec(rec);return {rec,uid:i,code:getCell(rec.group[rec.group.length-1],'COD CLIENTE',rec.H),cliente:inf.text('CLIENTE'),negocio:inf.text('NOMBRE DE NEGOCIO'),zona:inf.text('ZONA'),giro:inf.text('GIRO'),cm:cmtObj(rec),pctN:hl.pctN,hlStatus:hl.status,search:keyName([inf.text('CLIENTE'),inf.text('NOMBRE DE NEGOCIO'),rec.text('COD CLIENTE'),inf.text('ZONA'),inf.text('GIRO')].join(' '))};});
+  CLI=groups.map((rec,i)=>{const hl=clientHL(rec);const inf=latestInfoRec(rec);return {rec,uid:i,code:getCell(rec.group[rec.group.length-1],'COD CLIENTE',rec.H),cliente:inf.text('CLIENTE'),negocio:inf.text('NOMBRE DE NEGOCIO'),zona:inf.text('ZONA'),giro:inf.text('GIRO'),cm:cmtObj(rec),pctN:hl.pctN,hlStatus:hl.status,search:keyName([inf.text('CLIENTE'),inf.text('NOMBRE DE NEGOCIO'),rec.text('COD CLIENTE'),inf.text('ZONA'),inf.text('GIRO')].join(' '))};});
   REVIEWED.clear();
   filterClients();
 }
@@ -1851,7 +1876,7 @@ function renderMatrix(base,grid,pace,note){
       <div class="cli-head">
         <div class="cli-id"><div class="code">${esc(disp(c.code))}</div><h4 class="display">${esc(c.cliente||SD)}</h4><div class="neg">${esc(c.negocio||SD)}</div></div>
         <div class="cli-tags"><span class="tag">${esc(c.zona||'sin zona')}</span>${c.giro?`<span class="tag">${esc(c.giro)}</span>`:''}${credBadge(c.code)}${badge}</div>
-        <div class="cli-ring"><div class="big mono t-${ringCls}">${esc(ringTxt)}</div><div class="lbl">Avance Total</div></div>
+        <div class="cli-ring"><div class="big mono t-${ringCls}">${esc(ringTxt)}</div><div class="lbl">Avance general</div></div>
       </div>
       ${cardComments(c)}
       ${clientTiles(c.rec,pace)}
@@ -1867,7 +1892,7 @@ const CMT_FIELDS=[
   {key:'w2',lbl:'Segunda semana',short:'2a sem',heads:['SEGUNDA SEMANA','COMMENTARIO A MITAD DE MES','COMENTARIO A MITAD DE MES'],owner:'vendedor'},
   {key:'w3',lbl:'Tercera semana',short:'3a sem',heads:['TERCERA SEMANA'],owner:'vendedor'},
   {key:'cierre',lbl:'Cierre de mes',short:'Cierre',heads:['CIERRE DE MES','COMENTARIOS A FINAL DE MES','COMENTARIO A FINAL DE MES'],owner:'vendedor'},
-  {key:'ger',lbl:'Gerente de ventas',short:'Gerente',heads:['GERENTE DE VENTAS','COMENTARIO GERENTE','COMENTARIOS GERENTE','COMENTARIO DEL GERENTE','COMENTARIOS DEL GERENTE','RETROALIMENTACION GERENTE','RETROALIMENTACION DEL GERENTE','COMENTARIO GERENTE DE VENTAS'],owner:'gerente',cls:'ger'},
+  {key:'ger',lbl:'Supervisor de ventas',short:'Supervisor',heads:['GERENTE DE VENTAS','COMENTARIO GERENTE','COMENTARIOS GERENTE','COMENTARIO DEL GERENTE','COMENTARIOS DEL GERENTE','RETROALIMENTACION GERENTE','RETROALIMENTACION DEL GERENTE','COMENTARIO GERENTE DE VENTAS'],owner:'gerente',cls:'ger'},
 ];
 function cmtRead(rec,key){const f=CMT_FIELDS.find(x=>x.key===key);if(!f)return '';for(const h of f.heads){const v=rec.text(h);if(!isEmpty(v))return v;}return '';}
 function cmtObj(rec){const o={};CMT_FIELDS.forEach(f=>o[f.key]=cmtRead(rec,f.key));return o;}
@@ -2102,7 +2127,7 @@ function renderFicha(rec){
     <div class="card section-block" style="--sc:#f472b6"><div class="card-title"><span class="dot"></span>Comentarios del vendedor \u00b7 por semana</div>
       <div class="ficha-weeks">${['w1','w2','w3','cierre'].map(k=>{const f=CMT_FIELDS.find(x=>x.key===k);const v=cm[k];return `<div class="fw-item ${isEmpty(v)?'empty':''}"><div class="fw-lbl">${f.lbl}</div><div class="fw-txt">${esc(isEmpty(v)?SD:v)}</div></div>`;}).join('')}</div>
     </div>
-    <div class="card section-block" style="--sc:#22d3ee"><div class="card-title"><span class="dot"></span>Retroalimentaci\u00f3n del gerente de ventas</div><div class="coment ger ${isEmpty(cm.ger)?'empty':''}">${esc(isEmpty(cm.ger)?SD:cm.ger)}</div></div>`;
+    <div class="card section-block" style="--sc:#22d3ee"><div class="card-title"><span class="dot"></span>Retroalimentaci\u00f3n del supervisor de ventas</div><div class="coment ger ${isEmpty(cm.ger)?'empty':''}">${esc(isEmpty(cm.ger)?SD:cm.ger)}</div></div>`;
 }
 
 /* ---- REPORTES ---- */
@@ -2836,7 +2861,7 @@ function renderAct2(){
   const vendors=[...new Set(groups.map(r=>r.vendor))].sort();
   const o=org(STATE.org), perTxt=document.getElementById('periodSel').selectedOptions[0]?.textContent||'';
   let list=groups.map(rec=>{
-    const ld=lineData(rec,LINES.find(l=>l.key===HEADLINE_KEY));
+    const ld=clientHL(rec);
     const cm=cmtObj(rec);
     const days=DAYS.filter(([col])=>!isEmpty(rec.text(col))).map(([col])=>col);
     return {rec,cliente:rec.text('CLIENTE')||SD,negocio:rec.text('NOMBRE DE NEGOCIO')||'',zona:rec.text('ZONA')||'',vendor:rec.vendor,code:disp(getCell(rec.group[rec.group.length-1],'COD CLIENTE',rec.H)),pctN:ld.pctN,status:ld.status,days,cm};
@@ -2862,7 +2887,7 @@ function renderAct2(){
   }).join('');
   body.innerHTML=controls+`<div class="rd-wrap">
     <div class="print-head"><div class="ph-org">${esc(o.label)}</div><div class="ph-title">Reporte de visitas y comentarios \u00b7 ${esc(perTxt)}</div></div>
-    <div class="rep-note" style="margin-bottom:14px">Reporte diario de visitas con comentarios del <b>vendedor</b> y del <b>gerente</b> (Act. 2 y 3). Ordenado por los casos <b>m\u00e1s alarmantes</b> (menor avance primero). <b>${list.length}</b> cliente(s).</div>
+    <div class="rep-note" style="margin-bottom:14px">Reporte diario de visitas con comentarios del <b>vendedor</b> y del <b>supervisor</b> (Act. 2 y 3). Ordenado por los casos <b>m\u00e1s alarmantes</b> (menor avance primero). <b>${list.length}</b> cliente(s).</div>
     <div class="a2-list">${list.length?cards:'<div class="empty-state">Sin clientes para este filtro.</div>'}</div>
   </div>`;
 }
@@ -2958,14 +2983,14 @@ function renderAct9(){
   <div class="steps9">${items}</div></div>`;
 }
 /* ===== RESPUESTAS DEL GERENTE: todos los clientes, estilo lista a detalle ===== */
-let GER={vend:'ALL',day:'ALL',range:'ALL'};
+let GER={vend:'ALL',day:'ALL',range:'ALL',check:false};
 const GER_RANGES=[['ALL','Todos los avances'],['R1','0% a 44%'],['R2','45% a 69%'],['R3','70% o m\u00e1s'],['SINOBJ','Sin objetivo'],['ESP','Espor\u00e1dicos (sin d\u00eda de visita)']];
 function goGerente(){renderGerente();showScreen('ger');if(!CRED_DB)loadCredito().then(()=>{if(STATE.screen==='ger')renderGerente();});}
 function gerList(){
   const out=[];
   CONFIG.orgs.forEach((o,oi)=>{
     clientGroups(o.id).forEach(rec=>{
-      const hl=lineData(rec,LINES.find(l=>l.key===HEADLINE_KEY));
+      const hl=clientHL(rec);
       const inf=latestInfoRec(rec);
       const code=getCell(rec.group[rec.group.length-1],'COD CLIENTE',rec.H);
       const days=DAYS.filter(dd=>!isEmpty(rec.text(dd[0]))).map(dd=>dd[0]);
@@ -2974,7 +2999,65 @@ function gerList(){
   });
   return out;
 }
+const CHK_FIELDS=['w1','w2','w3','cierre'];
+const CHK_LBL=['1a semana','2a semana','3a semana','Cierre'];
+const CHK_RANGE=['d\u00edas 1-7','d\u00edas 8-14','d\u00edas 15-21','d\u00eda 22 al fin de mes'];
+function chkDueIdx(day){return day<=7?0:(day<=14?1:(day<=21?2:3));}
+function gerChecklistHTML(){
+  const now=new Date(); const day=now.getDate();
+  const due=chkDueIdx(day);
+  const curRank=now.getFullYear()*100+(now.getMonth()+1);
+  const per=PERIODS.find(pp=>pp.rank===curRank);
+  const perKey=per?per.key:STATE.period;
+  const perNote=per?'':'<div class="rep-note" style="margin-bottom:12px">\u26a0 A\u00fan no hay filas del <b>mes en curso</b> en la hoja; se muestra el periodo seleccionado arriba.</div>';
+  const rowsV=[];
+  CONFIG.orgs.forEach(o=>{
+    const byV=new Map();
+    clientGroups(o.id,perKey).forEach(rec=>{
+      const v=rec.vendor; if(!byV.has(v))byV.set(v,{v,o,tot:0,cnt:[0,0,0,0]});
+      const e=byV.get(v); e.tot++;
+      const cm=cmtObj(rec);
+      CHK_FIELDS.forEach((f,i)=>{if(!isEmpty(cm[f]))e.cnt[i]++;});
+    });
+    byV.forEach(e=>rowsV.push(e));
+  });
+  if(!rowsV.length)return perNote+'<div class="empty-state">Sin clientes registrados para este periodo.</div>';
+  rowsV.forEach(e=>{let pend=0;for(let i=0;i<=due;i++)pend+=e.tot-e.cnt[i];e.pend=pend;});
+  rowsV.sort((a,b)=>b.pend-a.pend);
+  const rows=rowsV.map(e=>{
+    const cells=CHK_FIELDS.map((f,i)=>{
+      const full=e.cnt[i]>=e.tot&&e.tot>0;
+      let cls;
+      if(i<due)cls=full?'ck-ok':'ck-bad';
+      else if(i===due)cls=full?'ck-ok':(e.cnt[i]>0?'ck-mid':'ck-bad');
+      else cls='ck-fut';
+      return `<td class="num ${cls}">${e.cnt[i]}/${e.tot}${i===due?' \u25c9':''}</td>`;
+    }).join('');
+    let st,stc;
+    const dueFull=e.cnt[due]>=e.tot, pastOk=CHK_FIELDS.slice(0,due).every((f,i)=>e.cnt[i]>=e.tot);
+    if(dueFull&&pastOk){st='\u2713 Al d\u00eda';stc='ck-ok';}
+    else if(e.cnt[due]===0){st='\u2717 Sin llenar la semana';stc='ck-bad';}
+    else{st='Parcial';stc='ck-mid';}
+    return `<tr><td class="l name"><span class="lt-dot" style="background:var(--${e.o.accent})"></span>${esc(e.v)}</td><td class="num">${e.tot}</td>${cells}<td class="l ${stc}" style="font-weight:800">${st}</td></tr>`;
+  }).join('');
+  const MM=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  return `${perNote}
+  <div class="strat-kpis">
+    <div class="skpi"><div class="sk-l">Hoy</div><div class="sk-v" style="font-size:17px">${day} de ${MM[now.getMonth()]} ${now.getFullYear()}</div><div class="sk-s">la fecha se toma en vivo del dispositivo</div></div>
+    <div class="skpi amber"><div class="sk-l">Semana que corresponde llenar</div><div class="sk-v" style="font-size:17px">${CHK_LBL[due]}</div><div class="sk-s">${CHK_RANGE[due]}</div></div>
+    <div class="skpi ${rowsV.some(e=>e.cnt[due]===0)?'down':'up'}"><div class="sk-l">Vendedores sin llenar la semana</div><div class="sk-v">${rowsV.filter(e=>e.cnt[due]===0).length}/${rowsV.length}</div><div class="sk-s">con 0 comentarios de ${CHK_LBL[due]}</div></div>
+  </div>
+  <div class="rep-note" style="margin-bottom:12px">Cada celda muestra <b>clientes con comentario / clientes totales</b> del vendedor en el mes en curso. El \u25c9 marca la semana que corresponde hoy. <span class="ck-ok" style="font-weight:800">Verde</span>: completa \u00b7 <span class="ck-mid" style="font-weight:800">\u00c1mbar</span>: parcial \u00b7 <span class="ck-bad" style="font-weight:800">Rojo</span>: sin llenar (o semana pasada incompleta) \u00b7 gris: semanas futuras. Ordenados: primero quien m\u00e1s pendientes tiene.</div>
+  <div class="rd-wrap"><div class="rd-tblwrap"><table class="rep-tbl hl-table chk-tbl">
+    <thead><tr><th class="l">Vendedor</th><th>Clientes</th>${CHK_LBL.map((l,i)=>`<th class="${i===due?'ck-due':''}">${l}<br><span style="font-weight:600;font-size:8.5px;opacity:.7">${CHK_RANGE[i]}</span></th>`).join('')}<th class="l">Estado</th></tr></thead>
+    <tbody>${rows}</tbody></table></div></div>`;
+}
 function renderGerente(){
+  if(GER.check){
+    const body=document.getElementById('gerBody');
+    body.innerHTML=`<div class="rd-controls" style="margin-bottom:14px"><button class="btn ghost" id="gerCheckBack"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Volver a respuestas</button></div>`+gerChecklistHTML();
+    return;
+  }
   const body=document.getElementById('gerBody');
   const pace=expectedPace();
   const all=gerList();
@@ -3002,7 +3085,7 @@ function renderGerente(){
       <div class="cli-head">
         <div class="cli-id"><div class="code">${esc(disp(c.code))}</div><h4 class="display">${esc(c.cliente)}</h4><div class="neg"><span style="color:var(--${c.o.accent==='cyan'?'cyan':'amber'});font-weight:800">${esc(c.o.label)}</span> \u00b7 <b>${esc(c.vendor)}</b>${c.negocio?' \u00b7 '+esc(c.negocio):''}</div></div>
         <div class="cli-tags"><span class="tag">${esc(c.zona||'sin zona')}</span>${c.giro?`<span class="tag">${esc(c.giro)}</span>`:''}${c.days.length?'':'<span class="tag" style="color:var(--cyan);border-color:var(--cyan)">espor\u00e1dico</span>'}${credBadge(c.code)}${done?'<span class="tag" style="color:var(--good);border-color:var(--good)">\u2713 respondido</span>':''}${badge}</div>
-        <div class="cli-ring"><div class="big mono t-${ringCls}">${esc(ringTxt)}</div><div class="lbl">Avance Total</div></div>
+        <div class="cli-ring"><div class="big mono t-${ringCls}">${esc(ringTxt)}</div><div class="lbl">Avance general</div></div>
       </div>
       ${cardComments({uid:c.uid,cm:c.cm,code:c.code,rec:c.rec})}
       ${clientTiles(c.rec,pace)}
@@ -3012,15 +3095,16 @@ function renderGerente(){
   body.innerHTML=`
   <div class="strat-kpis">
     <div class="skpi"><div class="sk-l">Clientes en el filtro</div><div class="sk-v">${list.length}</div><div class="sk-s">de ${all.length} clientes en total</div></div>
-    <div class="skpi ${answered>=list.length&&list.length?'up':''}"><div class="sk-l">Respondidos</div><div class="sk-v">${answered}/${list.length}</div><div class="sk-s">con respuesta del gerente</div></div>
-    <div class="skpi amber"><div class="sk-l">Sin responder</div><div class="sk-v">${list.length-answered}</div><div class="sk-s">pendientes de retroalimentaci\u00f3n</div></div>
+    <div class="skpi ${answered>=list.length&&list.length?'up':''}"><div class="sk-l">Respondidos</div><div class="sk-v">${answered}/${list.length}</div><div class="sk-s">con respuesta del supervisor</div></div>
+    <div class="skpi amber"><div class="sk-l">Sin responder</div><div class="sk-v">${list.length-answered}</div><div class="sk-s">pendientes de respuesta del supervisor</div></div>
   </div>
   <div class="rd-controls">
     <div class="ctrl"><label>Rango de avance</label><select class="inp" id="gerRange">${GER_RANGES.map(r=>`<option value="${r[0]}" ${GER.range===r[0]?'selected':''}>${esc(r[1])}</option>`).join('')}</select></div>
     <div class="ctrl"><label>Vendedor</label><select class="inp" id="gerVend">${['ALL',...vendors].map(v=>`<option value="${esc(v)}" ${GER.vend===v?'selected':''}>${v==='ALL'?'Todos':esc(v)}</option>`).join('')}</select></div>
     <div class="ctrl ctrl-day"><label>\u25c9 D\u00eda de visita</label><select class="inp" id="gerDay"><option value="ALL" ${(!GER.day||GER.day==='ALL')?'selected':''}>Todos los d\u00edas</option>${DAYS.map(d=>`<option value="${d[0]}" ${GER.day===d[0]?'selected':''}>${DAYFULL[d[0]]}</option>`).join('')}</select></div>
+    <button class="btn checkbtn" id="gerCheckBtn" style="align-self:flex-end"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Checklist de llenado</button>
   </div>
-  <div class="rep-note" style="margin-bottom:14px">Ordenados por <b>rango de avance</b>: primero los m\u00e1s rezagados (0\u201344%), luego 45\u201369% y al final 70% o m\u00e1s; los <b>sin objetivo</b> van al final. Responde en el recuadro de <b>Gerente</b> dentro de los comentarios de cada cliente; se guarda en la misma columna de siempre.</div>
+  <div class="rep-note" style="margin-bottom:14px">Ordenados por <b>rango de avance</b>: primero los m\u00e1s rezagados (0\u201344%), luego 45\u201369% y al final 70% o m\u00e1s; los <b>sin objetivo</b> van al final. Responde en el recuadro de <b>Supervisor</b> dentro de los comentarios de cada cliente; se guarda en la misma columna de siempre.</div>
   <div class="ger-list">${cards}</div>`;
 }
 function printVendorPDF(name){
@@ -3280,6 +3364,8 @@ document.addEventListener('click',e=>{
   const cm=e.target.closest('[data-camp]');if(cm){goCampaign();return;}
   const gb=e.target.closest('[data-gerbtn]');if(gb){goGerente();return;}
   const gv2=e.target.closest('[data-globalv]');if(gv2){goGlobalVend();return;}
+  const ckb=e.target.closest('#gerCheckBtn');if(ckb){GER.check=true;renderGerente();return;}
+  const ckk=e.target.closest('#gerCheckBack');if(ckk){GER.check=false;renderGerente();return;}
   const gc=e.target.closest('.ger-card');if(gc){const mc=e.target.closest('[data-mic]');if(mc){startDictation(mc.dataset.mic,mc);return;}const sv=e.target.closest('[data-save]');if(sv){saveComment(sv);return;}return;}
   const cch=e.target.closest('[data-cchip]');if(cch){const v=cch.dataset.cchip;if(v==='ALL')STRAT.clients.clear();else{if(STRAT.clients.has(v))STRAT.clients.delete(v);else STRAT.clients.add(v);}renderStrategy();return;}
   const stt=e.target.closest('#stratTot');if(stt){STRAT.onlyTotal=!STRAT.onlyTotal;renderStrategy();return;}
