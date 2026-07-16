@@ -34,9 +34,10 @@
   --bg:#eef2f8; --bg2:#e4eaf4; --panel:#ffffff; --panel2:#f6f9fd;
   --line:#dbe3f0; --line2:#c6d2e6;
   --txt:#0c1f44; --muted:#54658a; --muted2:#8093b3;
-  --amber:#ffd21e; --amber2:#f0a800;
-  --accent:#ffd21e; --accent2:#e8a200;
-  --accent-ink:#b58400;
+  --amber:#eab000; --amber2:#d69a00;
+  --accent:#eab000; --accent2:#c99700;
+  --accent-ink:#9c7100;
+  --cyan:#1f7fe0; --cyan2:#1462a8;
   --good:#13a85f; --mid:#c79200; --low:#e0444b;
   --shadow:0 18px 44px -24px rgba(12,31,68,.4);
   --card-bg:linear-gradient(162deg,#ffffff,#eef2f9);
@@ -869,7 +870,10 @@ tr.chk-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--line
 .dash-cta-s{font-size:12.5px;color:#aebfdc;margin-top:2px}
 .dash-cta-go{flex:none;color:var(--amber)}
 @media(max-width:560px){.dash-cta-s{display:none}}
-@media(max-width:760px){.ts-pill{display:none}}
+.ts-pill.pacechip{color:#07142e;background:linear-gradient(135deg,var(--amber),#ffdf6b);border:none;font-weight:800;font-size:11px}
+:root[data-theme="light"] .ts-pill.pacechip{background:linear-gradient(135deg,#eab000,#f5c93d)}
+.ts-pill.pacechip b{font-weight:800}
+@media(max-width:760px){.ts-pill{display:none}.ts-pill.pacechip{display:inline-flex}}
 @media(max-width:620px){.dash-btn span{display:none}.dash-btn{padding:8px}}
 /* filtro Dia resaltado */
 .ctrl-day label{color:var(--accent);font-weight:800}
@@ -1153,6 +1157,7 @@ tr.chk-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--line
       <button class="icon-btn" id="logoutBtn" title="Cambiar acceso / salir" style="display:none">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
       </button>
+      <span class="ts-pill pacechip" id="paceChip" title="Progreso que deber\u00edan llevar al d\u00eda de hoy, seg\u00fan los d\u00edas h\u00e1biles transcurridos del periodo"></span>
       <span class="ts-pill" id="dataTSchip" title="Momento en que el tablero ley\u00f3 los datos de Google Sheets"></span>
       <button class="icon-btn" id="themeBtn" title="Cambiar tema claro/oscuro">
         <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
@@ -1493,6 +1498,11 @@ async function loadAll(){
   DATA_TS=new Date();
 }
 function fmtTS(d){if(!d)return '';const MM=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];let h=d.getHours(),m=d.getMinutes();const ap=h<12?'a.m.':'p.m.';let h12=h%12;if(h12===0)h12=12;return `${d.getDate()} ${MM[d.getMonth()]} ${d.getFullYear()}, ${h12}:${String(m).padStart(2,'0')} ${ap}`;}
+function paintPace(){
+  const el=document.getElementById('paceChip'); if(!el)return;
+  const pc=expectedPace();
+  el.innerHTML=(pc!=null)?`\u25c9 Avance esperado hoy: <b>${Math.round(pc)}%</b>`:'';
+}
 function paintDataTS(){
   const real=SHEET_MODIFIED, load=DATA_TS;
   const footTxt = real?('Hoja actualizada: '+fmtTS(real)) : (load?('Datos cargados: '+fmtTS(load)):'Datos en vivo desde Google Sheets');
@@ -2381,7 +2391,10 @@ function goCli(v){
   _goCli(v);
 }
 function _goCli(v){STATE.vendor=v;document.getElementById('cliSearch').value='';LINE_FILTER='ALL';OBJF='con';DAY_FILTER='ALL';ORDER='regular';document.getElementById('daySel').value='ALL';document.getElementById('orderSel').value='regular';document.querySelectorAll('#objSeg .seg-btn').forEach(b=>b.classList.toggle('act',b.dataset.obj==='con'));buildLineSelector();renderClients();showScreen('cli');if(!CRED_DB)loadCredito().then(()=>{if(STATE.screen==='cli')filterClients();});}
-function goFicha(uid){const c=CLI.find(x=>x.uid===uid);if(!c)return;renderFicha(c.rec);showScreen('ficha');}
+let SCROLL_CLI=0;
+function goFicha(uid){const c=CLI.find(x=>x.uid===uid);if(!c)return;SCROLL_CLI=window.scrollY||0;renderFicha(c.rec);showScreen('ficha');}
+function returnCli(){if(!STATE.vendor){goHome();return;}showScreen('cli');setTimeout(()=>{try{window.scrollTo(0,SCROLL_CLI||0);}catch(_){}}
+,60);}
 function goRep(){if(ROLE!=='directivo')return;renderReportes();showScreen('rep');}
 
 /* ----- acceso ----- */
@@ -3512,7 +3525,7 @@ document.addEventListener('click',e=>{
   const mp=e.target.closest('.map-pin');if(mp){document.querySelectorAll('.map-pin.sel').forEach(x=>x.classList.remove('sel'));mp.classList.add('sel');showMapInfo(parseInt(mp.dataset.pin));return;}
   const sg=e.target.closest('#objSeg .seg-btn');if(sg){OBJF=sg.dataset.obj;document.querySelectorAll('#objSeg .seg-btn').forEach(b=>b.classList.toggle('act',b===sg));filterClients();return;}
   const wc=e.target.closest('[data-welcome]');if(wc){gotoWelcome();return;}
-  const bk=e.target.closest('[data-go]');if(bk){const g=bk.dataset.go;if(g==='home')goHome();else if(g==='vend'){if(GLOBAL_VEND&&ROLE==='directivo')goGlobalVend();else goVend(STATE.org);}else if(g==='cli')goCli(STATE.vendor);return;}
+  const bk=e.target.closest('[data-go]');if(bk){const g=bk.dataset.go;if(g==='home')goHome();else if(g==='vend'){if(GLOBAL_VEND&&ROLE==='directivo')goGlobalVend();else goVend(STATE.org);}else if(g==='cli')returnCli();return;}
 });
 document.getElementById('repBtn').addEventListener('click',goRep);
 /* resaltado de columna al pasar el cursor por tablas de datos */
@@ -3581,7 +3594,7 @@ document.addEventListener('change',e=>{
   else if(e.target.id==='p82Line'){P82.line=e.target.value;renderP8020();}
   else if(e.target.id==='p82Mode'){P82.mode=e.target.value;renderP8020();}
 });
-function rerender(){if(STATE.screen==='home')renderHome();else if(STATE.screen==='vend')renderVendors();else if(STATE.screen==='cli')renderClients();else if(STATE.screen==='rep')renderReportes();else if(STATE.screen==='camp')renderCampaign();else if(STATE.screen==='strat')renderStrategy();else if(STATE.screen==='ger')renderGerente();else if(STATE.screen==='ficha'){renderClients();goCli(STATE.vendor);}}
+function rerender(){paintPace();if(STATE.screen==='home')renderHome();else if(STATE.screen==='vend')renderVendors();else if(STATE.screen==='cli')renderClients();else if(STATE.screen==='rep')renderReportes();else if(STATE.screen==='camp')renderCampaign();else if(STATE.screen==='strat')renderStrategy();else if(STATE.screen==='ger')renderGerente();else if(STATE.screen==='ficha'){renderClients();goCli(STATE.vendor);}}
 
 /* ============================================================
    7. INICIO
@@ -3604,7 +3617,7 @@ async function init(){
     grid.innerHTML=`<div class="state" style="grid-column:1/-1"><h3>No se pudieron cargar los datos</h3><p>Si lo ves en una vista previa, <b>descarga el archivo y \u00e1brelo en tu navegador</b>. Verifica tambi\u00e9n que la hoja siga publicada como CSV.</p><div class="err-detail">${esc(LOAD_ERR)}</div><button class="btn" style="margin-top:16px" onclick="init()">Reintentar</button></div>`;
     return;
   }
-  initCutoff(); buildPeriodSelector(); setRoleUI(); paintDataTS(); if(ROLE)goHome(); else showWelcome();
+  initCutoff(); buildPeriodSelector(); setRoleUI(); paintDataTS(); paintPace(); if(ROLE)goHome(); else showWelcome();
 }
 init();
 </script>
