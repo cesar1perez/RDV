@@ -3020,7 +3020,8 @@ function renderAct9(){
   <div class="steps9">${items}</div></div>`;
 }
 /* ===== RESPUESTAS DEL GERENTE: todos los clientes, estilo lista a detalle ===== */
-let GER={vend:'ALL',day:'ALL',range:'ALL',check:false};
+let GER={vend:'ALL',day:'ALL',range:'ALL',pareto:'ALL',check:false};
+const GER_PARETO=[['ALL','Sin filtro \u00b7 todos'],['TOTAL','\u2605 Clave en Acumuladores'],['LUB','\u2605 Clave en Lubricantes'],['MOTO','\u2605 Clave en Motobater\u00edas'],['FILTRO','\u2605 Clave en Filtros']];
 const GER_RANGES=[['ALL','Todos los avances'],['R1','0% a 44%'],['R2','45% a 69%'],['R3','70% o m\u00e1s'],['SINOBJ','Sin objetivo'],['ESP','Espor\u00e1dicos (sin d\u00eda de visita)']];
 function goGerente(){renderGerente();showScreen('ger');if(!CRED_DB)loadCredito().then(()=>{if(STATE.screen==='ger')renderGerente();});}
 function goFichaFromGer(orgId,vendor,code){
@@ -3186,6 +3187,15 @@ function renderGerente(){
   if(!all.length){body.innerHTML='<div class="empty-state">Sin clientes en este periodo. Cambia el Periodo arriba.</div>';return;}
   const vendors=[...new Set(all.map(c=>c.vendor).filter(Boolean))].sort();
   let list=all.slice();
+  let pline=null;
+  if(GER.pareto&&GER.pareto!=='ALL'){
+    pline=LINES.find(l=>l.key===GER.pareto);
+    const withReal=all.map(c=>({c,r:lineData(c.rec,pline).real.n})).filter(x=>x.r!=null&&x.r>0).sort((a,b)=>b.r-a.r);
+    const tot=withReal.reduce((sm,x)=>sm+x.r,0);
+    let acc=0; const keys=new Set();
+    withReal.forEach(x=>{if(acc<tot*0.8){keys.add(x.c.uid);x.c._pr=x.r;}acc+=x.r;});
+    list=list.filter(c=>keys.has(c.uid));
+  }
   if(GER.vend!=='ALL')list=list.filter(c=>c.vendor===GER.vend);
   if(GER.day&&GER.day!=='ALL')list=list.filter(c=>c.days.includes(GER.day));
   if(GER.range==='R1')list=list.filter(c=>c.hlStatus==='ok'&&c.pctN!=null&&c.pctN<45);
@@ -3193,7 +3203,8 @@ function renderGerente(){
   else if(GER.range==='R3')list=list.filter(c=>c.hlStatus==='ok'&&c.pctN!=null&&c.pctN>=70);
   else if(GER.range==='SINOBJ')list=list.filter(c=>c.hlStatus!=='ok');
   else if(GER.range==='ESP')list=list.filter(c=>!c.days.length);
-  list.sort((a,b)=>{const pa=(a.hlStatus==='ok'&&a.pctN!=null)?a.pctN:Infinity;const pb=(b.hlStatus==='ok'&&b.pctN!=null)?b.pctN:Infinity;return pa-pb;});
+  if(pline)list.sort((a,b)=>(b._pr||0)-(a._pr||0));
+  else list.sort((a,b)=>{const pa=(a.hlStatus==='ok'&&a.pctN!=null)?a.pctN:Infinity;const pb=(b.hlStatus==='ok'&&b.pctN!=null)?b.pctN:Infinity;return pa-pb;});
   const gval=(c)=>{const k=cmtKey(c.uid,'ger');const ov=(k in CMT_OVERRIDE)?CMT_OVERRIDE[k]:undefined;return ov!==undefined?ov:cmtRead(c.rec,'ger');};
   const answered=list.filter(c=>!isEmpty(gval(c))).length;
   const cards=list.map((c,i)=>{
@@ -3206,7 +3217,7 @@ function renderGerente(){
       <span class="cli-num">${i+1}</span>
       <div class="cli-head">
         <div class="cli-id"><div class="code">${esc(disp(c.code))}</div><h4 class="display">${esc(c.cliente)}</h4><div class="neg"><span style="color:var(--${c.o.accent==='cyan'?'cyan':'amber'});font-weight:800">${esc(c.o.label)}</span> \u00b7 <b>${esc(c.vendor)}</b>${c.negocio?' \u00b7 '+esc(c.negocio):''}</div></div>
-        <div class="cli-tags"><span class="tag">${esc(c.zona||'sin zona')}</span>${c.giro?`<span class="tag">${esc(c.giro)}</span>`:''}${c.days.length?'':'<span class="tag" style="color:var(--cyan);border-color:var(--cyan)">espor\u00e1dico</span>'}${credBadge(c.code)}${done?'<span class="tag" style="color:var(--good);border-color:var(--good)">\u2713 respondido</span>':''}${badge}</div>
+        <div class="cli-tags"><span class="tag">${esc(c.zona||'sin zona')}</span>${c.giro?`<span class="tag">${esc(c.giro)}</span>`:''}${(pline&&c._pr!=null)?`<span class="tag" style="color:var(--accent);border-color:var(--accent)">\u2605 clave ${esc(pline.label)} \u00b7 ${fmtNum(c._pr)} u</span>`:''}${c.days.length?'':'<span class="tag" style="color:var(--cyan);border-color:var(--cyan)">espor\u00e1dico</span>'}${credBadge(c.code)}${done?'<span class="tag" style="color:var(--good);border-color:var(--good)">\u2713 respondido</span>':''}${badge}</div>
         <div class="cli-ring"><div class="big mono t-${ringCls}">${esc(ringTxt)}</div><div class="lbl">Avance general</div></div>
       </div>
       ${cardComments({uid:c.uid,cm:c.cm,code:c.code,rec:c.rec})}
@@ -3221,12 +3232,14 @@ function renderGerente(){
     <div class="skpi amber"><div class="sk-l">Sin responder</div><div class="sk-v">${list.length-answered}</div><div class="sk-s">pendientes de respuesta del supervisor</div></div>
   </div>
   <div class="rd-controls">
+    <div class="ctrl"><label>\u2605 Clientes clave (80/20)</label><select class="inp" id="gerPareto">${GER_PARETO.map(r=>`<option value="${r[0]}" ${GER.pareto===r[0]?'selected':''}>${r[1]}</option>`).join('')}</select></div>
     <div class="ctrl"><label>Rango de avance</label><select class="inp" id="gerRange">${GER_RANGES.map(r=>`<option value="${r[0]}" ${GER.range===r[0]?'selected':''}>${esc(r[1])}</option>`).join('')}</select></div>
     <div class="ctrl"><label>Vendedor</label><select class="inp" id="gerVend">${['ALL',...vendors].map(v=>`<option value="${esc(v)}" ${GER.vend===v?'selected':''}>${v==='ALL'?'Todos':esc(v)}</option>`).join('')}</select></div>
     <div class="ctrl ctrl-day"><label>\u25c9 D\u00eda de visita</label><select class="inp" id="gerDay"><option value="ALL" ${(!GER.day||GER.day==='ALL')?'selected':''}>Todos los d\u00edas</option>${DAYS.map(d=>`<option value="${d[0]}" ${GER.day===d[0]?'selected':''}>${DAYFULL[d[0]]}</option>`).join('')}</select></div>
     <button class="btn checkbtn" id="gerCheckBtn" style="align-self:flex-end"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Checklist de llenado</button>
   </div>
-  <div class="rep-note" style="margin-bottom:14px">Ordenados por <b>rango de avance</b>: primero los m\u00e1s rezagados (0\u201344%), luego 45\u201369% y al final 70% o m\u00e1s; los <b>sin objetivo</b> van al final. Responde en el recuadro de <b>Supervisor</b> dentro de los comentarios de cada cliente; se guarda en la misma columna de siempre.</div>
+  ${pline?`<div class="rep-note" style="margin-bottom:14px">\u2605 Mostrando los <b>clientes clave de ${esc(pline.label)}</b>: los que en conjunto concentran ~80% de la venta de esa l\u00ednea (ley de Pareto), ordenados del que m\u00e1s compra al que menos. Combinable con vendedor y d\u00eda.</div>`:''}
+  <div class="rep-note" style="margin-bottom:14px; display:${pline?'none':''}">Ordenados por <b>rango de avance</b>: primero los m\u00e1s rezagados (0\u201344%), luego 45\u201369% y al final 70% o m\u00e1s; los <b>sin objetivo</b> van al final. Responde en el recuadro de <b>Supervisor</b> dentro de los comentarios de cada cliente; se guarda en la misma columna de siempre.</div>
   <div class="ger-list">${cards}</div>`;
 }
 function printVendorPDF(name){
@@ -3597,6 +3610,7 @@ document.addEventListener('change',e=>{
   else if(e.target.id==='credCond'){CRED.cond=e.target.value;renderCredito();}
   else if(e.target.id==='gerVend'){GER.vend=e.target.value;renderGerente();}
   else if(e.target.id==='gerRange'){GER.range=e.target.value;renderGerente();}
+  else if(e.target.id==='gerPareto'){GER.pareto=e.target.value;renderGerente();}
   else if(e.target.id==='gerDay'){GER.day=e.target.value;renderGerente();}
   else if(e.target.id==='p82Org'){P82.org=e.target.value;P82.vend='ALL';renderP8020();}
   else if(e.target.id==='p82Vend'){P82.vend=e.target.value;renderP8020();}
