@@ -3649,12 +3649,11 @@ document.addEventListener('click',e=>{
   const fus=e.target.closest('[data-fusave]');if(fus){
     const [code,idxs]=fus.dataset.fusave.split('|'); const idx=parseInt(idxs);
     const ta=fus.closest('.fu-box').querySelector('.fu-ta'); const val=ta.value.trim();
-    const rec=DB.rows.find(r=>getCell(r,'COD CLIENTE',DB.H)===code);
-    if(!rec){alert('No encontr\u00e9 la fila del cliente para guardar.');return;}
-    const mes=getCell(rec,'MES',DB.H), ano=getCell(rec,'A\u00d1O',DB.H)||getCell(rec,'ANIO',DB.H)||getCell(rec,'ANO',DB.H);
+    if(!STATE.period||STATE.period==='ALL'){alert('Selecciona un mes espec\u00edfico arriba para guardar el seguimiento.');return;}
+    const [anio,mes]=STATE.period.split('||');
     fus.disabled=true; const prev=fus.textContent; fus.textContent='Guardando\u2026';
     const heads={}; heads[P82_FU_HEADS[idx]]=val;
-    doSave({codigo:code,mes,ano,heads}).then(res=>{
+    doSave({codCliente:code,codigo:code,mes:mes,anio:anio,ano:anio,heads:heads,campo:'p82fu_'+P82_FU_HEADS[idx],texto:val}).then(res=>{
       fus.disabled=false;
       if(res&&res.ok){
         CMT_OVERRIDE['p82fu|'+code+'|'+P82_FU_HEADS[idx]]=val;
