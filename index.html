@@ -253,10 +253,16 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 @media(max-width:560px){
   .cco-row{grid-template-columns:1fr;gap:3px;padding:8px 11px}
   .cco-txt{font-size:14px}
-  .cli-head{gap:8px 10px;align-items:flex-start}
-  .cli-id{flex:1 1 55%}
-  .cli-ring{margin-left:auto;padding-left:0}
-  .cli-tags{order:3;flex-basis:100%;margin-top:1px}
+  .cli-head{display:grid !important;grid-template-columns:1fr auto;grid-template-areas:"id ring" "tags tags";gap:8px 10px;align-items:start;flex-wrap:initial}
+  .cli-id{grid-area:id;flex:none;min-width:0}
+  .cli-id h4{font-size:16px;line-height:1.15;word-break:break-word;overflow-wrap:anywhere}
+  .cli-id .neg{font-size:11px;line-height:1.3;word-break:break-word}
+  .cli-ring{grid-area:ring;padding-left:0;text-align:right}
+  .cli-ring .big{font-size:22px;line-height:1}
+  .cli-ring .lbl{font-size:9px;letter-spacing:.4px}
+  .cli-tags{grid-area:tags;order:initial;flex-basis:auto;gap:5px;margin-top:2px}
+  .cli-tags .tag,.cli-tags .badge-st,.cli-tags .cred-badge{font-size:9.5px;padding:3px 8px;max-width:100%}
+  .cli-num{font-size:11px;padding:3px 7px}
 }
 /* tabla de líneas alineada en tarjeta de cliente */
 .lt{margin-top:6px}
@@ -784,6 +790,40 @@ tr.p82-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--line
 :root[data-theme="light"] .pm b{color:var(--accent-ink)}
 .pm i{font-style:normal;font-weight:800}
 .pm.dim{opacity:.45}
+/* seguimiento 80/20 */
+.p82-fu{width:110px;text-align:center}
+.fu-btn{display:inline-flex;flex-direction:column;align-items:center;gap:3px;padding:6px 9px;border:1px solid var(--line2);border-radius:9px;background:var(--bg2);color:var(--muted);cursor:pointer;transition:.15s}
+.fu-btn:hover{border-color:var(--accent);color:var(--accent)}
+.fu-btn.open{background:var(--accent);color:#07142e;border-color:var(--accent)}
+.fu-dots{display:flex;gap:5px}
+.fu-dot{width:10px;height:10px;border-radius:50%;background:var(--line2);border:1px solid var(--line2);display:inline-block}
+.fu-dot.ok{background:var(--good);border-color:var(--good);box-shadow:0 0 0 2px color-mix(in srgb,var(--good) 25%,transparent)}
+.fu-dot.miss{background:var(--low);border-color:var(--low)}
+.fu-dot.due{background:var(--accent);border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 30%,transparent);animation:fu-pulse 1.6s ease-in-out infinite}
+.fu-dot.fut{background:transparent}
+@keyframes fu-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}
+.fu-btn.open .fu-dot{border-color:#07142e}
+.fu-cnt{font-family:'IBM Plex Mono';font-size:10px;font-weight:800}
+.fu-editor{padding:8px 4px}
+.fu-title{font-size:13px;font-weight:800;color:var(--accent);margin-bottom:10px}
+:root[data-theme="light"] .fu-title{color:var(--accent-ink)}
+.fu-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:11px}
+.fu-box{background:var(--kpi-bg);border:1px solid var(--kpi-border);border-left:4px solid var(--line2);border-radius:11px;padding:10px 12px}
+.fu-box.ok{border-left-color:var(--good)}
+.fu-box.miss{border-left-color:var(--low)}
+.fu-box.due{border-left-color:var(--accent)}
+.fu-lbl{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:6px}
+.fu-st{font-size:9.5px;font-weight:800;color:var(--muted2);text-transform:none;letter-spacing:0}
+.fu-box.ok .fu-st{color:var(--good)}
+.fu-box.miss .fu-st{color:var(--low)}
+.fu-box.due .fu-st{color:var(--accent)}
+:root[data-theme="light"] .fu-box.due .fu-st{color:var(--accent-ink)}
+.fu-ta{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--txt);font:inherit;resize:vertical}
+.fu-actions{display:flex;gap:6px;justify-content:flex-end;margin-top:6px}
+.fu-mic{padding:5px 8px}
+.fu-save{background:var(--accent);color:#07142e;font-weight:800;border:none;padding:5px 14px;border-radius:8px;cursor:pointer}
+.fu-save:hover{filter:brightness(1.05)}
+.fu-hint{font-size:10.5px;color:var(--muted2);margin-top:10px;line-height:1.5}
 /* checklist de llenado */
 .btn.checkbtn{background:linear-gradient(135deg,#13a85f,#0d7f47);color:#fff;border:none;font-weight:800}
 .btn.checkbtn:hover{filter:brightness(1.1)}
@@ -2188,7 +2228,7 @@ const REP_TABS=[
   ['cmp','Rendimiento entre meses'],
 ];
 function renderReportes(){
-  document.getElementById('repEyebrow').textContent=org(STATE.org).label;
+  document.getElementById('repEyebrow').textContent=STATE.org?org(STATE.org).label:(GLOBAL_VEND?'Ambas razones sociales':'');
   document.getElementById('repBar').innerHTML=REP_TABS.map(([k,lbl])=>`<button class="btn ${k==='cred'?'credbtn':''} ${REPORT===k?'act':''}" data-rep="${k}">${esc(lbl)}</button>`).join('');
   renderActiveReport();
 }
@@ -2434,7 +2474,7 @@ function printTablePDF(sel,title,sub){
   const w=window.open('','_blank'); if(!w){alert('Permite las ventanas emergentes para generar el PDF.');return;}
   const o=STATE.org?org(STATE.org):null;
   const clone=t.cloneNode(true);
-  clone.querySelectorAll('svg').forEach(x=>x.remove());clone.querySelectorAll('.p82-det,.p82-expcol').forEach(x=>x.remove());
+  clone.querySelectorAll('svg').forEach(x=>x.remove());clone.querySelectorAll('.p82-det,.p82-expcol,.p82-fu').forEach(x=>x.remove());
   w.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${esc(title)}</title><style>
   @page{size:letter landscape;margin:10mm}
   *{box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
@@ -2801,6 +2841,55 @@ function p82Data(){
   });
   return {list:out,line};
 }
+const P82_FU_HEADS=['80201','80202','80203','80204'];
+const P82_FU_LBL=['1a junta','2a junta','3a junta','4a junta'];
+function p82FollowRead(code){
+  const H=DB.H; const rows=DB.rows.filter(r=>getCell(r,'COD CLIENTE',H)===code);
+  const out=['','','',''];
+  for(const r of rows){
+    for(let i=0;i<4;i++){
+      if(!out[i]){const v=getCell(r,P82_FU_HEADS[i],H);if(!isEmpty(v))out[i]=v;}
+    }
+  }
+  // overrides locales (para verse guardado antes de que el backend refresque)
+  P82_FU_HEADS.forEach((h,i)=>{const k='p82fu|'+code+'|'+h;if(k in CMT_OVERRIDE&&!isEmpty(CMT_OVERRIDE[k]))out[i]=CMT_OVERRIDE[k];});
+  return out;
+}
+function p82FollowDueIdx(){
+  const day=new Date().getDate();
+  if(day<=7)return 0;
+  if(day<=14)return 1;
+  if(day<=21)return 2;
+  return 3;
+}
+function p82FollowDots(c){
+  const arr=p82FollowRead(c.code);
+  const due=p82FollowDueIdx();
+  const filled=arr.filter(x=>!isEmpty(x)).length;
+  const dots=arr.map((v,i)=>{
+    let cls;
+    if(!isEmpty(v))cls='ok';
+    else if(i<due)cls='miss';
+    else if(i===due)cls='due';
+    else cls='fut';
+    return `<span class="fu-dot ${cls}" title="${P82_FU_LBL[i]}${!isEmpty(v)?': con comentario':''}"></span>`;
+  }).join('');
+  return `<button class="fu-btn" data-p82fu="${esc(c.code)}" title="${filled}/4 comentarios \u00b7 clic para editar"><span class="fu-dots">${dots}</span><span class="fu-cnt">${filled}/4</span></button>`;
+}
+function p82FollowEditorHTML(code,cliente){
+  const arr=p82FollowRead(code); const due=p82FollowDueIdx();
+  const boxes=arr.map((v,i)=>{
+    const stCls=!isEmpty(v)?'ok':(i<due?'miss':(i===due?'due':'fut'));
+    const stTxt=!isEmpty(v)?'\u2713 con comentario':(i<due?'pendiente':(i===due?'\u25c9 corresponde hoy':'a\u00fan no toca'));
+    const stName=`fu_${code}_${i}`;
+    return `<div class="fu-box ${stCls}">
+      <div class="fu-lbl">${P82_FU_LBL[i]} <span class="fu-st">${stTxt}</span></div>
+      <textarea class="inp fu-ta" id="${stName}" rows="2" placeholder="Comentario de la ${P82_FU_LBL[i]}">${esc(v)}</textarea>
+      <div class="fu-actions"><button class="btn ghost fu-mic" data-mic="${stName}" title="Dictar por voz"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg></button><button class="btn fu-save" data-fusave="${esc(code)}|${i}">Guardar</button></div>
+    </div>`;
+  }).join('');
+  return `<div class="fu-editor"><div class="fu-title">\u{1F4CB} Seguimiento por junta semanal \u00b7 <b>${esc(cliente)}</b></div><div class="fu-grid">${boxes}</div><div class="fu-hint">Las 4 columnas corresponden a las 4 juntas del mes (semanas 1 a 4). El punto <span class="fu-dot due" style="display:inline-block;vertical-align:middle"></span> indica la junta que corresponde llenar hoy; <span class="fu-dot miss" style="display:inline-block;vertical-align:middle"></span> juntas pasadas sin comentario; <span class="fu-dot ok" style="display:inline-block;vertical-align:middle"></span> con comentario guardado.</div></div>`;
+}
 function p82MonthDetail(code){
   const H=DB.H;
   const line=LINES.find(l=>l.key===P82.line)||LINES.find(l=>l.key==='TOTAL')||LINES[0];
@@ -2852,6 +2941,7 @@ function renderP8020(){
     <td class="num">${c.obj!=null?fmtNum(c.obj):'\u2014'}</td>
     <td class="num strong">${c.real!=null?fmtNum(c.real):'\u2014'}</td>
     <td class="num ${c.pct!=null?('t-'+(c.pct>=100?'good':(c.pct>=70?'mid':'low'))):''}">${c.pct!=null?Math.round(c.pct)+'%':'\u2014'}</td>
+    <td class="p82-fu">${p82FollowDots(c)}</td>
     <td class="p82-expcol"><button class="p82-exp" data-p82exp="${esc(c.code)}" title="Ver venta por mes"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button></td>
   </tr>`).join('');
   body.innerHTML=`
@@ -2869,7 +2959,7 @@ function renderP8020(){
   </div>
   <div class="rep-note" style="margin-bottom:12px">Clientes con su <b>${esc(line.label)}</b>: objetivo, real ${avgMode?'acumulado del a\u00f1o':'del mes'} y % de cumplimiento. Los marcados con <span class="p82-star">\u2605</span> son los <b>clientes clave</b>: el grupo que concentra ~80% de la venta de esa l\u00ednea. Haz clic en los <b>encabezados</b> para ordenar de mayor a menor (y viceversa).</div>
   ${list.length?`<div class="rd-wrap"><div class="rd-tblwrap"><table class="rep-tbl hl-table p82-tbl">
-    <thead><tr><th class="l sortable ${on('cliente')}" data-p82sort="cliente">Cliente${ar('cliente')}</th><th class="l sortable ${on('org')}" data-p82sort="org">Organizaci\u00f3n${ar('org')}</th><th class="l sortable ${on('vendor')}" data-p82sort="vendor">Vendedor${ar('vendor')}</th><th class="sortable ${on('obj')}" data-p82sort="obj">Objetivo${ar('obj')}</th><th class="sortable ${on('real')}" data-p82sort="real">Real${ar('real')}</th><th class="sortable ${on('pct')}" data-p82sort="pct">% vs Obj${ar('pct')}</th><th class="p82-expcol"></th></tr></thead>
+    <thead><tr><th class="l sortable ${on('cliente')}" data-p82sort="cliente">Cliente${ar('cliente')}</th><th class="l sortable ${on('org')}" data-p82sort="org">Organizaci\u00f3n${ar('org')}</th><th class="l sortable ${on('vendor')}" data-p82sort="vendor">Vendedor${ar('vendor')}</th><th class="sortable ${on('obj')}" data-p82sort="obj">Objetivo${ar('obj')}</th><th class="sortable ${on('real')}" data-p82sort="real">Real${ar('real')}</th><th class="sortable ${on('pct')}" data-p82sort="pct">% vs Obj${ar('pct')}</th><th class="p82-fu" title="Comentarios de seguimiento por junta semanal">Seguimiento</th><th class="p82-expcol"></th></tr></thead>
     <tbody>${rows}</tbody></table></div></div>`:'<div class="empty-state">Sin datos de esta l\u00ednea con los filtros elegidos. Cambia la l\u00ednea, el giro, el periodo o el vendedor.</div>'}`;
 }
 /* ===== Reporte generico con enlace (Act. 4, 7, 89) ===== */
@@ -3542,6 +3632,46 @@ document.addEventListener('click',e=>{
   const crs=e.target.closest('[data-csort]');if(crs){const k=crs.dataset.csort;if(CRED.sort===k)CRED.dir=-CRED.dir;else{CRED.sort=k;CRED.dir=-1;}renderCredito();return;}
   const c31=e.target.closest('#credOnly31');if(c31){CRED.only31=!CRED.only31;renderCredito();return;}
   const ps=e.target.closest('[data-p82sort]');if(ps){const k=ps.dataset.p82sort;if(P82.sort===k)P82.dir=-P82.dir;else{P82.sort=k;P82.dir=-1;}renderP8020();return;}
+  const pfu=e.target.closest('[data-p82fu]');if(pfu){
+    const code=pfu.dataset.p82fu; const tr=pfu.closest('tr');
+    const nxt=tr.nextElementSibling; const was=nxt&&nxt.classList.contains('p82-det');
+    const sameFu=was&&nxt.dataset.fu===code;
+    if(was)nxt.remove();
+    tr.parentElement.querySelectorAll('[data-p82exp].open,[data-p82fu].open').forEach(x=>x.classList.remove('open'));
+    if(!sameFu){
+      const det=document.createElement('tr'); det.className='p82-det'; det.dataset.fu=code;
+      const cliente=tr.querySelector('.name')?.textContent.trim()||code;
+      det.innerHTML=`<td colspan="${tr.cells.length}">${p82FollowEditorHTML(code,cliente)}</td>`;
+      tr.after(det); pfu.classList.add('open');
+    }
+    return;
+  }
+  const fus=e.target.closest('[data-fusave]');if(fus){
+    const [code,idxs]=fus.dataset.fusave.split('|'); const idx=parseInt(idxs);
+    const ta=fus.closest('.fu-box').querySelector('.fu-ta'); const val=ta.value.trim();
+    const rec=DB.rows.find(r=>getCell(r,'COD CLIENTE',DB.H)===code);
+    if(!rec){alert('No encontr\u00e9 la fila del cliente para guardar.');return;}
+    const mes=getCell(rec,'MES',DB.H), ano=getCell(rec,'A\u00d1O',DB.H)||getCell(rec,'ANIO',DB.H)||getCell(rec,'ANO',DB.H);
+    fus.disabled=true; const prev=fus.textContent; fus.textContent='Guardando\u2026';
+    const heads={}; heads[P82_FU_HEADS[idx]]=val;
+    doSave({codigo:code,mes,ano,heads}).then(res=>{
+      fus.disabled=false;
+      if(res&&res.ok){
+        CMT_OVERRIDE['p82fu|'+code+'|'+P82_FU_HEADS[idx]]=val;
+        fus.textContent='\u2713 Guardado'; setTimeout(()=>{fus.textContent=prev;},1300);
+        // repintar puntitos de esa fila
+        const tr=fus.closest('tr.p82-det')?.previousElementSibling;
+        if(tr){const cell=tr.querySelector('.p82-fu'); if(cell){cell.innerHTML=p82FollowDots({code});}}
+        const box=fus.closest('.fu-box'); box.classList.remove('miss','due','fut'); box.classList.add('ok');
+        box.querySelector('.fu-st').textContent='\u2713 con comentario';
+      } else {
+        fus.textContent='\u2717 Error'; setTimeout(()=>{fus.textContent=prev;},1500);
+        alert((res&&res.error)||'No se pudo guardar. Revisa tu conexi\u00f3n.');
+      }
+    }).catch(err=>{fus.disabled=false;fus.textContent='\u2717 Error';setTimeout(()=>{fus.textContent=prev;},1500);alert('Error de red: '+err.message);});
+    return;
+  }
+  const pmic=e.target.closest('.fu-mic');if(pmic){startDictation(pmic.dataset.mic);return;}
   const pe=e.target.closest('[data-p82exp]');if(pe){const tr=pe.closest('tr');const nxt=tr.nextElementSibling;if(nxt&&nxt.classList.contains('p82-det')){nxt.remove();pe.classList.remove('open');}else{const det=document.createElement('tr');det.className='p82-det';det.innerHTML=`<td colspan="${tr.cells.length}">${p82MonthDetail(pe.dataset.p82exp)}</td>`;tr.after(det);pe.classList.add('open');}return;}
   const a6=e.target.closest('#act106Seg .seg-btn');if(a6){ACT106_SCOPE=a6.dataset.sc;renderAct106();return;}
   const mp=e.target.closest('.map-pin');if(mp){document.querySelectorAll('.map-pin.sel').forEach(x=>x.classList.remove('sel'));mp.classList.add('sel');showMapInfo(parseInt(mp.dataset.pin));return;}
