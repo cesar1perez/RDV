@@ -860,6 +860,37 @@ tr.deta-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--lin
 .deta-load-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--amber),var(--cyan));transition:width .3s ease}
 .deta-orgs{display:flex;gap:6px;flex-wrap:wrap}
 .muted2{color:var(--muted2)}
+/* botones activos en toolbar del detalle */
+.deta-toolbar .btn.act,.deta-orgs .btn.act,.deta-years .btn.act,.deta-views .btn.act{background:linear-gradient(135deg,var(--amber),#ffdf6b);color:#07142e;border:none;font-weight:800;box-shadow:0 4px 14px -4px rgba(255,210,30,.5)}
+:root[data-theme="light"] .deta-toolbar .btn.act,:root[data-theme="light"] .deta-orgs .btn.act,:root[data-theme="light"] .deta-years .btn.act,:root[data-theme="light"] .deta-views .btn.act{background:linear-gradient(135deg,#eab000,#f5c93d);color:#07142e;box-shadow:0 4px 14px -4px rgba(158,113,0,.35)}
+/* multi-select */
+.deta-multi{position:relative;flex:1;min-width:180px}
+.deta-multi-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;cursor:pointer;text-align:left}
+.deta-multi-btn:hover{border-color:var(--accent)}
+.deta-multi-lbl.act{color:var(--accent);font-weight:800}
+:root[data-theme="light"] .deta-multi-lbl.act{color:var(--accent-ink)}
+.deta-multi-menu{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--panel);border:1px solid var(--card-border);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.25);z-index:50;max-height:280px;overflow:auto;padding:8px}
+.deta-multi-tools{display:flex;gap:6px;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.btn.sm{padding:4px 9px;font-size:10px}
+.deta-multi-list{display:flex;flex-direction:column;gap:2px}
+.deta-multi-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:7px;cursor:pointer;font-size:12.5px;transition:.1s}
+.deta-multi-item:hover{background:var(--bg2)}
+.deta-multi-item.on{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);font-weight:700}
+:root[data-theme="light"] .deta-multi-item.on{color:var(--accent-ink)}
+.deta-multi-item input{accent-color:var(--accent);width:15px;height:15px}
+/* comparativo mensual */
+.month-cmp{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:4px;margin-bottom:16px;overflow-x:auto}
+.month-cmp .mc-mes{background:var(--kpi-bg);border:1px solid var(--kpi-border);border-radius:8px;padding:0;overflow:hidden;min-width:88px}
+.month-cmp .mc-mes-hd{background:linear-gradient(135deg,var(--amber),#ffdf6b);color:#07142e;font-size:10px;font-weight:800;text-align:center;padding:4px 2px;letter-spacing:.4px}
+:root[data-theme="light"] .month-cmp .mc-mes-hd{background:linear-gradient(135deg,#eab000,#f5c93d)}
+.month-cmp .mc-mes.mc-tot .mc-mes-hd{background:linear-gradient(135deg,#0c1f44,#132c5e);color:var(--amber)}
+.month-cmp .mc-vals{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;padding:6px 4px 3px;font-family:'IBM Plex Mono';font-size:11px;font-weight:800;text-align:center}
+.month-cmp .mc-y{color:var(--kpi-ink)}
+.month-cmp .mc-dif.up{color:var(--good)}
+.month-cmp .mc-dif.down{color:var(--low)}
+.month-cmp .mc-dif.flat{color:var(--muted2)}
+.month-cmp .mc-lbls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;padding:0 4px 5px;font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--muted2);text-align:center}
+@media(max-width:900px){.month-cmp{grid-template-columns:repeat(6,minmax(80px,1fr))}}
 /* checklist de llenado */
 .btn.checkbtn{background:linear-gradient(135deg,#13a85f,#0d7f47);color:#fff;border:none;font-weight:800}
 .btn.checkbtn:hover{filter:brightness(1.1)}
@@ -3476,7 +3507,7 @@ let DETA_DB=null, DETA_PROMISE=null, DETA_ERR='';
 let DETA_DBAE=null, DETA_PROMISEAE=null, DETA_ERRAE='';
 let DETA_CLI2VEND=null;
 let DETA_LOADPROG={ll:0,ae:0};
-let DETA={year:'ALL',org:'ALL',clasif:'ALL',vendor:'ALL',view:'products',search:'',sort:'imp',dir:-1,expanded:new Set()};
+let DETA={year:'ALL',org:'ALL',clasif:new Set(),vendor:new Set(),view:'products',search:'',sort:'imp',dir:-1,expanded:new Set()};
 const DETA_VIEWS=[['products','Por producto'],['clients','Por cliente'],['rankProd','Ranking productos'],['rankCli','Ranking clientes por utilidad']];
 function loadDetalleAE(){
   if(DETA_DBAE)return Promise.resolve();
@@ -3588,8 +3619,8 @@ function detaFiltered(){
   let list=detaAll();
   if(DETA.org!=='ALL')list=list.filter(x=>x.org===DETA.org);
   if(DETA.year!=='ALL')list=list.filter(x=>String(x.y||'')===String(DETA.year));
-  if(DETA.clasif!=='ALL')list=list.filter(x=>x.clas===DETA.clasif);
-  if(DETA.vendor!=='ALL')list=list.filter(x=>x.vendedor===DETA.vendor);
+  if(DETA.clasif.size)list=list.filter(x=>DETA.clasif.has(x.clas));
+  if(DETA.vendor.size)list=list.filter(x=>DETA.vendor.has(x.vendedor));
   const q=keyName(DETA.search||'');
   if(q)list=list.filter(x=>keyName(x.desc+' '+x.cli+' '+x.codP+' '+x.codC).indexOf(q)>=0);
   return list;
@@ -3637,6 +3668,51 @@ function detaChildTable(rows, byKey, mode){
   }).join('');
   return `<div class="deta-sub"><table class="rep-tbl hl-table deta-subtbl"><thead><tr>${heads}</tr></thead><tbody>${rows2}</tbody></table></div>`;
 }
+function detaMultiCtrl(id,label,options,sel){
+  const cnt=sel.size;
+  const lbl=cnt===0?'Todos':(cnt===1?[...sel][0]:`${cnt} seleccionados`);
+  return `<div class="ctrl deta-multi" data-multiid="${id}">
+    <label>${esc(label)}</label>
+    <button class="inp deta-multi-btn" data-multitoggle="${id}">
+      <span class="deta-multi-lbl ${cnt?'act':''}">${esc(lbl)}</span>
+      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="deta-multi-menu" id="dmm_${id}" hidden>
+      <div class="deta-multi-tools"><button class="btn ghost sm" data-multiaction="${id}|all">Seleccionar todos</button><button class="btn ghost sm" data-multiaction="${id}|none">Limpiar</button></div>
+      <div class="deta-multi-list">${options.map(o=>`<label class="deta-multi-item ${sel.has(o)?'on':''}"><input type="checkbox" data-multi="${id}" value="${esc(o)}" ${sel.has(o)?'checked':''}><span>${esc(o)}</span></label>`).join('')}</div>
+    </div>
+  </div>`;
+}
+
+const MMONTH=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+function detaMonthCompare(list){
+  // solo tiene sentido si hay al menos 2 anios en el filtro (o year=ALL con datos multianio)
+  const yearsIn=[...new Set(list.map(x=>x.y).filter(y=>y!=null))].sort();
+  if(yearsIn.length<2)return '';
+  const y1=yearsIn[yearsIn.length-2], y2=yearsIn[yearsIn.length-1];
+  const agg={}; // month -> {y1:{cant,imp,util}, y2:{...}}
+  for(let m=0;m<12;m++)agg[m]={y1:{cant:0,imp:0,util:0,costo:0},y2:{cant:0,imp:0,util:0,costo:0}};
+  list.forEach(x=>{
+    const d=detaParseFecha(x.fecha); if(!d)return;
+    const m=d.getMonth();
+    const bucket=x.y===y1?'y1':(x.y===y2?'y2':null);
+    if(!bucket)return;
+    agg[m][bucket].cant+=x.cant; agg[m][bucket].imp+=x.imp; agg[m][bucket].costo+=x.costo; agg[m][bucket].util+=(x.imp-x.costo);
+  });
+  const metric='cant'; // piezas por default (como en la captura)
+  let totY1=0, totY2=0;
+  const cols=MMONTH.map((mn,i)=>{
+    const a=agg[i].y1[metric], b=agg[i].y2[metric], dif=b-a;
+    totY1+=a; totY2+=b;
+    const cls=dif>0?'up':(dif<0?'down':'flat');
+    return `<div class="mc-mes"><div class="mc-mes-hd">${mn}</div><div class="mc-vals"><span class="mc-y">${fmtNum(a)}</span><span class="mc-y">${fmtNum(b)}</span><span class="mc-dif ${cls}">${dif>=0?'+':''}${fmtNum(dif)}</span></div><div class="mc-lbls"><span>${y1}</span><span>${y2}</span><span>Dif</span></div></div>`;
+  }).join('');
+  const totDif=totY2-totY1;
+  const totCls=totDif>0?'up':(totDif<0?'down':'flat');
+  return `<div class="rep-note" style="margin:14px 0 8px"><b>Comparativo mensual ${y1} vs ${y2}</b> \u00b7 piezas facturadas por mes (respeta los filtros de organizaci\u00f3n, clasificaci\u00f3n y vendedor).</div>
+  <div class="month-cmp">${cols}<div class="mc-mes mc-tot"><div class="mc-mes-hd">TOTAL</div><div class="mc-vals"><span class="mc-y">${fmtNum(totY1)}</span><span class="mc-y">${fmtNum(totY2)}</span><span class="mc-dif ${totCls}">${totDif>=0?'+':''}${fmtNum(totDif)}</span></div><div class="mc-lbls"><span>${y1}</span><span>${y2}</span><span>Dif</span></div></div></div>`;
+}
+let DETA_SCROLL=0;
 function renderDetalle(){
   const body=document.getElementById('repBody');
   if(!DETA_DB||!DETA_DBAE){
@@ -3719,11 +3795,12 @@ function renderDetalle(){
     <div class="deta-views">${DETA_VIEWS.map(([v,lbl])=>`<button class="btn ${DETA.view===v?'act':'ghost'}" data-detav="${v}">${esc(lbl)}</button>`).join('')}</div>
   </div>
   <div class="rd-controls">
-    <div class="ctrl"><label>Clasificaci\u00f3n</label><select class="inp" id="detaClasif"><option value="ALL" ${DETA.clasif==='ALL'?'selected':''}>Todas</option>${clasifs.map(c=>`<option value="${esc(c)}" ${DETA.clasif===c?'selected':''}>${esc(c)}</option>`).join('')}</select></div>
-    <div class="ctrl"><label>Vendedor</label><select class="inp" id="detaVendor"><option value="ALL" ${DETA.vendor==='ALL'?'selected':''}>Todos</option>${vendors.map(v=>`<option value="${esc(v)}" ${DETA.vendor===v?'selected':''}>${esc(v)}</option>`).join('')}</select></div>
+    ${detaMultiCtrl('clasif','Clasificaci\u00f3n',clasifs,DETA.clasif)}
+    ${detaMultiCtrl('vendor','Vendedor',vendors,DETA.vendor)}
     <div class="ctrl" style="flex:2"><label>Buscar</label><input class="inp" id="detaSearch" placeholder="producto, cliente, c\u00f3digo\u2026" value="${esc(DETA.search)}"></div>
     <button class="btn ghost" onclick="printTablePDF('.deta-tbl','Detalle de ventas \u00b7 ${esc(DETA_VIEWS.find(v=>v[0]===DETA.view)[1])}','${DETA.year==='ALL'?'Comparativo todos los a\u00f1os':('A\u00f1o '+DETA.year)} \u00b7 Llanterama Tulancingo')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15h6M9 18h4"/></svg>PDF</button>
   </div>
+  ${DETA.year==='ALL'?detaMonthCompare(list):''}
   <div class="rep-note" style="margin-bottom:12px">Detalle de facturaci\u00f3n de <b>ambas razones sociales</b>. Filtra por <b>organizaci\u00f3n</b>, <b>a\u00f1o</b>, <b>clasificaci\u00f3n</b> o <b>vendedor</b>. El vendedor se identifica por el c\u00f3digo de cliente cruzando con la hoja principal; los que no se pueden mapear salen como <b>S/I</b> (sin identificar). En "Por producto" y "Por cliente" haz clic en cualquier fila para ver el desglose.</div>
   <div class="rd-wrap"><div class="rd-tblwrap">${table}</div></div>`;
 }
@@ -3872,6 +3949,7 @@ function renderStrategy(){
 }
 function logout(){showWelcome();}
 
+document.addEventListener('click',function _dmcClose(e){if(!e.target.closest('.deta-multi'))document.querySelectorAll('.deta-multi-menu').forEach(m=>m.setAttribute('hidden',''));});
 document.addEventListener('click',e=>{
   const vp=e.target.closest('[data-vpdf]');if(vp){printVendorPDF(vp.dataset.vpdf);e.stopPropagation();return;}
   const lg=e.target.closest('[data-lg]');if(lg){const wr=lg.closest('.lt-gwrap,.ln-gwrap');if(wr)wr.classList.toggle('open');e.stopPropagation();return;}
@@ -3926,11 +4004,13 @@ document.addEventListener('click',e=>{
   const cs=e.target.closest('[data-cmpsort]');if(cs){const k=cs.dataset.cmpsort;if(CMP_SORT.key===k)CMP_SORT.dir=CMP_SORT.dir==='desc'?'asc':'desc';else{CMP_SORT.key=k;CMP_SORT.dir='desc';}renderComparativo();return;}
   const crs=e.target.closest('[data-csort]');if(crs){const k=crs.dataset.csort;if(CRED.sort===k)CRED.dir=-CRED.dir;else{CRED.sort=k;CRED.dir=-1;}renderCredito();return;}
   const c31=e.target.closest('#credOnly31');if(c31){CRED.only31=!CRED.only31;renderCredito();return;}
+  const mt=e.target.closest('[data-multitoggle]');if(mt){const id=mt.dataset.multitoggle;const menu=document.getElementById('dmm_'+id);const open=!menu.hasAttribute('hidden');document.querySelectorAll('.deta-multi-menu').forEach(m=>m.setAttribute('hidden',''));if(!open)menu.removeAttribute('hidden');e.stopPropagation();return;}
+  const ma=e.target.closest('[data-multiaction]');if(ma){const [id,act]=ma.dataset.multiaction.split('|');const key=id==='clasif'?'clasif':'vendor';if(act==='all'){const box=ma.closest('.deta-multi').querySelector('.deta-multi-list');[...box.querySelectorAll('input[type=checkbox]')].forEach(c=>DETA[key].add(c.value));}else{DETA[key]=new Set();}renderDetalle();e.stopPropagation();return;}
   const doo=e.target.closest('[data-detao]');if(doo){DETA.org=doo.dataset.detao;renderDetalle();return;}
   const dy=e.target.closest('[data-detay]');if(dy){DETA.year=dy.dataset.detay;renderDetalle();return;}
   const dv=e.target.closest('[data-detav]');if(dv){DETA.view=dv.dataset.detav;DETA.expanded=new Set();DETA.sort=(dv.dataset.detav==='rankCli')?'util':'imp';DETA.dir=-1;renderDetalle();return;}
-  const dx=e.target.closest('[data-detax]');if(dx){const k=dx.dataset.detax;if(DETA.expanded.has(k))DETA.expanded.delete(k);else DETA.expanded.add(k);renderDetalle();return;}
-  const ds=e.target.closest('[data-detasort]');if(ds){const k=ds.dataset.detasort;if(DETA.sort===k)DETA.dir=-DETA.dir;else{DETA.sort=k;DETA.dir=-1;}renderDetalle();return;}
+  const dx=e.target.closest('[data-detax]');if(dx){DETA_SCROLL=window.scrollY||0;const k=dx.dataset.detax;if(DETA.expanded.has(k))DETA.expanded.delete(k);else DETA.expanded.add(k);renderDetalle();setTimeout(()=>{try{window.scrollTo(0,DETA_SCROLL);const el=document.querySelector(`[data-detax="${k}"]`);if(el&&DETA.expanded.has(k)){const r=el.getBoundingClientRect();if(r.top<80||r.bottom>window.innerHeight-40){el.scrollIntoView({block:'center',behavior:'smooth'});}}}catch(_){}}, 30);return;}
+  const ds=e.target.closest('[data-detasort]');if(ds){DETA_SCROLL=window.scrollY||0;const k=ds.dataset.detasort;if(DETA.sort===k)DETA.dir=-DETA.dir;else{DETA.sort=k;DETA.dir=-1;}renderDetalle();setTimeout(()=>{try{window.scrollTo(0,DETA_SCROLL);}catch(_){}},30);return;}
   const ps=e.target.closest('[data-p82sort]');if(ps){const k=ps.dataset.p82sort;if(P82.sort===k)P82.dir=-P82.dir;else{P82.sort=k;P82.dir=-1;}renderP8020();return;}
   const pfu=e.target.closest('[data-p82fu]');if(pfu){
     const code=pfu.dataset.p82fu; const tr=pfu.closest('tr');
@@ -4045,9 +4125,8 @@ document.addEventListener('change',e=>{
   else if(e.target.id==='p82Vend'){P82.vend=e.target.value;renderP8020();}
   else if(e.target.id==='p82Line'){P82.line=e.target.value;renderP8020();}
   else if(e.target.id==='p82Mode'){P82.mode=e.target.value;renderP8020();}
-  else if(e.target.id==='detaClasif'){DETA.clasif=e.target.value;renderDetalle();}
-  else if(e.target.id==='detaVendor'){DETA.vendor=e.target.value;renderDetalle();}
   else if(e.target.id==='detaSearch'){DETA.search=e.target.value;renderDetalle();}
+  else if(e.target.matches('input[data-multi]')){const id=e.target.dataset.multi;const key=id==='clasif'?'clasif':'vendor';if(e.target.checked)DETA[key].add(e.target.value);else DETA[key].delete(e.target.value);DETA_SCROLL=window.scrollY||0;renderDetalle();setTimeout(()=>{try{window.scrollTo(0,DETA_SCROLL);document.getElementById('dmm_'+id)?.removeAttribute('hidden');}catch(_){}},20);}
 });
 function rerender(){paintPace();if(STATE.screen==='home')renderHome();else if(STATE.screen==='vend')renderVendors();else if(STATE.screen==='cli')renderClients();else if(STATE.screen==='rep')renderReportes();else if(STATE.screen==='camp')renderCampaign();else if(STATE.screen==='strat')renderStrategy();else if(STATE.screen==='ger')renderGerente();else if(STATE.screen==='ficha'){renderClients();goCli(STATE.vendor);}}
 
