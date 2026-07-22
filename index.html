@@ -1375,7 +1375,6 @@ tr.chk-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--line
     </a>
     <div id="gerZone"></div>
     <div class="div-grid" id="divGrid"></div>
-    <div id="mapZone"></div>
     <div id="campaignZone"></div>
   </section>
 
@@ -1955,7 +1954,7 @@ function renderHidalgoMap(){
 }
 function renderHome(){
   const grid=document.getElementById('divGrid');
-  setTimeout(renderHidalgoMap,10);grid.innerHTML=(ROLE==='directivo')?'':CONFIG.orgs.map((o,i)=>{
+  grid.innerHTML=(ROLE==='directivo')?'':CONFIG.orgs.map((o,i)=>{
     if(!DB.rows.length){return `<div class="div-card reveal" style="--c:var(--${o.accent});animation-delay:${i*.08}s"><span class="badge">${esc(o.label)}</span><h2 class="display">${esc(o.label)}</h2><p class="csub" style="color:var(--low)">Sin datos cargados.</p>${LOAD_ERR?`<div class="err-detail">${esc(LOAD_ERR)}</div>`:''}</div>`;}
     const s=orgStats(o.id), pc=paceClass(s.pct,expectedPace()), cvar=`var(--${o.accent})`;
     return `<div class="div-card reveal" data-org="${o.id}" style="--c:${cvar};animation-delay:${i*.08}s">
