@@ -891,6 +891,37 @@ tr.deta-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--lin
 .month-cmp .mc-dif.flat{color:var(--muted2)}
 .month-cmp .mc-lbls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;padding:0 4px 5px;font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--muted2);text-align:center}
 @media(max-width:900px){.month-cmp{grid-template-columns:repeat(6,minmax(80px,1fr))}}
+/* Mapa Hidalgo — bienvenida directiva */
+.mapa-hidalgo{background:linear-gradient(135deg,#0c1f44 0%,#132c5e 100%);border:1px solid rgba(255,210,30,.25);border-radius:20px;padding:22px 26px;margin-top:18px;position:relative;overflow:hidden;box-shadow:0 22px 60px -30px rgba(0,0,0,.6)}
+.mapa-hidalgo::before{content:"";position:absolute;top:-40%;right:-10%;width:60%;height:180%;background:radial-gradient(circle,rgba(255,210,30,.09) 0%,transparent 60%);pointer-events:none}
+:root[data-theme="light"] .mapa-hidalgo{background:linear-gradient(135deg,#0c1f44 0%,#132c5e 100%);color:#fff}
+.mapa-hidalgo .eyebrow{color:#facc15;letter-spacing:2px;font-weight:800;font-size:10px}
+.mapa-hidalgo h2{font-family:'Archivo';font-style:italic;font-weight:800;font-size:24px;margin:6px 0 0;color:#fff;letter-spacing:-.5px}
+.mp-head{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;position:relative;z-index:2}
+.mp-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:#c9d6ec}
+.mp-legend-item{display:inline-flex;align-items:center;gap:6px;font-weight:700}
+.mp-dot{display:inline-block;width:12px;height:12px;border-radius:50%}
+.mp-canvas{margin-top:14px;position:relative;z-index:1}
+.mp-svg{width:100%;height:auto;max-height:520px;display:block}
+.zone-blob{cursor:default;transition:.25s}
+.zone-blob:hover{transform:translateY(-1px)}
+.zone-blob.hub{filter:drop-shadow(0 0 22px rgba(255,210,30,.55))}
+.zone-blob.hub circle:last-of-type{animation:zoneHubPulse 2.4s ease-in-out infinite}
+.zone-blob.main{filter:drop-shadow(0 0 12px rgba(58,166,255,.3))}
+.zone-blob.sec circle:first-of-type{opacity:.12}
+.zone-blob.ext circle{opacity:.55}
+@keyframes zoneHubPulse{0%,100%{r:60}50%{r:66}}
+.zone-lbl{font-family:'Archivo',sans-serif;font-weight:800;font-size:11px;fill:#fff;letter-spacing:.3px;pointer-events:none;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.zone-lbl.hub{font-size:13px;fill:#0c1f44}
+.zone-blob.ext .zone-lbl{fill:#c9d6ec;font-size:10px;font-style:italic}
+.zone-link{stroke:rgba(255,210,30,.15);stroke-width:1;stroke-dasharray:2 4;fill:none}
+.zone-link.ae{stroke:rgba(58,166,255,.18)}
+.zone-link.both{stroke:rgba(255,255,255,.15)}
+.mp-foot{margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.08);font-size:11px;color:#8093b3}
+.mp-unk-toggle{color:#facc15;cursor:pointer;text-decoration:underline;font-weight:700}
+.mp-unk{display:none;margin-left:8px;font-family:'IBM Plex Mono';font-size:10px;opacity:.7}
+.mp-unk.open{display:inline}
+@media(max-width:640px){.mapa-hidalgo{padding:16px 14px}.mapa-hidalgo h2{font-size:19px}.mp-legend{font-size:10px;gap:8px}}
 /* checklist de llenado */
 .btn.checkbtn{background:linear-gradient(135deg,#13a85f,#0d7f47);color:#fff;border:none;font-weight:800}
 .btn.checkbtn:hover{filter:brightness(1.1)}
@@ -1338,6 +1369,7 @@ tr.chk-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--line
       <svg class="dash-cta-go" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>
     </a>
     <div id="gerZone"></div>
+    <div id="mapZone"></div>
     <div class="div-grid" id="divGrid"></div>
     <div id="campaignZone"></div>
   </section>
@@ -1799,9 +1831,122 @@ function globalCard(){
     <div class="glob-lines">${lines}</div>
   </div>`;
 }
+const HIDALGO_ZONES=[
+  // Cinturón centro-sur (Tulancingo hub) — la casa
+  {keys:['TULANCINGO','TULANC'],lbl:'Tulancingo',x:520,y:320,r:52,tier:'hub'},
+  {keys:['PACHUCA','MINERAL DE LA REFORMA','MINERAL','REFORMA'],lbl:'Pachuca',x:355,y:325,r:44,tier:'main'},
+  {keys:['TIZAYUCA','TIZA'],lbl:'Tizayuca',x:290,y:415,r:38,tier:'main'},
+  // Corredor oriente
+  {keys:['CUAUTEPEC','CUAUT'],lbl:'Cuautepec',x:590,y:280,r:30,tier:'main'},
+  {keys:['ACAXOCHITLAN','ACAX','ACAXOCHITL'],lbl:'Acaxochitl\u00e1n',x:640,y:335,r:30,tier:'sec'},
+  {keys:['SANTIAGO','TULANTEPEC','SANTIAGO TULANTEPEC'],lbl:'Santiago Tulantepec',x:485,y:355,r:26,tier:'sec'},
+  {keys:['METEPEC','SAN BARTOLO','TENANGO','TENANGO DE DORIA'],lbl:'Sierra Otom\u00ed',x:640,y:245,r:28,tier:'sec'},
+  {keys:['SINGUILUCAN','SINGUI'],lbl:'Singuilucan',x:435,y:365,r:24,tier:'sec'},
+  {keys:['EPAZOYUCAN','EPAZ'],lbl:'Epazoyucan',x:400,y:340,r:22,tier:'sec'},
+  {keys:['ZEMPOALA','ZEMPOAL'],lbl:'Zempoala',x:335,y:380,r:24,tier:'sec'},
+  // Sur / Valle de Tulancingo hacia CDMX-Edomex
+  {keys:['TIZAYUCA','TEMASCALAPA','TEOTIHUACAN'],lbl:'Sur',x:255,y:460,r:22,tier:'sec'},
+  {keys:['CIUDAD SAHAGUN','SAHAGUN','TEPEAPULCO','TEPEA'],lbl:'Tepeapulco',x:445,y:405,r:28,tier:'sec'},
+  // Norte / valle del mezquital
+  {keys:['ACTOPAN'],lbl:'Actopan',x:275,y:270,r:26,tier:'sec'},
+  {keys:['IXMIQUILPAN','IXMIQ'],lbl:'Ixmiquilpan',x:230,y:210,r:24,tier:'sec'},
+  {keys:['HUICHAPAN'],lbl:'Huichapan',x:150,y:230,r:22,tier:'sec'},
+  {keys:['MIXQUIAHUALA','TULA','TULA DE ALLENDE'],lbl:'Tula',x:180,y:340,r:24,tier:'sec'},
+  {keys:['ZIMAPAN','ZIMAPA'],lbl:'Zimap\u00e1n',x:130,y:170,r:22,tier:'sec'},
+  {keys:['ATOTONILCO','ATOTON'],lbl:'Atotonilco',x:210,y:295,r:20,tier:'sec'},
+  // Estados vecinos: Puebla, Veracruz, Edomex, Tlaxcala
+  {keys:['HUAUCHINANGO','PUEBLA','ZACATLAN','ZACAPOAX','XICOTEPEC'],lbl:'Norte de Puebla',x:715,y:305,r:34,tier:'ext',ext:true},
+  {keys:['TLAXCALA','APIZACO','HUAMANTLA'],lbl:'Tlaxcala',x:600,y:435,r:28,tier:'ext',ext:true},
+  {keys:['TEXCOCO','ECATEPEC','EDOMEX','ESTADO DE MEXICO','TECAMAC','TEOTIHUACAN'],lbl:'Edomex',x:200,y:465,r:30,tier:'ext',ext:true},
+  {keys:['POZA RICA','TUXPAN','VERACRUZ','MARTINEZ DE LA TORRE'],lbl:'Veracruz',x:750,y:225,r:34,tier:'ext',ext:true},
+  {keys:['QUERETARO','SAN JUAN DEL RIO'],lbl:'Quer\u00e9taro',x:60,y:250,r:26,tier:'ext',ext:true},
+  // Comodines
+  {keys:['HUEJUTLA','HUEJUT'],lbl:'Huasteca',x:400,y:80,r:26,tier:'sec'},
+  {keys:['MOLANGO'],lbl:'Molango',x:340,y:130,r:20,tier:'sec'},
+];
+function zoneMatch(txt){
+  if(!txt)return null;
+  const k=keyName(txt);
+  for(const z of HIDALGO_ZONES){
+    if(z.keys.some(kk=>{
+      const kkn=keyName(kk);
+      return kkn && (k===kkn || k.indexOf(kkn)>=0 || kkn.indexOf(k)>=0);
+    })){
+      return z;
+    }
+  }
+  return null;
+}
+function collectZonesData(){
+  const active=new Map(); const unknown=new Map();
+  const orgs=CONFIG.orgs.map(o=>o.id);
+  orgs.forEach(oid=>{
+    clientGroups(oid).forEach(rec=>{
+      const inf=latestInfoRec(rec);
+      const raw=String(inf.text('ZONA')||'').trim();
+      if(!raw)return;
+      const z=zoneMatch(raw);
+      if(z){
+        if(!active.has(z.lbl))active.set(z.lbl,{z,orgs:new Set(),n:0});
+        const e=active.get(z.lbl); e.orgs.add(oid); e.n++;
+      } else {
+        const kk=raw.toUpperCase().slice(0,20);
+        unknown.set(kk,(unknown.get(kk)||0)+1);
+      }
+    });
+  });
+  return {active,unknown};
+}
+function renderHidalgoMap(){
+  const box=document.getElementById('mapZone'); if(!box)return;
+  if(!DB||!DB.rows||!DB.rows.length){box.innerHTML='';return;}
+  const {active,unknown}=collectZonesData();
+  if(!active.size){box.innerHTML='';return;}
+  const nUnk=unknown.size;
+  // color por organizacion: dorado (llanterama), cyan (autoelectrica), degradado (ambas)
+  const shapeFor=(z,orgs)=>{
+    const cx=z.x, cy=z.y, r=z.r;
+    let fill;
+    if(orgs.has('llanterama')&&orgs.has('autoelectrica')) fill='url(#zoneBoth)';
+    else if(orgs.has('llanterama')) fill='url(#zoneLL)';
+    else fill='url(#zoneAE)';
+    const stroke=z.tier==='hub'?'var(--amber)':(z.ext?'var(--muted2)':'rgba(255,255,255,.4)');
+    const cls='zone-blob '+(z.tier==='hub'?'hub':(z.ext?'ext':z.tier));
+    return `<g class="${cls}"><circle cx="${cx}" cy="${cy}" r="${r+8}" fill="${fill}" opacity=".18"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="${z.tier==='hub'?'2.5':'1.2'}"/><text x="${cx}" y="${cy+4}" text-anchor="middle" class="zone-lbl ${z.tier==='hub'?'hub':''}">${esc(z.lbl)}</text></g>`;
+  };
+  const shapes=[...active.values()].map(e=>shapeFor(e.z,e.orgs)).join('');
+  // conexiones sutiles desde el hub Tulancingo
+  const hub=HIDALGO_ZONES.find(z=>z.tier==='hub');
+  const lines=[...active.values()].filter(e=>e.z!==hub).map(e=>`<line x1="${hub.x}" y1="${hub.y}" x2="${e.z.x}" y2="${e.z.y}" class="zone-link ${e.orgs.has('llanterama')&&e.orgs.has('autoelectrica')?'both':(e.orgs.has('llanterama')?'ll':'ae')}"/>`).join('');
+  const legend=`
+    <span class="mp-legend-item"><span class="mp-dot" style="background:linear-gradient(135deg,#eab000,#ffdf6b)"></span>Llanterama Tulancingo</span>
+    <span class="mp-legend-item"><span class="mp-dot" style="background:linear-gradient(135deg,#1f7fe0,#5aa7f0)"></span>Autoel\u00e9ctrica Roma</span>
+    <span class="mp-legend-item"><span class="mp-dot" style="background:linear-gradient(135deg,#eab000,#1f7fe0)"></span>Ambas</span>`;
+  box.innerHTML=`<div class="mapa-hidalgo">
+    <div class="mp-head"><div><div class="eyebrow">Presencia comercial</div><h2 class="display">Hidalgo y alrededores</h2></div>
+    <div class="mp-legend">${legend}</div></div>
+    <div class="mp-canvas">
+      <svg viewBox="0 0 800 520" preserveAspectRatio="xMidYMid meet" class="mp-svg">
+        <defs>
+          <radialGradient id="zoneLL" cx="50%" cy="50%" r="60%"><stop offset="0%" stop-color="#ffdf6b"/><stop offset="100%" stop-color="#eab000"/></radialGradient>
+          <radialGradient id="zoneAE" cx="50%" cy="50%" r="60%"><stop offset="0%" stop-color="#5aa7f0"/><stop offset="100%" stop-color="#1f7fe0"/></radialGradient>
+          <linearGradient id="zoneBoth" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffdf6b"/><stop offset="100%" stop-color="#1f7fe0"/></linearGradient>
+          <linearGradient id="mapBg" x1="0" x2="1"><stop offset="0" stop-color="rgba(255,210,30,.03)"/><stop offset="1" stop-color="rgba(58,166,255,.03)"/></linearGradient>
+          <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".8" fill="rgba(255,255,255,.06)"/></pattern>
+        </defs>
+        <rect x="0" y="0" width="800" height="520" fill="url(#mapBg)"/>
+        <rect x="0" y="0" width="800" height="520" fill="url(#dots)"/>
+        <path d="M 60 250 Q 130 130 260 100 Q 380 60 480 90 Q 580 120 660 180 Q 730 230 750 290 Q 730 360 680 400 Q 580 460 480 470 Q 380 480 280 460 Q 180 440 110 380 Q 50 320 60 250 Z" fill="rgba(255,255,255,.02)" stroke="rgba(255,210,30,.15)" stroke-width="1.5" stroke-dasharray="4 6"/>
+        <g class="zone-links">${lines}</g>
+        ${shapes}
+      </svg>
+    </div>
+    ${nUnk?`<div class="mp-foot"><span class="mp-hint">\u2139\ufe0f ${nUnk} ${nUnk===1?'zona no reconocida':'zonas no reconocidas'} en la hoja \u00b7 <span class="mp-unk-toggle" onclick="this.nextElementSibling.classList.toggle('open')">ver</span><span class="mp-unk">${[...unknown.keys()].map(u=>esc(u)).join(' \u00b7 ')}</span></span></div>`:''}
+  </div>`;
+}
 function renderHome(){
   const grid=document.getElementById('divGrid');
-  grid.innerHTML=(ROLE==='directivo')?'':CONFIG.orgs.map((o,i)=>{
+  setTimeout(renderHidalgoMap,10);grid.innerHTML=(ROLE==='directivo')?'':CONFIG.orgs.map((o,i)=>{
     if(!DB.rows.length){return `<div class="div-card reveal" style="--c:var(--${o.accent});animation-delay:${i*.08}s"><span class="badge">${esc(o.label)}</span><h2 class="display">${esc(o.label)}</h2><p class="csub" style="color:var(--low)">Sin datos cargados.</p>${LOAD_ERR?`<div class="err-detail">${esc(LOAD_ERR)}</div>`:''}</div>`;}
     const s=orgStats(o.id), pc=paceClass(s.pct,expectedPace()), cvar=`var(--${o.accent})`;
     return `<div class="div-card reveal" data-org="${o.id}" style="--c:${cvar};animation-delay:${i*.08}s">
