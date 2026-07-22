@@ -824,6 +824,25 @@ tr.p82-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--line
 .fu-save{background:var(--accent);color:#07142e;font-weight:800;border:none;padding:5px 14px;border-radius:8px;cursor:pointer}
 .fu-save:hover{filter:brightness(1.05)}
 .fu-hint{font-size:10.5px;color:var(--muted2);margin-top:10px;line-height:1.5}
+/* Detalle de ventas */
+.deta-toolbar{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px}
+.deta-years,.deta-views{display:flex;gap:6px;flex-wrap:wrap}
+.deta-tbl td.num{font-family:'IBM Plex Mono';text-align:right;white-space:nowrap}
+.deta-tbl td.mono{font-family:'IBM Plex Mono'}
+.deta-tbl td.muted{color:var(--muted2);font-size:10.5px}
+.deta-tbl td.strong{font-weight:800}
+.deta-tbl th.sortable{cursor:pointer;user-select:none}
+.deta-tbl th.sortable:hover,.deta-tbl th.sortable.on{color:var(--accent)}
+:root[data-theme="light"] .deta-tbl th.sortable:hover,:root[data-theme="light"] .deta-tbl th.sortable.on{color:var(--accent-ink)}
+tr.deta-row{cursor:pointer;transition:.12s}
+tr.deta-row:hover td{background:rgba(255,210,30,.05)}
+.deta-caret{color:var(--muted2);font-size:10px;margin-right:5px;transition:.15s;display:inline-block}
+tr.deta-row:has(+ tr.deta-det) .deta-caret{transform:rotate(90deg);color:var(--accent)}
+tr.deta-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--line2);padding:10px}
+:root[data-theme="light"] tr.deta-det td{background:rgba(181,132,0,.05)}
+.deta-sub .deta-subtbl{width:100%;font-size:11.5px}
+.deta-sub .deta-subtbl th{background:transparent;color:var(--muted);border-bottom:1px solid var(--line);font-size:9.5px;text-transform:uppercase;letter-spacing:.4px}
+.deta-sub .deta-subtbl td{padding:5px 8px}
 /* checklist de llenado */
 .btn.checkbtn{background:linear-gradient(135deg,#13a85f,#0d7f47);color:#fff;border:none;font-weight:800}
 .btn.checkbtn:hover{filter:brightness(1.1)}
@@ -2211,6 +2230,7 @@ let REPORT='act1', REP_VENDOR=null, REP_DAY='LUNES';
 const REP_TABS=[
   ['cred','Cr\u00e9dito \u00b7 cartera'],
   ['p8020','80/20 \u00b7 clientes clave'],
+  ['deta','Detalle de ventas \u00b7 productos y clientes'],
   ['act1','Act. 1 \u00b7 Carpeta de ruta'],
   ['act2','Act. 2-3 \u00b7 Reporte de visitas'],
   ['act4','Act. 4 \u00b7 Pedido sugerido'],
@@ -2236,6 +2256,7 @@ function renderActiveReport(){
   if(REPORT==='ruta')renderRutaDia();
   else if(REPORT==='cred')renderCredito();
   else if(REPORT==='p8020')renderP8020();
+  else if(REPORT==='deta')renderDetalle();
   else if(REPORT==='fact')renderFactSemanal();
   else if(REPORT==='cmp')renderComparativo();
   else if(REPORT==='act1')renderAct1();
@@ -3433,6 +3454,183 @@ function printStrategyPDF(){
 function showWelcome(){ROLE=null;UNLOCKED.clear();setRoleUI();showScreen('welcome');}
 
 /* ====== ESTRATEGIA ACUMULADORES (pestana campania, por fecha) ====== */
+/* ===== DETALLE DE VENTAS (hoja detallell, solo Llanterama Tulancingo) ===== */
+let DETA_DB=null, DETA_PROMISE=null, DETA_ERR='';
+let DETA={year:'ALL',clasif:'ALL',vendor:'ALL',view:'products',search:'',sort:'imp',dir:-1,expanded:new Set()};
+const DETA_VIEWS=[['products','Por producto'],['clients','Por cliente'],['rankProd','Ranking productos'],['rankCli','Ranking clientes por utilidad']];
+function loadDetalle(){
+  if(DETA_DB)return Promise.resolve();
+  if(DETA_PROMISE)return DETA_PROMISE;
+  DETA_ERR='';
+  DETA_PROMISE=(async()=>{
+    try{
+      let text='';
+      if(APPS){text=await gsRun('getDetalle');}
+      else if(SAVE_URL&&SAVE_URL.indexOf('http')===0){
+        const r=await fetch(SAVE_URL,{method:'POST',body:JSON.stringify({action:'getDetalle'}),redirect:'follow'});
+        const j=await r.json();
+        if(!j||!j.ok)throw new Error((j&&j.error)||'No se pudo leer la pesta\u00f1a detallell');
+        text=j.csv;
+      }
+      const grid=parseCSV(text||''); if(!grid.length)throw new Error('La pesta\u00f1a detallell est\u00e1 vac\u00eda');
+      const H=buildHeaderIndex(grid[0]);
+      const rows=grid.slice(1).filter(r=>String(getCell(r,'Codigo',H)||getCell(r,'CODIGO',H)||'').trim()!=='');
+      DETA_DB={H,rows};
+    }catch(e){DETA_ERR=e.message||String(e);DETA_DB=null;}
+    finally{DETA_PROMISE=null;}
+  })();
+  return DETA_PROMISE;
+}
+function detaParseFecha(v){
+  if(!v)return null;
+  if(v instanceof Date)return v;
+  const s=String(v).trim();
+  // ISO
+  const iso=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/); if(iso)return new Date(+iso[1],+iso[2]-1,+iso[3]);
+  // dd/mm/yyyy o dd-mm-yyyy
+  const dmy=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+  if(dmy){let y=+dmy[3]; if(y<100)y+=2000; return new Date(y,+dmy[2]-1,+dmy[1]);}
+  const d=new Date(s); return isNaN(d)?null:d;
+}
+function detaYear(v){const d=detaParseFecha(v); return d?d.getFullYear():null;}
+function detaNum(v){const n=parseNum(v); return n==null?0:n;}
+function detaAll(){
+  if(!DETA_DB)return [];
+  const H=DETA_DB.H;
+  return DETA_DB.rows.map(r=>{
+    const codP=String(getCell(r,'Codigo',H)||'').trim();
+    const desc=String(getCell(r,'Descripcion',H)||'').trim();
+    const codV=String(getCell(r,'Cod Vend 1',H)||'').trim();
+    const cant=detaNum(getCell(r,'Cantidad',H));
+    const imp =detaNum(getCell(r,'Importe',H));
+    const costo=detaNum(getCell(r,'Costo',H));
+    const cli =String(getCell(r,'Cliente',H)||'').trim();
+    const codC=String(getCell(r,'Cod de cliente',H)||'').trim();
+    const clas=String(getCell(r,'Clasificacion',H)||'').trim();
+    const fac =String(getCell(r,'Factura',H)||'').trim();
+    const fecha=getCell(r,'Fecha',H);
+    const y=detaYear(fecha);
+    return {codP,desc,codV,cant,imp,costo,util:imp-costo,cli,codC,clas,fac,fecha,y};
+  });
+}
+function detaFiltered(){
+  let list=detaAll();
+  if(DETA.year!=='ALL')list=list.filter(x=>String(x.y||'')===String(DETA.year));
+  if(DETA.clasif!=='ALL')list=list.filter(x=>x.clas===DETA.clasif);
+  if(DETA.vendor!=='ALL')list=list.filter(x=>x.codV===DETA.vendor);
+  const q=keyName(DETA.search||'');
+  if(q)list=list.filter(x=>keyName(x.desc+' '+x.cli+' '+x.codP+' '+x.codC).indexOf(q)>=0);
+  return list;
+}
+function detaAgg(list, byKey){
+  const map=new Map();
+  list.forEach(x=>{
+    const k=byKey(x); if(!k)return;
+    if(!map.has(k))map.set(k,{key:k,rows:[],cant:0,imp:0,costo:0,util:0});
+    const g=map.get(k); g.rows.push(x); g.cant+=x.cant; g.imp+=x.imp; g.costo+=x.costo; g.util+=x.util;
+  });
+  return [...map.values()];
+}
+function detaSort(arr){
+  const s=DETA.sort, d=DETA.dir;
+  arr.sort((a,b)=>{
+    if(s==='name')return String(a.name||a.key).localeCompare(String(b.name||b.key),'es')*d;
+    const va=a[s]==null?-Infinity:a[s], vb=b[s]==null?-Infinity:b[s];
+    return (va-vb)*d;
+  });
+}
+function detaAr(k){return DETA.sort===k?(DETA.dir>0?' \u25b2':' \u25bc'):'';}
+function detaOn(k){return DETA.sort===k?'on':'';}
+function detaHeaders(cols){
+  return cols.map(([k,lbl,cls])=>`<th class="${cls||''} sortable ${detaOn(k)}" data-detasort="${k}">${lbl}${detaAr(k)}</th>`).join('');
+}
+function detaChildTable(rows, byKey, labels){
+  const map=new Map();
+  rows.forEach(x=>{
+    const k=byKey(x); if(!k)return;
+    if(!map.has(k))map.set(k,{key:k,cant:0,imp:0,costo:0,util:0,sample:x});
+    const g=map.get(k); g.cant+=x.cant; g.imp+=x.imp; g.costo+=x.costo; g.util+=x.util;
+  });
+  const arr=[...map.values()].sort((a,b)=>b.imp-a.imp);
+  return `<div class="deta-sub"><table class="rep-tbl hl-table deta-subtbl"><thead><tr>${labels.map(l=>`<th class="${l.cls||''}">${l.lbl}</th>`).join('')}</tr></thead><tbody>${arr.map(g=>`<tr><td class="l">${labels[0].key==='desc'?esc(g.sample.desc||g.sample.codP):esc(g.sample.cli||g.sample.codC)}</td><td class="l muted">${labels[0].key==='desc'?esc(g.sample.codP):esc(g.sample.codC)}</td><td class="num">${fmtNum(g.cant)}</td><td class="num">${money2(g.imp)}</td><td class="num">${money2(g.costo)}</td><td class="num strong ${g.util>=0?'t-good':'t-low'}">${money2(g.util)}</td></tr>`).join('')}</tbody></table></div>`;
+}
+function renderDetalle(){
+  const body=document.getElementById('repBody');
+  if(!DETA_DB){
+    body.innerHTML='<div class="empty-state">Cargando detalle de ventas\u2026</div>';
+    loadDetalle().then(()=>{
+      if(REPORT!=='deta')return;
+      if(DETA_DB)renderDetalle();
+      else body.innerHTML=`<div class="empty-state">No se pudo leer la pesta\u00f1a <b>detallell</b>.<br><span style="color:var(--muted2);font-size:12px">${esc(DETA_ERR||'Revisa que la pesta\u00f1a se llame detallell y que Codigo.gs tenga getDetalle.')}</span><br><button class="btn ghost" style="margin-top:12px" onclick="DETA_PROMISE=null;renderDetalle()">Reintentar</button></div>`;
+    });
+    return;
+  }
+  const all=detaAll();
+  const years=[...new Set(all.map(x=>x.y).filter(y=>y!=null))].sort();
+  const clasifs=[...new Set(all.map(x=>x.clas).filter(Boolean))].sort();
+  const vendors=[...new Set(all.map(x=>x.codV).filter(Boolean))].sort();
+  const list=detaFiltered();
+  const totCant=list.reduce((s,x)=>s+x.cant,0);
+  const totImp=list.reduce((s,x)=>s+x.imp,0);
+  const totCosto=list.reduce((s,x)=>s+x.costo,0);
+  const totUtil=totImp-totCosto;
+  const margen=totImp>0?totUtil/totImp*100:0;
+  const yearsBtns=[['ALL','Todo (comparativo)'],...years.map(y=>[String(y),String(y)])];
+
+  let table='';
+  if(DETA.view==='products'){
+    const arr=detaAgg(list,x=>x.codP+'||'+x.desc);
+    arr.forEach(g=>{const s=g.rows[0];g.desc=s.desc;g.codP=s.codP;g.name=s.desc;g.nCli=new Set(g.rows.map(r=>r.codC)).size;});
+    detaSort(arr);
+    const rows=arr.map(g=>`<tr class="deta-row" data-detax="p:${esc(g.codP)}"><td class="l"><span class="deta-caret">\u25b8</span> ${esc(g.desc||g.codP)}</td><td class="l muted mono">${esc(g.codP)}</td><td class="num">${fmtNum(g.cant)}</td><td class="num">${g.nCli}</td><td class="num">${money2(g.imp)}</td><td class="num">${money2(g.costo)}</td><td class="num strong ${g.util>=0?'t-good':'t-low'}">${money2(g.util)}</td><td class="num">${g.imp>0?Math.round(g.util/g.imp*100)+'%':'\u2014'}</td></tr>${DETA.expanded.has('p:'+g.codP)?`<tr class="deta-det"><td colspan="8">${detaChildTable(g.rows,x=>x.codC,[{key:'cli',lbl:'Cliente'},{lbl:'C\u00f3d'},{lbl:'Cant',cls:'num'},{lbl:'Importe',cls:'num'},{lbl:'Costo',cls:'num'},{lbl:'Utilidad',cls:'num'}])}</td></tr>`:''}`).join('');
+    table=`<table class="rep-tbl hl-table deta-tbl"><thead><tr>${detaHeaders([['name','Producto','l'],['codP','C\u00f3digo','l'],['cant','Cantidad','num'],['nCli','# Clientes','num'],['imp','Importe','num'],['costo','Costo','num'],['util','Utilidad','num'],['margen','Margen','num']])}</tr></thead><tbody>${rows||'<tr><td colspan="8" class="empty-state">Sin datos con esos filtros.</td></tr>'}</tbody></table>`;
+  }
+  else if(DETA.view==='clients'){
+    const arr=detaAgg(list,x=>x.codC+'||'+x.cli);
+    arr.forEach(g=>{const s=g.rows[0];g.cli=s.cli;g.codC=s.codC;g.codV=s.codV;g.name=s.cli;g.nProd=new Set(g.rows.map(r=>r.codP)).size;});
+    detaSort(arr);
+    const rows=arr.map(g=>`<tr class="deta-row" data-detax="c:${esc(g.codC)}"><td class="l"><span class="deta-caret">\u25b8</span> ${esc(g.cli||g.codC)}</td><td class="l muted mono">${esc(g.codC)}</td><td class="l muted mono">${esc(g.codV||'\u2014')}</td><td class="num">${g.nProd}</td><td class="num">${fmtNum(g.cant)}</td><td class="num">${money2(g.imp)}</td><td class="num">${money2(g.costo)}</td><td class="num strong ${g.util>=0?'t-good':'t-low'}">${money2(g.util)}</td></tr>${DETA.expanded.has('c:'+g.codC)?`<tr class="deta-det"><td colspan="8">${detaChildTable(g.rows,x=>x.codP,[{key:'desc',lbl:'Producto'},{lbl:'C\u00f3d'},{lbl:'Cant',cls:'num'},{lbl:'Importe',cls:'num'},{lbl:'Costo',cls:'num'},{lbl:'Utilidad',cls:'num'}])}</td></tr>`:''}`).join('');
+    table=`<table class="rep-tbl hl-table deta-tbl"><thead><tr>${detaHeaders([['name','Cliente','l'],['codC','C\u00f3digo','l'],['codV','Cod Vend','l'],['nProd','# Productos','num'],['cant','Cantidad','num'],['imp','Importe','num'],['costo','Costo','num'],['util','Utilidad','num']])}</tr></thead><tbody>${rows||'<tr><td colspan="8" class="empty-state">Sin datos con esos filtros.</td></tr>'}</tbody></table>`;
+  }
+  else if(DETA.view==='rankProd'){
+    const arr=detaAgg(list,x=>x.codP+'||'+x.desc);
+    arr.forEach(g=>{g.desc=g.rows[0].desc;g.codP=g.rows[0].codP;g.name=g.desc;});
+    if(DETA.sort==='imp'&&DETA.dir===-1){}else detaSort(arr);
+    arr.sort((a,b)=>b[DETA.sort==='name'?'imp':DETA.sort]-a[DETA.sort==='name'?'imp':DETA.sort]);
+    const top=arr.slice(0,50);
+    const rows=top.map((g,i)=>`<tr><td class="num">${i+1}</td><td class="l">${esc(g.desc||g.codP)}</td><td class="l muted mono">${esc(g.codP)}</td><td class="num">${fmtNum(g.cant)}</td><td class="num strong">${money2(g.imp)}</td><td class="num">${money2(g.costo)}</td><td class="num strong ${g.util>=0?'t-good':'t-low'}">${money2(g.util)}</td></tr>`).join('');
+    table=`<div class="rep-note" style="margin-bottom:10px">Top 50 productos por importe facturado en el filtro.</div><table class="rep-tbl hl-table deta-tbl"><thead><tr><th>#</th><th class="l">Producto</th><th class="l">C\u00f3digo</th><th>Cantidad</th><th>Importe</th><th>Costo</th><th>Utilidad</th></tr></thead><tbody>${rows||'<tr><td colspan="7" class="empty-state">Sin datos.</td></tr>'}</tbody></table>`;
+  }
+  else {
+    const arr=detaAgg(list,x=>x.codC+'||'+x.cli);
+    arr.forEach(g=>{g.cli=g.rows[0].cli;g.codC=g.rows[0].codC;g.codV=g.rows[0].codV;g.name=g.cli;});
+    arr.sort((a,b)=>b.util-a.util);
+    const top=arr.slice(0,50);
+    const rows=top.map((g,i)=>`<tr><td class="num">${i+1}</td><td class="l">${esc(g.cli||g.codC)}</td><td class="l muted mono">${esc(g.codC)}</td><td class="l muted mono">${esc(g.codV||'\u2014')}</td><td class="num">${money2(g.imp)}</td><td class="num">${money2(g.costo)}</td><td class="num strong ${g.util>=0?'t-good':'t-low'}">${money2(g.util)}</td><td class="num">${g.imp>0?Math.round(g.util/g.imp*100)+'%':'\u2014'}</td></tr>`).join('');
+    table=`<div class="rep-note" style="margin-bottom:10px">Top 50 clientes por utilidad (Importe \u2212 Costo) en el filtro.</div><table class="rep-tbl hl-table deta-tbl"><thead><tr><th>#</th><th class="l">Cliente</th><th class="l">C\u00f3digo</th><th class="l">Cod Vend</th><th>Importe</th><th>Costo</th><th>Utilidad</th><th>Margen</th></tr></thead><tbody>${rows||'<tr><td colspan="8" class="empty-state">Sin datos.</td></tr>'}</tbody></table>`;
+  }
+
+  body.innerHTML=`
+  <div class="strat-kpis">
+    <div class="skpi"><div class="sk-l">Piezas</div><div class="sk-v mono">${fmtNum(totCant)}</div><div class="sk-s">unidades facturadas en el filtro</div></div>
+    <div class="skpi amber"><div class="sk-l">Importe</div><div class="sk-v mono">${money2(totImp)}</div><div class="sk-s">venta bruta</div></div>
+    <div class="skpi"><div class="sk-l">Costo</div><div class="sk-v mono">${money2(totCosto)}</div><div class="sk-s">costo total</div></div>
+    <div class="skpi ${totUtil>=0?'up':'down'}"><div class="sk-l">Utilidad</div><div class="sk-v mono">${money2(totUtil)}</div><div class="sk-s">margen ${Math.round(margen)}%</div></div>
+  </div>
+  <div class="deta-toolbar">
+    <div class="deta-years">${yearsBtns.map(([v,lbl])=>`<button class="btn ${DETA.year===v?'act':'ghost'}" data-detay="${v}">${esc(lbl)}</button>`).join('')}</div>
+    <div class="deta-views">${DETA_VIEWS.map(([v,lbl])=>`<button class="btn ${DETA.view===v?'act':'ghost'}" data-detav="${v}">${esc(lbl)}</button>`).join('')}</div>
+  </div>
+  <div class="rd-controls">
+    <div class="ctrl"><label>Clasificaci\u00f3n</label><select class="inp" id="detaClasif"><option value="ALL" ${DETA.clasif==='ALL'?'selected':''}>Todas</option>${clasifs.map(c=>`<option value="${esc(c)}" ${DETA.clasif===c?'selected':''}>${esc(c)}</option>`).join('')}</select></div>
+    <div class="ctrl"><label>Cod Vend</label><select class="inp" id="detaVendor"><option value="ALL" ${DETA.vendor==='ALL'?'selected':''}>Todos</option>${vendors.map(v=>`<option value="${esc(v)}" ${DETA.vendor===v?'selected':''}>${esc(v)}</option>`).join('')}</select></div>
+    <div class="ctrl" style="flex:2"><label>Buscar</label><input class="inp" id="detaSearch" placeholder="producto, cliente, c\u00f3digo\u2026" value="${esc(DETA.search)}"></div>
+    <button class="btn ghost" onclick="printTablePDF('.deta-tbl','Detalle de ventas \u00b7 ${esc(DETA_VIEWS.find(v=>v[0]===DETA.view)[1])}','${DETA.year==='ALL'?'Comparativo todos los a\u00f1os':('A\u00f1o '+DETA.year)} \u00b7 Llanterama Tulancingo')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15h6M9 18h4"/></svg>PDF</button>
+  </div>
+  <div class="rep-note" style="margin-bottom:12px">Detalle de facturaci\u00f3n de <b>Llanterama Tulancingo</b>. Cambia entre <b>a\u00f1os</b> (2025, 2026) o el <b>comparativo</b>; alterna la vista por producto o cliente, o revisa los rankings. En "Por producto" y "Por cliente" haz clic en cualquier fila para ver el desglose.</div>
+  <div class="rd-wrap"><div class="rd-tblwrap">${table}</div></div>`;
+}
+function money2(n){if(n==null||isNaN(n))return '\u2014';const s=Math.abs(n).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});return (n<0?'-':'')+'$'+s;}
 let CAMP_DB=null, CAMP_PROMISE=null, CAMP_ERR='';
 function loadCampania(){
   if(CAMP_DB)return Promise.resolve();
@@ -3631,6 +3829,10 @@ document.addEventListener('click',e=>{
   const cs=e.target.closest('[data-cmpsort]');if(cs){const k=cs.dataset.cmpsort;if(CMP_SORT.key===k)CMP_SORT.dir=CMP_SORT.dir==='desc'?'asc':'desc';else{CMP_SORT.key=k;CMP_SORT.dir='desc';}renderComparativo();return;}
   const crs=e.target.closest('[data-csort]');if(crs){const k=crs.dataset.csort;if(CRED.sort===k)CRED.dir=-CRED.dir;else{CRED.sort=k;CRED.dir=-1;}renderCredito();return;}
   const c31=e.target.closest('#credOnly31');if(c31){CRED.only31=!CRED.only31;renderCredito();return;}
+  const dy=e.target.closest('[data-detay]');if(dy){DETA.year=dy.dataset.detay;renderDetalle();return;}
+  const dv=e.target.closest('[data-detav]');if(dv){DETA.view=dv.dataset.detav;DETA.expanded=new Set();DETA.sort=(dv.dataset.detav==='rankCli')?'util':'imp';DETA.dir=-1;renderDetalle();return;}
+  const dx=e.target.closest('[data-detax]');if(dx){const k=dx.dataset.detax;if(DETA.expanded.has(k))DETA.expanded.delete(k);else DETA.expanded.add(k);renderDetalle();return;}
+  const ds=e.target.closest('[data-detasort]');if(ds){const k=ds.dataset.detasort;if(DETA.sort===k)DETA.dir=-DETA.dir;else{DETA.sort=k;DETA.dir=-1;}renderDetalle();return;}
   const ps=e.target.closest('[data-p82sort]');if(ps){const k=ps.dataset.p82sort;if(P82.sort===k)P82.dir=-P82.dir;else{P82.sort=k;P82.dir=-1;}renderP8020();return;}
   const pfu=e.target.closest('[data-p82fu]');if(pfu){
     const code=pfu.dataset.p82fu; const tr=pfu.closest('tr');
@@ -3745,6 +3947,9 @@ document.addEventListener('change',e=>{
   else if(e.target.id==='p82Vend'){P82.vend=e.target.value;renderP8020();}
   else if(e.target.id==='p82Line'){P82.line=e.target.value;renderP8020();}
   else if(e.target.id==='p82Mode'){P82.mode=e.target.value;renderP8020();}
+  else if(e.target.id==='detaClasif'){DETA.clasif=e.target.value;renderDetalle();}
+  else if(e.target.id==='detaVendor'){DETA.vendor=e.target.value;renderDetalle();}
+  else if(e.target.id==='detaSearch'){DETA.search=e.target.value;renderDetalle();}
 });
 function rerender(){paintPace();if(STATE.screen==='home')renderHome();else if(STATE.screen==='vend')renderVendors();else if(STATE.screen==='cli')renderClients();else if(STATE.screen==='rep')renderReportes();else if(STATE.screen==='camp')renderCampaign();else if(STATE.screen==='strat')renderStrategy();else if(STATE.screen==='ger')renderGerente();else if(STATE.screen==='ficha'){renderClients();goCli(STATE.vendor);}}
 
