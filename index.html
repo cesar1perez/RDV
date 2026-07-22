@@ -1995,7 +1995,7 @@ function filterClients(){
   if(LINE_FILTER!=='ALL'&&LINE_FILTER!=='NONE'){renderLineFocus(base,grid,LINES.find(l=>l.key===LINE_FILTER),pace);return;}
   // vista general filtrada por con/sin objetivo
   if(OBJF==='con')base=base.filter(c=>hasObjective(c.rec));
-  else base=base.filter(c=>!hasObjective(c.rec)&&hasSales(c.rec));
+  else base=base.filter(c=>!hasObjective(c.rec));
   renderMatrix(base,grid,pace,OBJF==='con'?'con objetivo':'venta sin objetivo');
 }
 function renderMatrix(base,grid,pace,note){
@@ -3506,6 +3506,7 @@ function showWelcome(){ROLE=null;UNLOCKED.clear();setRoleUI();showScreen('welcom
 let DETA_DB=null, DETA_PROMISE=null, DETA_ERR='';
 let DETA_DBAE=null, DETA_PROMISEAE=null, DETA_ERRAE='';
 let DETA_CLI2VEND=null;
+let DETA_NAME2VEND=null;
 let DETA_LOADPROG={ll:0,ae:0};
 let DETA={year:'ALL',org:'ALL',clasif:new Set(),vendor:new Set(),view:'products',search:'',sort:'imp',dir:-1,expanded:new Set()};
 const DETA_VIEWS=[['products','Por producto'],['clients','Por cliente'],['rankProd','Ranking productos'],['rankCli','Ranking clientes por utilidad']];
@@ -3542,20 +3543,28 @@ function detaPaintLoader(){
     <div class="deta-load-row"><span class="deta-load-lbl">Autoel\u00e9ctrica Roma</span><span class="deta-load-st ${stCls(DETA_LOADPROG.ae)}">${stTxt(DETA_LOADPROG.ae)}</span></div>
     <div class="deta-load-bar"><i style="width:${Math.round(((Math.max(0,DETA_LOADPROG.ll)+Math.max(0,DETA_LOADPROG.ae))/4)*100)}%"></i></div>`;
 }
-function detaCliVend(codC){
+function detaCliVend(codC,cliName){
+  const norm=(x)=>String(x||'').trim().replace(/^0+/,'').toUpperCase();
   if(!DETA_CLI2VEND){
     DETA_CLI2VEND={};
+    DETA_NAME2VEND={};
     if(DB&&DB.rows){
       const H=DB.H;
       DB.rows.forEach(r=>{
-        const cc=String(getCell(r,'COD CLIENTE',H)||'').trim(); if(!cc)return;
+        const cc=norm(getCell(r,'COD CLIENTE',H)); if(!cc)return;
         const raw=getCell(r,'VENDEDOR',H); if(!raw)return;
         const v=resolveVendor(raw).display||String(raw).trim();
         if(v&&!DETA_CLI2VEND[cc])DETA_CLI2VEND[cc]=v;
+        const nm=keyName(getCell(r,'CLIENTE',H));
+        if(nm&&v&&!DETA_NAME2VEND[nm])DETA_NAME2VEND[nm]=v;
       });
     }
   }
-  return DETA_CLI2VEND[String(codC||'').trim()]||null;
+  const key=norm(codC);
+  if(key&&DETA_CLI2VEND[key])return DETA_CLI2VEND[key];
+  const nk=keyName(cliName||'');
+  if(nk&&DETA_NAME2VEND[nk])return DETA_NAME2VEND[nk];
+  return null;
 }
 function loadDetalle(){
   if(DETA_DB)return Promise.resolve();
@@ -3606,7 +3615,7 @@ function detaMapRow(r,H,orgId){
   const fac =String(getCell(r,'Factura',H)||'').trim();
   const fecha=getCell(r,'Fecha',H);
   const y=detaYear(fecha);
-  const vendedor=detaCliVend(codC)||'S/I';
+  const vendedor=detaCliVend(codC,cli)||'S/I';
   return {codP,desc,codV,cant,imp,costo,util:imp-costo,cli,codC,clas,fac,fecha,y,org:orgId,vendedor};
 }
 function detaAll(){
