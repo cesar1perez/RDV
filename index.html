@@ -843,6 +843,23 @@ tr.deta-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--lin
 .deta-sub .deta-subtbl{width:100%;font-size:11.5px}
 .deta-sub .deta-subtbl th{background:transparent;color:var(--muted);border-bottom:1px solid var(--line);font-size:9.5px;text-transform:uppercase;letter-spacing:.4px}
 .deta-sub .deta-subtbl td{padding:5px 8px}
+/* barra de carga detalle */
+.deta-loading{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:28px 32px;max-width:520px;margin:32px auto}
+.deta-load-title{font-family:'Archivo';font-size:19px;font-weight:800;color:var(--txt);margin-bottom:6px}
+.deta-load-sub{font-size:12.5px;color:var(--muted);line-height:1.5;margin-bottom:18px}
+.deta-load-hint{font-size:11px;color:var(--muted2);margin-top:14px}
+.deta-load-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.deta-load-row:last-of-type{border-bottom:none}
+.deta-load-lbl{font-weight:700;font-size:13px}
+.deta-load-st{font-family:'IBM Plex Mono';font-size:11px;font-weight:800;padding:3px 10px;border-radius:12px;border:1px solid var(--line2)}
+.deta-load-st.wait{color:var(--muted2)}
+.deta-load-st.run{color:var(--accent);border-color:var(--accent);animation:fu-pulse 1.4s ease-in-out infinite}
+.deta-load-st.ok{color:var(--good);border-color:var(--good)}
+.deta-load-st.bad{color:var(--low);border-color:var(--low)}
+.deta-load-bar{height:8px;background:var(--bg2);border-radius:6px;overflow:hidden;margin-top:14px}
+.deta-load-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--amber),var(--cyan));transition:width .3s ease}
+.deta-orgs{display:flex;gap:6px;flex-wrap:wrap}
+.muted2{color:var(--muted2)}
 /* checklist de llenado */
 .btn.checkbtn{background:linear-gradient(135deg,#13a85f,#0d7f47);color:#fff;border:none;font-weight:800}
 .btn.checkbtn:hover{filter:brightness(1.1)}
@@ -3456,8 +3473,59 @@ function showWelcome(){ROLE=null;UNLOCKED.clear();setRoleUI();showScreen('welcom
 /* ====== ESTRATEGIA ACUMULADORES (pestana campania, por fecha) ====== */
 /* ===== DETALLE DE VENTAS (hoja detallell, solo Llanterama Tulancingo) ===== */
 let DETA_DB=null, DETA_PROMISE=null, DETA_ERR='';
-let DETA={year:'ALL',clasif:'ALL',vendor:'ALL',view:'products',search:'',sort:'imp',dir:-1,expanded:new Set()};
+let DETA_DBAE=null, DETA_PROMISEAE=null, DETA_ERRAE='';
+let DETA_CLI2VEND=null;
+let DETA_LOADPROG={ll:0,ae:0};
+let DETA={year:'ALL',org:'ALL',clasif:'ALL',vendor:'ALL',view:'products',search:'',sort:'imp',dir:-1,expanded:new Set()};
 const DETA_VIEWS=[['products','Por producto'],['clients','Por cliente'],['rankProd','Ranking productos'],['rankCli','Ranking clientes por utilidad']];
+function loadDetalleAE(){
+  if(DETA_DBAE)return Promise.resolve();
+  if(DETA_PROMISEAE)return DETA_PROMISEAE;
+  DETA_ERRAE='';
+  DETA_PROMISEAE=(async()=>{
+    try{
+      let text='';
+      if(APPS){text=await gsRun('getDetalleAE');}
+      else if(SAVE_URL&&SAVE_URL.indexOf('http')===0){
+        DETA_LOADPROG.ae=1;detaPaintLoader();
+        const r=await fetch(SAVE_URL,{method:'POST',body:JSON.stringify({action:'getDetalleAE'}),redirect:'follow'});
+        const j=await r.json();
+        if(!j||!j.ok)throw new Error((j&&j.error)||'No se pudo leer la pesta\u00f1a detalleaut');
+        text=j.csv;
+      }
+      const grid=parseCSV(text||''); if(!grid.length)throw new Error('La pesta\u00f1a detalleaut est\u00e1 vac\u00eda');
+      const H=buildHeaderIndex(grid[0]);
+      const rows=grid.slice(1).filter(r=>String(getCell(r,'Codigo',H)||getCell(r,'CODIGO',H)||'').trim()!=='');
+      DETA_DBAE={H,rows};DETA_LOADPROG.ae=2;detaPaintLoader();
+    }catch(e){DETA_ERRAE=e.message||String(e);DETA_DBAE=null;DETA_LOADPROG.ae=-1;detaPaintLoader();}
+    finally{DETA_PROMISEAE=null;}
+  })();
+  return DETA_PROMISEAE;
+}
+function detaPaintLoader(){
+  const box=document.getElementById('detaLoader'); if(!box)return;
+  const stTxt=(n)=>n===2?'\u2713 listo':(n===-1?'\u2717 error':(n===1?'cargando\u2026':'esperando'));
+  const stCls=(n)=>n===2?'ok':(n===-1?'bad':(n===1?'run':'wait'));
+  box.innerHTML=`
+    <div class="deta-load-row"><span class="deta-load-lbl">Llanterama Tulancingo</span><span class="deta-load-st ${stCls(DETA_LOADPROG.ll)}">${stTxt(DETA_LOADPROG.ll)}</span></div>
+    <div class="deta-load-row"><span class="deta-load-lbl">Autoel\u00e9ctrica Roma</span><span class="deta-load-st ${stCls(DETA_LOADPROG.ae)}">${stTxt(DETA_LOADPROG.ae)}</span></div>
+    <div class="deta-load-bar"><i style="width:${Math.round(((Math.max(0,DETA_LOADPROG.ll)+Math.max(0,DETA_LOADPROG.ae))/4)*100)}%"></i></div>`;
+}
+function detaCliVend(codC){
+  if(!DETA_CLI2VEND){
+    DETA_CLI2VEND={};
+    if(DB&&DB.rows){
+      const H=DB.H;
+      DB.rows.forEach(r=>{
+        const cc=String(getCell(r,'COD CLIENTE',H)||'').trim(); if(!cc)return;
+        const raw=getCell(r,'VENDEDOR',H); if(!raw)return;
+        const v=resolveVendor(raw).display||String(raw).trim();
+        if(v&&!DETA_CLI2VEND[cc])DETA_CLI2VEND[cc]=v;
+      });
+    }
+  }
+  return DETA_CLI2VEND[String(codC||'').trim()]||null;
+}
 function loadDetalle(){
   if(DETA_DB)return Promise.resolve();
   if(DETA_PROMISE)return DETA_PROMISE;
@@ -3467,7 +3535,7 @@ function loadDetalle(){
       let text='';
       if(APPS){text=await gsRun('getDetalle');}
       else if(SAVE_URL&&SAVE_URL.indexOf('http')===0){
-        const r=await fetch(SAVE_URL,{method:'POST',body:JSON.stringify({action:'getDetalle'}),redirect:'follow'});
+        DETA_LOADPROG.ll=1;detaPaintLoader();const r=await fetch(SAVE_URL,{method:'POST',body:JSON.stringify({action:'getDetalle'}),redirect:'follow'});
         const j=await r.json();
         if(!j||!j.ok)throw new Error((j&&j.error)||'No se pudo leer la pesta\u00f1a detallell');
         text=j.csv;
@@ -3475,8 +3543,8 @@ function loadDetalle(){
       const grid=parseCSV(text||''); if(!grid.length)throw new Error('La pesta\u00f1a detallell est\u00e1 vac\u00eda');
       const H=buildHeaderIndex(grid[0]);
       const rows=grid.slice(1).filter(r=>String(getCell(r,'Codigo',H)||getCell(r,'CODIGO',H)||'').trim()!=='');
-      DETA_DB={H,rows};
-    }catch(e){DETA_ERR=e.message||String(e);DETA_DB=null;}
+      DETA_DB={H,rows};DETA_LOADPROG.ll=2;detaPaintLoader();
+    }catch(e){DETA_ERR=e.message||String(e);DETA_DB=null;DETA_LOADPROG.ll=-1;detaPaintLoader();}
     finally{DETA_PROMISE=null;}
   })();
   return DETA_PROMISE;
@@ -3494,30 +3562,34 @@ function detaParseFecha(v){
 }
 function detaYear(v){const d=detaParseFecha(v); return d?d.getFullYear():null;}
 function detaNum(v){const n=parseNum(v); return n==null?0:n;}
+function detaMapRow(r,H,orgId){
+  const codP=String(getCell(r,'Codigo',H)||'').trim();
+  const desc=String(getCell(r,'Descripcion',H)||'').trim();
+  const codV=String(getCell(r,'Cod Vend 1',H)||'').trim();
+  const cant=detaNum(getCell(r,'Cantidad',H));
+  const imp =detaNum(getCell(r,'Importe',H));
+  const costo=detaNum(getCell(r,'Costo',H));
+  const cli =String(getCell(r,'Cliente',H)||'').trim();
+  const codC=String(getCell(r,'Cod de cliente',H)||'').trim();
+  const clas=String(getCell(r,'Clasificacion',H)||'').trim();
+  const fac =String(getCell(r,'Factura',H)||'').trim();
+  const fecha=getCell(r,'Fecha',H);
+  const y=detaYear(fecha);
+  const vendedor=detaCliVend(codC)||'S/I';
+  return {codP,desc,codV,cant,imp,costo,util:imp-costo,cli,codC,clas,fac,fecha,y,org:orgId,vendedor};
+}
 function detaAll(){
-  if(!DETA_DB)return [];
-  const H=DETA_DB.H;
-  return DETA_DB.rows.map(r=>{
-    const codP=String(getCell(r,'Codigo',H)||'').trim();
-    const desc=String(getCell(r,'Descripcion',H)||'').trim();
-    const codV=String(getCell(r,'Cod Vend 1',H)||'').trim();
-    const cant=detaNum(getCell(r,'Cantidad',H));
-    const imp =detaNum(getCell(r,'Importe',H));
-    const costo=detaNum(getCell(r,'Costo',H));
-    const cli =String(getCell(r,'Cliente',H)||'').trim();
-    const codC=String(getCell(r,'Cod de cliente',H)||'').trim();
-    const clas=String(getCell(r,'Clasificacion',H)||'').trim();
-    const fac =String(getCell(r,'Factura',H)||'').trim();
-    const fecha=getCell(r,'Fecha',H);
-    const y=detaYear(fecha);
-    return {codP,desc,codV,cant,imp,costo,util:imp-costo,cli,codC,clas,fac,fecha,y};
-  });
+  const out=[];
+  if(DETA_DB)DETA_DB.rows.forEach(r=>out.push(detaMapRow(r,DETA_DB.H,'llanterama')));
+  if(DETA_DBAE)DETA_DBAE.rows.forEach(r=>out.push(detaMapRow(r,DETA_DBAE.H,'autoelectrica')));
+  return out;
 }
 function detaFiltered(){
   let list=detaAll();
+  if(DETA.org!=='ALL')list=list.filter(x=>x.org===DETA.org);
   if(DETA.year!=='ALL')list=list.filter(x=>String(x.y||'')===String(DETA.year));
   if(DETA.clasif!=='ALL')list=list.filter(x=>x.clas===DETA.clasif);
-  if(DETA.vendor!=='ALL')list=list.filter(x=>x.codV===DETA.vendor);
+  if(DETA.vendor!=='ALL')list=list.filter(x=>x.vendedor===DETA.vendor);
   const q=keyName(DETA.search||'');
   if(q)list=list.filter(x=>keyName(x.desc+' '+x.cli+' '+x.codP+' '+x.codC).indexOf(q)>=0);
   return list;
@@ -3544,7 +3616,7 @@ function detaOn(k){return DETA.sort===k?'on':'';}
 function detaHeaders(cols){
   return cols.map(([k,lbl,cls])=>`<th class="${cls||''} sortable ${detaOn(k)}" data-detasort="${k}">${lbl}${detaAr(k)}</th>`).join('');
 }
-function detaChildTable(rows, byKey, labels){
+function detaChildTable(rows, byKey, mode){
   const map=new Map();
   rows.forEach(x=>{
     const k=byKey(x); if(!k)return;
@@ -3552,23 +3624,47 @@ function detaChildTable(rows, byKey, labels){
     const g=map.get(k); g.cant+=x.cant; g.imp+=x.imp; g.costo+=x.costo; g.util+=x.util;
   });
   const arr=[...map.values()].sort((a,b)=>b.imp-a.imp);
-  return `<div class="deta-sub"><table class="rep-tbl hl-table deta-subtbl"><thead><tr>${labels.map(l=>`<th class="${l.cls||''}">${l.lbl}</th>`).join('')}</tr></thead><tbody>${arr.map(g=>`<tr><td class="l">${labels[0].key==='desc'?esc(g.sample.desc||g.sample.codP):esc(g.sample.cli||g.sample.codC)}</td><td class="l muted">${labels[0].key==='desc'?esc(g.sample.codP):esc(g.sample.codC)}</td><td class="num">${fmtNum(g.cant)}</td><td class="num">${money2(g.imp)}</td><td class="num">${money2(g.costo)}</td><td class="num strong ${g.util>=0?'t-good':'t-low'}">${money2(g.util)}</td></tr>`).join('')}</tbody></table></div>`;
+  const isCli=mode==='client';
+  const heads=isCli
+    ? '<th class="l">Cliente</th><th class="l">C\u00f3d</th><th class="l">Vendedor</th><th>Cant</th><th>Importe</th><th>Costo</th><th>Utilidad</th>'
+    : '<th class="l">Producto</th><th class="l">C\u00f3d</th><th class="l">Clasificaci\u00f3n</th><th>Cant</th><th>Importe</th><th>Costo</th><th>Utilidad</th>';
+  const rows2=arr.map(g=>{
+    const sm=g.sample;
+    const c1=isCli?esc(sm.cli||sm.codC):esc(sm.desc||sm.codP);
+    const c2=isCli?esc(sm.codC):esc(sm.codP);
+    const c3=isCli?`<span class="${sm.vendedor==='S/I'?'muted2':''}">${esc(sm.vendedor||'S/I')}</span>`:esc(sm.clas||'\u2014');
+    return `<tr><td class="l">${c1}</td><td class="l muted mono">${c2}</td><td class="l muted">${c3}</td><td class="num">${fmtNum(g.cant)}</td><td class="num">${money2(g.imp)}</td><td class="num">${money2(g.costo)}</td><td class="num strong ${g.util>=0?'t-good':'t-low'}">${money2(g.util)}</td></tr>`;
+  }).join('');
+  return `<div class="deta-sub"><table class="rep-tbl hl-table deta-subtbl"><thead><tr>${heads}</tr></thead><tbody>${rows2}</tbody></table></div>`;
 }
 function renderDetalle(){
   const body=document.getElementById('repBody');
-  if(!DETA_DB){
-    body.innerHTML='<div class="empty-state">Cargando detalle de ventas\u2026</div>';
-    loadDetalle().then(()=>{
+  if(!DETA_DB||!DETA_DBAE){
+    body.innerHTML=`<div class="deta-loading">
+      <div class="deta-load-title">Cargando detalle de ventas\u2026</div>
+      <div class="deta-load-sub">Son varios miles de renglones; la primera vez tarda unos segundos. Las pr\u00f3ximas cargas son instant\u00e1neas (queda en memoria).</div>
+      <div id="detaLoader"></div>
+      <div class="deta-load-hint">Puedes seguir usando el tablero en otra pesta\u00f1a mientras carga.</div>
+    </div>`;
+    detaPaintLoader();
+    const p1=DETA_DB?Promise.resolve():loadDetalle();
+    const p2=DETA_DBAE?Promise.resolve():loadDetalleAE();
+    Promise.all([p1,p2]).then(()=>{
       if(REPORT!=='deta')return;
-      if(DETA_DB)renderDetalle();
-      else body.innerHTML=`<div class="empty-state">No se pudo leer la pesta\u00f1a <b>detallell</b>.<br><span style="color:var(--muted2);font-size:12px">${esc(DETA_ERR||'Revisa que la pesta\u00f1a se llame detallell y que Codigo.gs tenga getDetalle.')}</span><br><button class="btn ghost" style="margin-top:12px" onclick="DETA_PROMISE=null;renderDetalle()">Reintentar</button></div>`;
+      if(DETA_DB&&DETA_DBAE)renderDetalle();
+      else{
+        const errs=[];
+        if(!DETA_DB)errs.push(`Llanterama: ${esc(DETA_ERR||'sin datos')}`);
+        if(!DETA_DBAE)errs.push(`Autoel\u00e9ctrica: ${esc(DETA_ERRAE||'sin datos')}`);
+        body.innerHTML=`<div class="empty-state">Falt\u00f3 informaci\u00f3n:<br><span style="color:var(--muted2);font-size:12px">${errs.join('<br>')}</span><br><button class="btn ghost" style="margin-top:12px" onclick="DETA_PROMISE=null;DETA_PROMISEAE=null;DETA_LOADPROG={ll:0,ae:0};renderDetalle()">Reintentar</button></div>`;
+      }
     });
     return;
   }
   const all=detaAll();
   const years=[...new Set(all.map(x=>x.y).filter(y=>y!=null))].sort();
   const clasifs=[...new Set(all.map(x=>x.clas).filter(Boolean))].sort();
-  const vendors=[...new Set(all.map(x=>x.codV).filter(Boolean))].sort();
+  const vendors=[...new Set(all.map(x=>x.vendedor).filter(Boolean))].sort((a,b)=>a==='S/I'?1:b==='S/I'?-1:a.localeCompare(b,'es'));
   const list=detaFiltered();
   const totCant=list.reduce((s,x)=>s+x.cant,0);
   const totImp=list.reduce((s,x)=>s+x.imp,0);
@@ -3582,15 +3678,15 @@ function renderDetalle(){
     const arr=detaAgg(list,x=>x.codP+'||'+x.desc);
     arr.forEach(g=>{const s=g.rows[0];g.desc=s.desc;g.codP=s.codP;g.name=s.desc;g.nCli=new Set(g.rows.map(r=>r.codC)).size;});
     detaSort(arr);
-    const rows=arr.map(g=>`<tr class="deta-row" data-detax="p:${esc(g.codP)}"><td class="l"><span class="deta-caret">\u25b8</span> ${esc(g.desc||g.codP)}</td><td class="l muted mono">${esc(g.codP)}</td><td class="num">${fmtNum(g.cant)}</td><td class="num">${g.nCli}</td><td class="num">${money2(g.imp)}</td><td class="num">${money2(g.costo)}</td><td class="num strong ${g.util>=0?'t-good':'t-low'}">${money2(g.util)}</td><td class="num">${g.imp>0?Math.round(g.util/g.imp*100)+'%':'\u2014'}</td></tr>${DETA.expanded.has('p:'+g.codP)?`<tr class="deta-det"><td colspan="8">${detaChildTable(g.rows,x=>x.codC,[{key:'cli',lbl:'Cliente'},{lbl:'C\u00f3d'},{lbl:'Cant',cls:'num'},{lbl:'Importe',cls:'num'},{lbl:'Costo',cls:'num'},{lbl:'Utilidad',cls:'num'}])}</td></tr>`:''}`).join('');
+    const rows=arr.map(g=>`<tr class="deta-row" data-detax="p:${esc(g.codP)}"><td class="l"><span class="deta-caret">\u25b8</span> ${esc(g.desc||g.codP)}</td><td class="l muted mono">${esc(g.codP)}</td><td class="num">${fmtNum(g.cant)}</td><td class="num">${g.nCli}</td><td class="num">${money2(g.imp)}</td><td class="num">${money2(g.costo)}</td><td class="num strong ${g.util>=0?'t-good':'t-low'}">${money2(g.util)}</td><td class="num">${g.imp>0?Math.round(g.util/g.imp*100)+'%':'\u2014'}</td></tr>${DETA.expanded.has('p:'+g.codP)?`<tr class="deta-det"><td colspan="8">${detaChildTable(g.rows,x=>x.codC,'client')}</td></tr>`:''}`).join('');
     table=`<table class="rep-tbl hl-table deta-tbl"><thead><tr>${detaHeaders([['name','Producto','l'],['codP','C\u00f3digo','l'],['cant','Cantidad','num'],['nCli','# Clientes','num'],['imp','Importe','num'],['costo','Costo','num'],['util','Utilidad','num'],['margen','Margen','num']])}</tr></thead><tbody>${rows||'<tr><td colspan="8" class="empty-state">Sin datos con esos filtros.</td></tr>'}</tbody></table>`;
   }
   else if(DETA.view==='clients'){
     const arr=detaAgg(list,x=>x.codC+'||'+x.cli);
-    arr.forEach(g=>{const s=g.rows[0];g.cli=s.cli;g.codC=s.codC;g.codV=s.codV;g.name=s.cli;g.nProd=new Set(g.rows.map(r=>r.codP)).size;});
+    arr.forEach(g=>{const s=g.rows[0];g.cli=s.cli;g.codC=s.codC;g.vendedor=s.vendedor;g.name=s.cli;g.nProd=new Set(g.rows.map(r=>r.codP)).size;});
     detaSort(arr);
-    const rows=arr.map(g=>`<tr class="deta-row" data-detax="c:${esc(g.codC)}"><td class="l"><span class="deta-caret">\u25b8</span> ${esc(g.cli||g.codC)}</td><td class="l muted mono">${esc(g.codC)}</td><td class="l muted mono">${esc(g.codV||'\u2014')}</td><td class="num">${g.nProd}</td><td class="num">${fmtNum(g.cant)}</td><td class="num">${money2(g.imp)}</td><td class="num">${money2(g.costo)}</td><td class="num strong ${g.util>=0?'t-good':'t-low'}">${money2(g.util)}</td></tr>${DETA.expanded.has('c:'+g.codC)?`<tr class="deta-det"><td colspan="8">${detaChildTable(g.rows,x=>x.codP,[{key:'desc',lbl:'Producto'},{lbl:'C\u00f3d'},{lbl:'Cant',cls:'num'},{lbl:'Importe',cls:'num'},{lbl:'Costo',cls:'num'},{lbl:'Utilidad',cls:'num'}])}</td></tr>`:''}`).join('');
-    table=`<table class="rep-tbl hl-table deta-tbl"><thead><tr>${detaHeaders([['name','Cliente','l'],['codC','C\u00f3digo','l'],['codV','Cod Vend','l'],['nProd','# Productos','num'],['cant','Cantidad','num'],['imp','Importe','num'],['costo','Costo','num'],['util','Utilidad','num']])}</tr></thead><tbody>${rows||'<tr><td colspan="8" class="empty-state">Sin datos con esos filtros.</td></tr>'}</tbody></table>`;
+    const rows=arr.map(g=>`<tr class="deta-row" data-detax="c:${esc(g.codC)}"><td class="l"><span class="deta-caret">\u25b8</span> ${esc(g.cli||g.codC)}</td><td class="l muted mono">${esc(g.codC)}</td><td class="l ${g.vendedor==='S/I'?'muted2':''}">${esc(g.vendedor||'S/I')}</td><td class="num">${g.nProd}</td><td class="num">${fmtNum(g.cant)}</td><td class="num">${money2(g.imp)}</td><td class="num">${money2(g.costo)}</td><td class="num strong ${g.util>=0?'t-good':'t-low'}">${money2(g.util)}</td></tr>${DETA.expanded.has('c:'+g.codC)?`<tr class="deta-det"><td colspan="8">${detaChildTable(g.rows,x=>x.codP,'product')}</td></tr>`:''}`).join('');
+    table=`<table class="rep-tbl hl-table deta-tbl"><thead><tr>${detaHeaders([['name','Cliente','l'],['codC','C\u00f3digo','l'],['vendedor','Vendedor','l'],['nProd','# Productos','num'],['cant','Cantidad','num'],['imp','Importe','num'],['costo','Costo','num'],['util','Utilidad','num']])}</tr></thead><tbody>${rows||'<tr><td colspan="8" class="empty-state">Sin datos con esos filtros.</td></tr>'}</tbody></table>`;
   }
   else if(DETA.view==='rankProd'){
     const arr=detaAgg(list,x=>x.codP+'||'+x.desc);
@@ -3603,11 +3699,11 @@ function renderDetalle(){
   }
   else {
     const arr=detaAgg(list,x=>x.codC+'||'+x.cli);
-    arr.forEach(g=>{g.cli=g.rows[0].cli;g.codC=g.rows[0].codC;g.codV=g.rows[0].codV;g.name=g.cli;});
+    arr.forEach(g=>{g.cli=g.rows[0].cli;g.codC=g.rows[0].codC;g.vendedor=g.rows[0].vendedor;g.name=g.cli;});
     arr.sort((a,b)=>b.util-a.util);
     const top=arr.slice(0,50);
-    const rows=top.map((g,i)=>`<tr><td class="num">${i+1}</td><td class="l">${esc(g.cli||g.codC)}</td><td class="l muted mono">${esc(g.codC)}</td><td class="l muted mono">${esc(g.codV||'\u2014')}</td><td class="num">${money2(g.imp)}</td><td class="num">${money2(g.costo)}</td><td class="num strong ${g.util>=0?'t-good':'t-low'}">${money2(g.util)}</td><td class="num">${g.imp>0?Math.round(g.util/g.imp*100)+'%':'\u2014'}</td></tr>`).join('');
-    table=`<div class="rep-note" style="margin-bottom:10px">Top 50 clientes por utilidad (Importe \u2212 Costo) en el filtro.</div><table class="rep-tbl hl-table deta-tbl"><thead><tr><th>#</th><th class="l">Cliente</th><th class="l">C\u00f3digo</th><th class="l">Cod Vend</th><th>Importe</th><th>Costo</th><th>Utilidad</th><th>Margen</th></tr></thead><tbody>${rows||'<tr><td colspan="8" class="empty-state">Sin datos.</td></tr>'}</tbody></table>`;
+    const rows=top.map((g,i)=>`<tr><td class="num">${i+1}</td><td class="l">${esc(g.cli||g.codC)}</td><td class="l muted mono">${esc(g.codC)}</td><td class="l ${g.vendedor==='S/I'?'muted2':''}">${esc(g.vendedor||'S/I')}</td><td class="num">${money2(g.imp)}</td><td class="num">${money2(g.costo)}</td><td class="num strong ${g.util>=0?'t-good':'t-low'}">${money2(g.util)}</td><td class="num">${g.imp>0?Math.round(g.util/g.imp*100)+'%':'\u2014'}</td></tr>`).join('');
+    table=`<div class="rep-note" style="margin-bottom:10px">Top 50 clientes por utilidad (Importe \u2212 Costo) en el filtro.</div><table class="rep-tbl hl-table deta-tbl"><thead><tr><th>#</th><th class="l">Cliente</th><th class="l">C\u00f3digo</th><th class="l">Vendedor</th><th>Importe</th><th>Costo</th><th>Utilidad</th><th>Margen</th></tr></thead><tbody>${rows||'<tr><td colspan="8" class="empty-state">Sin datos.</td></tr>'}</tbody></table>`;
   }
 
   body.innerHTML=`
@@ -3618,16 +3714,17 @@ function renderDetalle(){
     <div class="skpi ${totUtil>=0?'up':'down'}"><div class="sk-l">Utilidad</div><div class="sk-v mono">${money2(totUtil)}</div><div class="sk-s">margen ${Math.round(margen)}%</div></div>
   </div>
   <div class="deta-toolbar">
+    <div class="deta-orgs">${[['ALL','Ambas'],['llanterama','Llanterama Tulancingo'],['autoelectrica','Autoel\u00e9ctrica Roma']].map(([v,lbl])=>`<button class="btn ${DETA.org===v?'act':'ghost'}" data-detao="${v}">${esc(lbl)}</button>`).join('')}</div>
     <div class="deta-years">${yearsBtns.map(([v,lbl])=>`<button class="btn ${DETA.year===v?'act':'ghost'}" data-detay="${v}">${esc(lbl)}</button>`).join('')}</div>
     <div class="deta-views">${DETA_VIEWS.map(([v,lbl])=>`<button class="btn ${DETA.view===v?'act':'ghost'}" data-detav="${v}">${esc(lbl)}</button>`).join('')}</div>
   </div>
   <div class="rd-controls">
     <div class="ctrl"><label>Clasificaci\u00f3n</label><select class="inp" id="detaClasif"><option value="ALL" ${DETA.clasif==='ALL'?'selected':''}>Todas</option>${clasifs.map(c=>`<option value="${esc(c)}" ${DETA.clasif===c?'selected':''}>${esc(c)}</option>`).join('')}</select></div>
-    <div class="ctrl"><label>Cod Vend</label><select class="inp" id="detaVendor"><option value="ALL" ${DETA.vendor==='ALL'?'selected':''}>Todos</option>${vendors.map(v=>`<option value="${esc(v)}" ${DETA.vendor===v?'selected':''}>${esc(v)}</option>`).join('')}</select></div>
+    <div class="ctrl"><label>Vendedor</label><select class="inp" id="detaVendor"><option value="ALL" ${DETA.vendor==='ALL'?'selected':''}>Todos</option>${vendors.map(v=>`<option value="${esc(v)}" ${DETA.vendor===v?'selected':''}>${esc(v)}</option>`).join('')}</select></div>
     <div class="ctrl" style="flex:2"><label>Buscar</label><input class="inp" id="detaSearch" placeholder="producto, cliente, c\u00f3digo\u2026" value="${esc(DETA.search)}"></div>
     <button class="btn ghost" onclick="printTablePDF('.deta-tbl','Detalle de ventas \u00b7 ${esc(DETA_VIEWS.find(v=>v[0]===DETA.view)[1])}','${DETA.year==='ALL'?'Comparativo todos los a\u00f1os':('A\u00f1o '+DETA.year)} \u00b7 Llanterama Tulancingo')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15h6M9 18h4"/></svg>PDF</button>
   </div>
-  <div class="rep-note" style="margin-bottom:12px">Detalle de facturaci\u00f3n de <b>Llanterama Tulancingo</b>. Cambia entre <b>a\u00f1os</b> (2025, 2026) o el <b>comparativo</b>; alterna la vista por producto o cliente, o revisa los rankings. En "Por producto" y "Por cliente" haz clic en cualquier fila para ver el desglose.</div>
+  <div class="rep-note" style="margin-bottom:12px">Detalle de facturaci\u00f3n de <b>ambas razones sociales</b>. Filtra por <b>organizaci\u00f3n</b>, <b>a\u00f1o</b>, <b>clasificaci\u00f3n</b> o <b>vendedor</b>. El vendedor se identifica por el c\u00f3digo de cliente cruzando con la hoja principal; los que no se pueden mapear salen como <b>S/I</b> (sin identificar). En "Por producto" y "Por cliente" haz clic en cualquier fila para ver el desglose.</div>
   <div class="rd-wrap"><div class="rd-tblwrap">${table}</div></div>`;
 }
 function money2(n){if(n==null||isNaN(n))return '\u2014';const s=Math.abs(n).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});return (n<0?'-':'')+'$'+s;}
@@ -3829,6 +3926,7 @@ document.addEventListener('click',e=>{
   const cs=e.target.closest('[data-cmpsort]');if(cs){const k=cs.dataset.cmpsort;if(CMP_SORT.key===k)CMP_SORT.dir=CMP_SORT.dir==='desc'?'asc':'desc';else{CMP_SORT.key=k;CMP_SORT.dir='desc';}renderComparativo();return;}
   const crs=e.target.closest('[data-csort]');if(crs){const k=crs.dataset.csort;if(CRED.sort===k)CRED.dir=-CRED.dir;else{CRED.sort=k;CRED.dir=-1;}renderCredito();return;}
   const c31=e.target.closest('#credOnly31');if(c31){CRED.only31=!CRED.only31;renderCredito();return;}
+  const doo=e.target.closest('[data-detao]');if(doo){DETA.org=doo.dataset.detao;renderDetalle();return;}
   const dy=e.target.closest('[data-detay]');if(dy){DETA.year=dy.dataset.detay;renderDetalle();return;}
   const dv=e.target.closest('[data-detav]');if(dv){DETA.view=dv.dataset.detav;DETA.expanded=new Set();DETA.sort=(dv.dataset.detav==='rankCli')?'util':'imp';DETA.dir=-1;renderDetalle();return;}
   const dx=e.target.closest('[data-detax]');if(dx){const k=dx.dataset.detax;if(DETA.expanded.has(k))DETA.expanded.delete(k);else DETA.expanded.add(k);renderDetalle();return;}
