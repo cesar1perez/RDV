@@ -837,7 +837,8 @@ tr.p82-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--line
 tr.deta-row{cursor:pointer;transition:.12s}
 tr.deta-row:hover td{background:rgba(255,210,30,.05)}
 .deta-caret{color:var(--muted2);font-size:10px;margin-right:5px;transition:.15s;display:inline-block}
-tr.deta-row:has(+ tr.deta-det) .deta-caret{transform:rotate(90deg);color:var(--accent)}
+tr.deta-row.open .deta-caret{transform:rotate(90deg);color:var(--accent)}
+tr.deta-row.open td{background:rgba(255,210,30,.07)}
 tr.deta-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--line2);padding:10px}
 :root[data-theme="light"] tr.deta-det td{background:rgba(181,132,0,.05)}
 .deta-sub .deta-subtbl{width:100%;font-size:11.5px}
@@ -3916,14 +3917,14 @@ function renderDetalle(){
     const arr=detaAgg(list,x=>x.codP+'||'+x.desc);
     arr.forEach(g=>{const s=g.rows[0];g.desc=s.desc;g.codP=s.codP;g.name=s.desc;g.nCli=new Set(g.rows.map(r=>r.codC)).size;});
     detaSort(arr);
-    const rows=arr.map(g=>`<tr class="deta-row" data-detax="p:${esc(g.codP)}"><td class="l"><span class="deta-caret">\u25b8</span> ${esc(g.desc||g.codP)}</td><td class="l muted mono">${esc(g.codP)}</td><td class="num">${fmtNum(g.cant)}</td><td class="num">${g.nCli}</td><td class="num">${money2(g.imp)}</td><td class="num">${money2(g.costo)}</td><td class="num strong ${g.util>=0?'t-good':'t-low'}">${money2(g.util)}</td><td class="num">${g.imp>0?Math.round(g.util/g.imp*100)+'%':'\u2014'}</td></tr>${DETA.expanded.has('p:'+g.codP)?`<tr class="deta-det"><td colspan="8">${detaChildTable(g.rows,x=>x.codC,'client')}</td></tr>`:''}`).join('');
+    const rows=arr.map(g=>`<tr class="deta-row ${DETA.expanded.has('p:'+g.codP)?'open':''}" data-detax="p:${esc(g.codP)}"><td class="l"><span class="deta-caret">\u25b8</span> ${esc(g.desc||g.codP)}</td><td class="l muted mono">${esc(g.codP)}</td><td class="num">${fmtNum(g.cant)}</td><td class="num">${g.nCli}</td><td class="num">${money2(g.imp)}</td><td class="num">${money2(g.costo)}</td><td class="num strong ${g.util>=0?'t-good':'t-low'}">${money2(g.util)}</td><td class="num">${g.imp>0?Math.round(g.util/g.imp*100)+'%':'\u2014'}</td></tr>${DETA.expanded.has('p:'+g.codP)?`<tr class="deta-det"><td colspan="8">${detaChildTable(g.rows,x=>x.codC,'client')}</td></tr>`:''}`).join('');
     table=`<table class="rep-tbl hl-table deta-tbl"><thead><tr>${detaHeaders([['name','Producto','l'],['codP','C\u00f3digo','l'],['cant','Cantidad','num'],['nCli','# Clientes','num'],['imp','Importe','num'],['costo','Costo','num'],['util','Utilidad','num'],['margen','Margen','num']])}</tr></thead><tbody>${rows||'<tr><td colspan="8" class="empty-state">Sin datos con esos filtros.</td></tr>'}</tbody></table>`;
   }
   else if(DETA.view==='clients'){
     const arr=detaAgg(list,x=>x.codC+'||'+x.cli);
     arr.forEach(g=>{const s=g.rows[0];g.cli=s.cli;g.codC=s.codC;g.vendedor=s.vendedor;g.name=s.cli;g.nProd=new Set(g.rows.map(r=>r.codP)).size;});
     detaSort(arr);
-    const rows=arr.map(g=>`<tr class="deta-row" data-detax="c:${esc(g.codC)}"><td class="l"><span class="deta-caret">\u25b8</span> ${esc(g.cli||g.codC)}</td><td class="l muted mono">${esc(g.codC)}</td><td class="l ${g.vendedor==='S/I'?'muted2':''}">${esc(g.vendedor||'S/I')}</td><td class="num">${g.nProd}</td><td class="num">${fmtNum(g.cant)}</td><td class="num">${money2(g.imp)}</td><td class="num">${money2(g.costo)}</td><td class="num strong ${g.util>=0?'t-good':'t-low'}">${money2(g.util)}</td></tr>${DETA.expanded.has('c:'+g.codC)?`<tr class="deta-det"><td colspan="8">${detaChildTable(g.rows,x=>x.codP,'product')}</td></tr>`:''}`).join('');
+    const rows=arr.map(g=>`<tr class="deta-row ${DETA.expanded.has('c:'+g.codC)?'open':''}" data-detax="c:${esc(g.codC)}"><td class="l"><span class="deta-caret">\u25b8</span> ${esc(g.cli||g.codC)}</td><td class="l muted mono">${esc(g.codC)}</td><td class="l ${g.vendedor==='S/I'?'muted2':''}">${esc(g.vendedor||'S/I')}</td><td class="num">${g.nProd}</td><td class="num">${fmtNum(g.cant)}</td><td class="num">${money2(g.imp)}</td><td class="num">${money2(g.costo)}</td><td class="num strong ${g.util>=0?'t-good':'t-low'}">${money2(g.util)}</td></tr>${DETA.expanded.has('c:'+g.codC)?`<tr class="deta-det"><td colspan="8">${detaChildTable(g.rows,x=>x.codP,'product')}</td></tr>`:''}`).join('');
     table=`<table class="rep-tbl hl-table deta-tbl"><thead><tr>${detaHeaders([['name','Cliente','l'],['codC','C\u00f3digo','l'],['vendedor','Vendedor','l'],['nProd','# Productos','num'],['cant','Cantidad','num'],['imp','Importe','num'],['costo','Costo','num'],['util','Utilidad','num']])}</tr></thead><tbody>${rows||'<tr><td colspan="8" class="empty-state">Sin datos con esos filtros.</td></tr>'}</tbody></table>`;
   }
   else if(DETA.view==='rankProd'){
@@ -4171,7 +4172,26 @@ document.addEventListener('click',e=>{
   const doo=e.target.closest('[data-detao]');if(doo){DETA.org=doo.dataset.detao;renderDetalle();return;}
   const dy=e.target.closest('[data-detay]');if(dy){DETA.year=dy.dataset.detay;renderDetalle();return;}
   const dv=e.target.closest('[data-detav]');if(dv){DETA.view=dv.dataset.detav;DETA.expanded=new Set();DETA.sort=(dv.dataset.detav==='rankCli')?'util':'imp';DETA.dir=-1;renderDetalle();return;}
-  const dx=e.target.closest('[data-detax]');if(dx){DETA_SCROLL=window.scrollY||0;const k=dx.dataset.detax;const was=DETA.expanded.has(k);DETA.expanded=new Set();if(!was)DETA.expanded.add(k);renderDetalle();setTimeout(()=>{try{window.scrollTo(0,DETA_SCROLL);const el=document.querySelector(`[data-detax="${k}"]`);if(el&&DETA.expanded.has(k)){const r=el.getBoundingClientRect();if(r.top<80||r.bottom>window.innerHeight-40){el.scrollIntoView({block:'center',behavior:'smooth'});}}}catch(_){}}, 30);return;}
+  const dx=e.target.closest('[data-detax]');if(dx){
+    if(DETA._busy)return; DETA._busy=true; setTimeout(()=>{DETA._busy=false;},350);
+    DETA_SCROLL=window.scrollY||0;
+    const k=dx.dataset.detax;
+    const was=DETA.expanded.has(k);
+    DETA.expanded=new Set();
+    if(!was)DETA.expanded.add(k);
+    renderDetalle();
+    requestAnimationFrame(()=>{
+      try{
+        window.scrollTo(0,DETA_SCROLL);
+        const el=document.querySelector(`[data-detax="${k}"]`);
+        if(el&&DETA.expanded.has(k)){
+          const r=el.getBoundingClientRect();
+          if(r.top<80||r.bottom>window.innerHeight-40){el.scrollIntoView({block:'center',behavior:'smooth'});}
+        }
+      }catch(_){}
+    });
+    return;
+  }
   const ds=e.target.closest('[data-detasort]');if(ds){DETA_SCROLL=window.scrollY||0;const k=ds.dataset.detasort;if(DETA.sort===k)DETA.dir=-DETA.dir;else{DETA.sort=k;DETA.dir=-1;}renderDetalle();setTimeout(()=>{try{window.scrollTo(0,DETA_SCROLL);}catch(_){}},30);return;}
   const ps=e.target.closest('[data-p82sort]');if(ps){const k=ps.dataset.p82sort;if(P82.sort===k)P82.dir=-P82.dir;else{P82.sort=k;P82.dir=-1;}renderP8020();return;}
   const pfu=e.target.closest('[data-p82fu]');if(pfu){
