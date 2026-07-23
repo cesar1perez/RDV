@@ -4173,23 +4173,35 @@ document.addEventListener('click',e=>{
   const dy=e.target.closest('[data-detay]');if(dy){DETA.year=dy.dataset.detay;renderDetalle();return;}
   const dv=e.target.closest('[data-detav]');if(dv){DETA.view=dv.dataset.detav;DETA.expanded=new Set();DETA.sort=(dv.dataset.detav==='rankCli')?'util':'imp';DETA.dir=-1;renderDetalle();return;}
   const dx=e.target.closest('[data-detax]');if(dx){
-    if(DETA._busy)return; DETA._busy=true; setTimeout(()=>{DETA._busy=false;},350);
-    DETA_SCROLL=window.scrollY||0;
     const k=dx.dataset.detax;
-    const was=DETA.expanded.has(k);
-    DETA.expanded=new Set();
-    if(!was)DETA.expanded.add(k);
-    renderDetalle();
-    requestAnimationFrame(()=>{
-      try{
-        window.scrollTo(0,DETA_SCROLL);
-        const el=document.querySelector(`[data-detax="${k}"]`);
-        if(el&&DETA.expanded.has(k)){
-          const r=el.getBoundingClientRect();
-          if(r.top<80||r.bottom>window.innerHeight-40){el.scrollIntoView({block:'center',behavior:'smooth'});}
-        }
-      }catch(_){}
-    });
+    const tbody=dx.parentElement;
+    // Cerrar cualquier detalle abierto en esta tabla
+    tbody.querySelectorAll('tr.deta-det').forEach(r=>r.remove());
+    tbody.querySelectorAll('tr.deta-row.open').forEach(r=>r.classList.remove('open'));
+    // Si la fila clickeada YA estaba abierta, era un cierre: no reabrimos
+    if(DETA.expanded.has(k)){DETA.expanded=new Set();return;}
+    // Abrir SOLO la que se clicked
+    DETA.expanded=new Set([k]);
+    dx.classList.add('open');
+    // Buscar la data del grupo para renderizar la subtabla
+    let html='';
+    try{
+      const list=detaFiltered();
+      if(k.startsWith('p:')){
+        const codP=k.slice(2);
+        const rows=list.filter(x=>x.codP===codP);
+        html=detaChildTable(rows,x=>x.codC,'client');
+      } else if(k.startsWith('c:')){
+        const codC=k.slice(2);
+        const rows=list.filter(x=>x.codC===codC);
+        html=detaChildTable(rows,x=>x.codP,'product');
+      }
+    }catch(_){html='<div class="empty-state">No se pudo cargar el desglose.</div>';}
+    const cols=dx.cells.length;
+    const det=document.createElement('tr');
+    det.className='deta-det';
+    det.innerHTML=`<td colspan="${cols}">${html}</td>`;
+    dx.after(det);
     return;
   }
   const ds=e.target.closest('[data-detasort]');if(ds){DETA_SCROLL=window.scrollY||0;const k=ds.dataset.detasort;if(DETA.sort===k)DETA.dir=-DETA.dir;else{DETA.sort=k;DETA.dir=-1;}renderDetalle();setTimeout(()=>{try{window.scrollTo(0,DETA_SCROLL);}catch(_){}},30);return;}
