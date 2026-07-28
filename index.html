@@ -845,10 +845,28 @@ tr.deta-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--lin
 .deta-sub .deta-subtbl th{background:transparent;color:var(--muted);border-bottom:1px solid var(--line);font-size:9.5px;text-transform:uppercase;letter-spacing:.4px}
 .deta-sub .deta-subtbl td{padding:5px 8px}
 /* Año vs Año */
-.yvy-wrap{overflow-x:auto;max-width:100%}
-.yvy-tbl{min-width:100%;font-size:11px}
-.yvy-tbl thead th{padding:5px 6px;font-size:9.5px}
-.yvy-tbl td{padding:5px 7px;white-space:nowrap}
+.yvy-wrap{overflow-x:auto;max-width:100%;position:relative}
+.yvy-tbl{min-width:100%;font-size:11px;border-collapse:separate;border-spacing:0}
+.yvy-tbl thead th{padding:6px 8px;font-size:9.5px;position:sticky;top:0;background:var(--panel);z-index:3}
+:root[data-theme="light"] .yvy-tbl thead th{background:var(--panel)}
+.yvy-tbl td{padding:6px 9px;white-space:nowrap}
+/* Solo la primera columna (nombre del cliente/producto/vendedor) queda fija */
+.yvy-tbl th.stick-col,.yvy-tbl td.stick-col{position:sticky;left:0;background:var(--panel);z-index:2;min-width:220px;max-width:280px;white-space:normal;box-shadow:6px 0 8px -5px rgba(0,0,0,.35)}
+.yvy-tbl th.stick-col{z-index:5}
+.yvy-tbl tr.yvy-row:hover td.stick-col{background:color-mix(in srgb,var(--accent) 8%,var(--panel))}
+.yvy-tbl tr.yvy-row.open td.stick-col{background:color-mix(in srgb,var(--accent) 12%,var(--panel))}
+.yvy-tbl tr.yvy-totrow td.stick-col{background:color-mix(in srgb,#0c1f44 55%,var(--panel));color:var(--amber)}
+:root[data-theme="light"] .yvy-tbl tr.yvy-totrow td.stick-col{background:color-mix(in srgb,var(--accent) 20%,var(--panel));color:var(--accent-ink)}
+/* separador entre meses: la primera sub-columna de cada mes lleva borde izquierdo grueso */
+.yvy-tbl th.ym-sub.y1,.yvy-tbl td.y1{border-left:2px solid var(--line2)}
+:root[data-theme="light"] .yvy-tbl th.ym-sub.y1,:root[data-theme="light"] .yvy-tbl td.y1{border-left:2px solid #c6d2e6}
+.yvy-tbl th.ym-hd{border-left:2px solid var(--line2)}
+:root[data-theme="light"] .yvy-tbl th.ym-hd{border-left:2px solid #c6d2e6}
+/* estrella 80/20 */
+.yvy-star{color:var(--accent);margin-right:5px;font-size:13px}
+:root[data-theme="light"] .yvy-star{color:var(--accent-ink)}
+.yvy-tbl tr.yvy-clave td.stick-col{background:color-mix(in srgb,var(--accent) 8%,var(--panel));border-left:3px solid var(--accent)}
+:root[data-theme="light"] .yvy-tbl tr.yvy-clave td.stick-col{background:color-mix(in srgb,var(--accent) 10%,var(--panel))}
 .yvy-tbl th.ym-hd{background:linear-gradient(135deg,var(--amber),#ffdf6b);color:#07142e;font-weight:800;font-size:10px;text-align:center;border-right:1px solid rgba(12,31,68,.15)}
 :root[data-theme="light"] .yvy-tbl th.ym-hd{background:linear-gradient(135deg,#eab000,#f5c93d)}
 .yvy-tbl th.ym-hd.tot{background:linear-gradient(135deg,#0c1f44,#132c5e);color:var(--amber)}
@@ -4027,6 +4045,7 @@ function yvyData(){
     if(!yvyMatchClas(x.clas))return false;
     if(YVY.clasif.size&&!YVY.clasif.has(x.clas))return false;
     if(YVY.org!=='ALL'&&x.org!==YVY.org)return false;
+    if(!x.vendedor||x.vendedor==='S/I')return false;
     if(YVY.vendor.size&&!YVY.vendor.has(x.vendedor))return false;
     if(YVY.search){const q=keyName(YVY.search); if(keyName(x.desc+' '+x.cli+' '+x.codP+' '+x.codC+' '+x.vendedor).indexOf(q)<0)return false;}
     return x.y===y1||x.y===y2;
@@ -4073,7 +4092,7 @@ function renderYvY(){
   }
   const {arr,y1,y2}=yvyData();
   const all=detaAll();
-  const vendors=[...new Set(all.map(x=>x.vendedor).filter(Boolean))].sort((a,b)=>a==='S/I'?1:b==='S/I'?-1:a.localeCompare(b,'es'));
+  const vendors=[...new Set(all.map(x=>x.vendedor).filter(v=>v&&v!=='S/I'))].sort((a,b)=>a.localeCompare(b,'es'));
   const yvyClasifsInData=[...new Set(all.filter(x=>yvyMatchClas(x.clas)).map(x=>x.clas).filter(Boolean))].sort();
 
   // Totales por mes agregado
@@ -4085,13 +4104,21 @@ function renderYvY(){
   const shown=monthsWithData.filter(x=>x.any);
   if(!shown.length)shown.push({m:'\u2014',i:0,any:true});
 
-  // Ordenar filas
-  arr.sort((a,b)=>{
-    if(YVY.sort==='label')return String(a.label).localeCompare(String(b.label),'es')*YVY.dir;
-    const va=a[YVY.sort==='diff'?'dif':(YVY.sort==='y1'?'y1T':(YVY.sort==='y2'?'y2T':'dif'))];
-    const vb=b[YVY.sort==='diff'?'dif':(YVY.sort==='y1'?'y1T':(YVY.sort==='y2'?'y2T':'dif'))];
-    return ((vb||0)-(va||0))*(YVY.dir===-1?1:-1);
-  });
+  // Ordenar por IMPACTO 80/20 (piezas totales y1+y2 desc) y marcar clientes clave
+  arr.sort((a,b)=>((b.y1T+b.y2T)||0)-((a.y1T+a.y2T)||0));
+  const totalPiezas=arr.reduce((s,g)=>s+g.y1T+g.y2T,0);
+  let acc=0;
+  arr.forEach(g=>{const v=g.y1T+g.y2T; const wasBelow=acc<totalPiezas*0.8; acc+=v; g.isKey=wasBelow&&v>0;});
+  const claveCount=arr.filter(g=>g.isKey).length;
+  // Si el usuario elige otro sort, respetarlo pero manteniendo la marca de clave
+  if(YVY.sort!=='diff'){
+    arr.sort((a,b)=>{
+      if(YVY.sort==='label')return String(a.label).localeCompare(String(b.label),'es')*YVY.dir;
+      const va=a[YVY.sort==='y1'?'y1T':(YVY.sort==='y2'?'y2T':'dif')];
+      const vb=b[YVY.sort==='y1'?'y1T':(YVY.sort==='y2'?'y2T':'dif')];
+      return ((vb||0)-(va||0))*(YVY.dir===-1?1:-1);
+    });
+  }
 
   // Encabezado con meses (2025 | 2026 | Dif por mes) + TOTAL
   const monthCells=shown.map(({m,i})=>`<th class="ym-hd" colspan="3">${esc(m)}</th>`).join('')+`<th class="ym-hd tot" colspan="3">TOTAL</th>`;
@@ -4107,7 +4134,7 @@ function renderYvY(){
     const totCls=g.dif>0?'up':(g.dif<0?'down':'flat');
     const rowExtra=YVY.view==='vendedores'?'':`<td class="l muted mono">${esc(g.code||'')}</td>`;
     const vendorTd=YVY.view==='clientes'?`<td class="l muted">${esc(g.vendor||'S/I')}</td>`:'';
-    return `<tr class="yvy-row ${YVY.expanded.has(g.key)?'open':''}" data-yvyx="${esc(g.key)}"><td class="l"><span class="deta-caret">\u25b8</span> ${esc(g.label)}</td>${rowExtra}${vendorTd}${cells}<td class="num strong y1">${yvyMoney(g.y1T)}</td><td class="num strong y2">${yvyMoney(g.y2T)}</td><td class="num strong ${totCls}">${g.dif>0?'+':''}${yvyMoney(g.dif)}</td></tr>`;
+    return `<tr class="yvy-row ${YVY.expanded.has(g.key)?'open':''} ${g.isKey?'yvy-clave':''}" data-yvyx="${esc(g.key)}"><td class="l stick-col"><span class="deta-caret">\u25b8</span> ${g.isKey?'<span class="yvy-star" title="Cliente clave: parte del 80% del volumen">\u2605</span>':''}${esc(g.label)}</td>${rowExtra}${vendorTd}${cells}<td class="num strong y1">${yvyMoney(g.y1T)}</td><td class="num strong y2">${yvyMoney(g.y2T)}</td><td class="num strong ${totCls}">${g.dif>0?'+':''}${yvyMoney(g.dif)}</td></tr>`;
   }).join('');
   // fila de TOTALES arriba
   const totCells=shown.map(({i})=>{
@@ -4118,7 +4145,7 @@ function renderYvY(){
   const totDifCls=dif>0?'up':(dif<0?'down':'flat');
     const nMesesY1=totY1.filter(v=>v!==0).length||1;
   const nMesesY2=totY2.filter(v=>v!==0).length||1;
-  const totalRow=`<tr class="yvy-totrow"><td class="l"><b>TOTALES</b></td>${YVY.view==='vendedores'?'':'<td></td>'}${YVY.view==='clientes'?'<td></td>':''}${totCells}<td class="num strong y1">${yvyMoney(totY1sum)}</td><td class="num strong y2">${yvyMoney(totY2sum)}</td><td class="num strong ${totDifCls}">${dif>0?'+':''}${yvyMoney(dif)}</td></tr>`;
+  const totalRow=`<tr class="yvy-totrow"><td class="l stick-col"><b>TOTALES</b></td>${YVY.view==='vendedores'?'':'<td></td>'}${YVY.view==='clientes'?'<td></td>':''}${totCells}<td class="num strong y1">${yvyMoney(totY1sum)}</td><td class="num strong y2">${yvyMoney(totY2sum)}</td><td class="num strong ${totDifCls}">${dif>0?'+':''}${yvyMoney(dif)}</td></tr>`;
 
   // Promedios por cliente/producto/vendedor (Total / meses con dato)
 
@@ -4130,6 +4157,7 @@ function renderYvY(){
   <div class="strat-kpis">
     <div class="skpi"><div class="sk-l">Piezas ${y1}</div><div class="sk-v mono">${yvyMoney(totY1sum)}</div><div class="sk-s">total del a\u00f1o (${nMesesY1} meses con dato)</div></div>
     <div class="skpi amber"><div class="sk-l">Piezas ${y2}</div><div class="sk-v mono">${yvyMoney(totY2sum)}</div><div class="sk-s">total del a\u00f1o (${nMesesY2} meses con dato)</div></div>
+    <div class="skpi"><div class="sk-l">Clientes clave \u2605</div><div class="sk-v">${claveCount}</div><div class="sk-s">de ${arr.length} \u00b7 80% del volumen</div></div>
     <div class="skpi ${dif>=0?'up':'down'}"><div class="sk-l">Diferencia</div><div class="sk-v mono">${dif>0?'+':''}${yvyMoney(dif)}</div><div class="sk-s">${dif===0||totY1sum===0?'sin cambio':((dif>0?'+':'')+Math.round(dif/totY1sum*100)+'% vs '+y1)}</div></div>
     <div class="skpi"><div class="sk-l">Promedio mensual</div><div class="sk-v mono" style="font-size:16px">${yvyMoney(totY1sum/nMesesY1)} \u2192 ${yvyMoney(totY2sum/nMesesY2)}</div><div class="sk-s">${y1} \u2192 ${y2}</div></div>
   </div>
@@ -4143,11 +4171,11 @@ function renderYvY(){
     <div class="ctrl" style="flex:2"><label>Buscar</label><input class="inp" id="yvySearch" placeholder="cliente, producto, vendedor\u2026" value="${esc(YVY.search)}"></div>
     <button class="btn ghost" onclick="printTablePDF('.yvy-tbl','A\u00f1o vs A\u00f1o ${y1} vs ${y2} \u00b7 ${esc(YVY_VIEWS.find(v=>v[0]===YVY.view)[1])}','${YVY.org==='ALL'?'Ambas razones sociales':(YVY.org==='llanterama'?'Llanterama':'Autoel\u00e9ctrica')}')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15h6M9 18h4"/></svg>PDF</button>
   </div>
-  <div class="rep-note" style="margin-bottom:12px">Comparativo <b>${y1} vs ${y2}</b> en <b>piezas</b> mes a mes por ${esc(labelCol.toLowerCase())}. Solo considera l\u00edneas duras: <b>5 Acumuladores, 7 Lubricantes, 8 Motobater\u00edas, 6 Filtros, China Auto, 1 Auto, 2 Camioneta, 3 Cami\u00f3n</b>. Verde crecimiento, rojo ca\u00edda. Haz clic en cualquier fila para ver el desglose.</div>
+  <div class="rep-note" style="margin-bottom:12px">Comparativo <b>${y1} vs ${y2}</b> en <b>piezas</b> mes a mes por ${esc(labelCol.toLowerCase())}. Solo considera l\u00edneas duras: <b>5 Acumuladores, 7 Lubricantes, 8 Motobater\u00edas, 6 Filtros, China Auto, 1 Auto, 2 Camioneta, 3 Cami\u00f3n</b> y solo clientes identificados por vendedor. Ordenados por <b>impacto 80/20</b>: los marcados con <span class="yvy-star">\u2605</span> concentran ~80% del volumen total. Verde crecimiento, rojo ca\u00edda.</div>
   <div class="rd-wrap"><div class="rd-tblwrap yvy-wrap">
     <table class="rep-tbl hl-table yvy-tbl">
       <thead>
-        <tr><th class="l sortable ${YVY.sort==='label'?'on':''}" data-yvysort="label" rowspan="2">${esc(labelCol)}</th>${YVY.view!=='vendedores'?'<th class="l" rowspan="2">C\u00f3digo</th>':''}${YVY.view==='clientes'?'<th class="l" rowspan="2">Vendedor</th>':''}${monthCells}</tr>
+        <tr><th class="l stick-col sortable ${YVY.sort==='label'?'on':''}" data-yvysort="label" rowspan="2">${esc(labelCol)}</th>${YVY.view!=='vendedores'?'<th class="l" rowspan="2">C\u00f3digo</th>':''}${YVY.view==='clientes'?'<th class="l" rowspan="2">Vendedor</th>':''}${monthCells}</tr>
         <tr>${subHead}</tr>
       </thead>
       <tbody>${totalRow}${rowsHtml||'<tr><td colspan="99" class="empty-state">Sin datos con esos filtros.</td></tr>'}</tbody>
