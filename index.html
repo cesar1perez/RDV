@@ -845,10 +845,22 @@ tr.deta-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--lin
 .deta-sub .deta-subtbl th{background:transparent;color:var(--muted);border-bottom:1px solid var(--line);font-size:9.5px;text-transform:uppercase;letter-spacing:.4px}
 .deta-sub .deta-subtbl td{padding:5px 8px}
 /* Año vs Año */
-.yvy-wrap{overflow-x:auto;max-width:100%}
-.yvy-tbl{min-width:100%;font-size:11px}
-.yvy-tbl thead th{padding:5px 6px;font-size:9.5px}
+.yvy-wrap{overflow-x:auto;max-width:100%;position:relative}
+.yvy-tbl{min-width:100%;font-size:11px;border-collapse:separate;border-spacing:0}
+.yvy-tbl thead th{padding:5px 6px;font-size:9.5px;position:sticky;top:0;background:var(--panel);z-index:3}
+:root[data-theme="light"] .yvy-tbl thead th{background:var(--panel)}
 .yvy-tbl td{padding:5px 7px;white-space:nowrap}
+/* columnas fijas al scroll horizontal */
+.yvy-tbl th.stick-col,.yvy-tbl td.stick-col{position:sticky;background:var(--panel);z-index:2;box-shadow:1px 0 0 var(--line) inset,-1px 0 0 var(--line)}
+.yvy-tbl th.stick-col{z-index:4;background:var(--panel)}
+.yvy-tbl tr.yvy-row:hover td.stick-col{background:color-mix(in srgb,var(--accent) 6%,var(--panel))}
+.yvy-tbl tr.yvy-row.open td.stick-col{background:color-mix(in srgb,var(--accent) 10%,var(--panel))}
+.yvy-tbl tr.yvy-totrow td.stick-col{background:color-mix(in srgb,#0c1f44 55%,var(--panel))}
+:root[data-theme="light"] .yvy-tbl tr.yvy-totrow td.stick-col{background:color-mix(in srgb,var(--accent) 15%,var(--panel))}
+.yvy-tbl tr.yvy-avgrow td.stick-col{background:color-mix(in srgb,var(--cyan) 12%,var(--panel))}
+.yvy-tbl .stick-1{left:0;min-width:220px;max-width:260px;white-space:normal}
+.yvy-tbl .stick-2{left:220px;min-width:110px;max-width:130px}
+.yvy-tbl .stick-3{left:330px;min-width:130px;max-width:170px;white-space:normal}
 .yvy-tbl th.ym-hd{background:linear-gradient(135deg,var(--amber),#ffdf6b);color:#07142e;font-weight:800;font-size:10px;text-align:center;border-right:1px solid rgba(12,31,68,.15)}
 :root[data-theme="light"] .yvy-tbl th.ym-hd{background:linear-gradient(135deg,#eab000,#f5c93d)}
 .yvy-tbl th.ym-hd.tot{background:linear-gradient(135deg,#0c1f44,#132c5e);color:var(--amber)}
@@ -869,6 +881,8 @@ tr.deta-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--lin
 .yvy-tbl td.strong{font-weight:800}
 .yvy-tbl tr.yvy-totrow td{background:rgba(12,31,68,.4);font-weight:800;border-bottom:2px solid var(--accent);position:sticky;top:0;z-index:2}
 :root[data-theme="light"] .yvy-tbl tr.yvy-totrow td{background:rgba(234,176,0,.1)}
+.yvy-tbl tr.yvy-avgrow td{background:rgba(58,166,255,.08);font-weight:800;border-bottom:2px solid var(--cyan)}
+:root[data-theme="light"] .yvy-tbl tr.yvy-avgrow td{background:rgba(31,127,224,.09)}
 .yvy-tbl tr.yvy-row{cursor:pointer;transition:.12s}
 .yvy-tbl tr.yvy-row:hover td{background:rgba(255,210,30,.05)}
 .yvy-tbl tr.yvy-row.open td{background:rgba(255,210,30,.09)}
@@ -4005,8 +4019,9 @@ function renderDetalle(){
   <div class="rep-note" style="margin-bottom:12px">Detalle de facturaci\u00f3n de <b>ambas razones sociales</b>. Filtra por <b>organizaci\u00f3n</b>, <b>a\u00f1o</b>, <b>clasificaci\u00f3n</b> o <b>vendedor</b>. El vendedor se identifica por el c\u00f3digo de cliente cruzando con la hoja principal; los que no se pueden mapear salen como <b>S/I</b> (sin identificar). En "Por producto" y "Por cliente" haz clic en cualquier fila para ver el desglose.</div>
   <div class="rd-wrap"><div class="rd-tblwrap">${table}</div></div>`;
 }
-let YVY={org:'ALL',vendor:new Set(),metric:'cant',view:'clientes',expanded:new Set(),sort:'diff',dir:-1,search:''};
-const YVY_METRICS=[['cant','Piezas'],['imp','Importe'],['util','Utilidad']];
+let YVY={org:'ALL',vendor:new Set(),view:'clientes',expanded:new Set(),sort:'diff',dir:-1,search:''};
+const YVY_ALLOWED_CLAS=['5 ACUMULAD','7 LUBRICAN','8 MOTOBAT','6 FILTROS','CHINA AUTO','1 AUT','2 CAMTA','3 CAMION'];
+function yvyMatchClas(c){const k=keyName(c||''); return YVY_ALLOWED_CLAS.some(x=>{const kk=keyName(x); return k===kk||k.indexOf(kk)>=0||kk.indexOf(k)>=0;});}
 const YVY_VIEWS=[['clientes','Por cliente'],['productos','Por producto'],['vendedores','Por vendedor']];
 const YVY_MONTHS=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
 
@@ -4022,12 +4037,13 @@ function yvyData(){
       ? (x)=>x.codP+'||'+x.desc
       : (x)=>x.vendedor||'S/I');
   const list=all.filter(x=>{
+    if(!yvyMatchClas(x.clas))return false;
     if(YVY.org!=='ALL'&&x.org!==YVY.org)return false;
     if(YVY.vendor.size&&!YVY.vendor.has(x.vendedor))return false;
     if(YVY.search){const q=keyName(YVY.search); if(keyName(x.desc+' '+x.cli+' '+x.codP+' '+x.codC+' '+x.vendedor).indexOf(q)<0)return false;}
     return x.y===y1||x.y===y2;
   });
-  const M=YVY.metric;
+  
   const map=new Map();
   list.forEach(x=>{
     const k=keyFn(x); if(!k)return;
@@ -4038,7 +4054,7 @@ function yvyData(){
     }
     const g=map.get(k);
     const d=detaParseFecha(x.fecha); const mo=d?d.getMonth():-1;
-    const val=M==='cant'?x.cant:(M==='imp'?x.imp:x.util);
+    const val=x.cant;
     if(mo>=0){
       if(x.y===y1){g.y1M[mo]+=val;g.y1T+=val;g.rowsY1.push(x);}
       else if(x.y===y2){g.y2M[mo]+=val;g.y2T+=val;g.rowsY2.push(x);}
@@ -4048,7 +4064,7 @@ function yvyData(){
   arr.forEach(g=>{g.dif=g.y2T-g.y1T;});
   return {arr,y1,y2};
 }
-function yvyMoney(v,M){return M==='cant'?fmtNum(v):money2(v);}
+function yvyMoney(v){return fmtNum(v);}
 function yvyMonthMax(arr,M){
   // no usado por ahora pero disponible para heatmap
   return null;
@@ -4097,54 +4113,61 @@ function renderYvY(){
     const cells=shown.map(({i})=>{
       const a=g.y1M[i], b=g.y2M[i], d=b-a;
       const dc=d>0?'up':(d<0?'down':'flat');
-      return `<td class="num y1">${a?yvyMoney(a,YVY.metric):'\u2014'}</td><td class="num y2">${b?yvyMoney(b,YVY.metric):'\u2014'}</td><td class="num diff ${dc}">${d>0?'+':''}${d?yvyMoney(d,YVY.metric):'0'}</td>`;
+      return `<td class="num y1">${a?yvyMoney(a):'\u2014'}</td><td class="num y2">${b?yvyMoney(b):'\u2014'}</td><td class="num diff ${dc}">${d>0?'+':''}${d?yvyMoney(d):'0'}</td>`;
     }).join('');
     const totCls=g.dif>0?'up':(g.dif<0?'down':'flat');
-    const rowExtra=YVY.view==='vendedores'?'':`<td class="l muted mono">${esc(g.code||'')}</td>`;
-    const vendorTd=YVY.view==='clientes'?`<td class="l muted">${esc(g.vendor||'S/I')}</td>`:'';
-    return `<tr class="yvy-row ${YVY.expanded.has(g.key)?'open':''}" data-yvyx="${esc(g.key)}"><td class="l"><span class="deta-caret">\u25b8</span> ${esc(g.label)}</td>${rowExtra}${vendorTd}${cells}<td class="num strong y1">${yvyMoney(g.y1T,YVY.metric)}</td><td class="num strong y2">${yvyMoney(g.y2T,YVY.metric)}</td><td class="num strong ${totCls}">${g.dif>0?'+':''}${yvyMoney(g.dif,YVY.metric)}</td></tr>`;
+    const rowExtra=YVY.view==='vendedores'?'':`<td class="l muted mono stick-col stick-2">${esc(g.code||'')}</td>`;
+    const vendorTd=YVY.view==='clientes'?`<td class="l muted stick-col stick-3">${esc(g.vendor||'S/I')}</td>`:'';
+    return `<tr class="yvy-row ${YVY.expanded.has(g.key)?'open':''}" data-yvyx="${esc(g.key)}"><td class="l stick-col stick-1"><span class="deta-caret">\u25b8</span> ${esc(g.label)}</td>${rowExtra}${vendorTd}${cells}<td class="num strong y1">${yvyMoney(g.y1T)}</td><td class="num strong y2">${yvyMoney(g.y2T)}</td><td class="num strong ${totCls}">${g.dif>0?'+':''}${yvyMoney(g.dif)}</td></tr>`;
   }).join('');
   // fila de TOTALES arriba
   const totCells=shown.map(({i})=>{
     const a=totY1[i], b=totY2[i], d=b-a;
     const dc=d>0?'up':(d<0?'down':'flat');
-    return `<td class="num y1">${a?yvyMoney(a,YVY.metric):'\u2014'}</td><td class="num y2">${b?yvyMoney(b,YVY.metric):'\u2014'}</td><td class="num diff ${dc}">${d>0?'+':''}${d?yvyMoney(d,YVY.metric):'0'}</td>`;
+    return `<td class="num y1">${a?yvyMoney(a):'\u2014'}</td><td class="num y2">${b?yvyMoney(b):'\u2014'}</td><td class="num diff ${dc}">${d>0?'+':''}${d?yvyMoney(d):'0'}</td>`;
   }).join('');
   const totDifCls=dif>0?'up':(dif<0?'down':'flat');
-  const totalRow=`<tr class="yvy-totrow"><td class="l"><b>TOTALES</b></td>${YVY.view==='vendedores'?'':'<td></td>'}${YVY.view==='clientes'?'<td></td>':''}${totCells}<td class="num strong y1">${yvyMoney(totY1sum,YVY.metric)}</td><td class="num strong y2">${yvyMoney(totY2sum,YVY.metric)}</td><td class="num strong ${totDifCls}">${dif>0?'+':''}${yvyMoney(dif,YVY.metric)}</td></tr>`;
+    const nMesesY1=totY1.filter(v=>v!==0).length||1;
+  const nMesesY2=totY2.filter(v=>v!==0).length||1;
+  const avgY1=totY1.map(v=>nMesesY1?v/nMesesY1:0);
+  const avgY2=totY2.map(v=>nMesesY2?v/nMesesY2:0);
+  const avgCells=shown.map(({i})=>{const a=avgY1[i],b=avgY2[i],d=b-a;const dc=d>0?'up':(d<0?'down':'flat');return `<td class="num y1">${a?yvyMoney(Math.round(a)):'\u2014'}</td><td class="num y2">${b?yvyMoney(Math.round(b)):'\u2014'}</td><td class="num diff ${dc}">${d>0?'+':''}${d?yvyMoney(Math.round(d)):'0'}</td>`;}).join('');
+  const avgY1sum=nMesesY1?totY1sum/nMesesY1:0, avgY2sum=nMesesY2?totY2sum/nMesesY2:0, avgDif=avgY2sum-avgY1sum;
+  const avgDifCls=avgDif>0?'up':(avgDif<0?'down':'flat');
+  const avgRow=`<tr class="yvy-avgrow"><td class="l stick-col stick-1"><b>PROMEDIO / MES</b></td>${YVY.view==='vendedores'?'':'<td class="stick-col stick-2"></td>'}${YVY.view==='clientes'?'<td class="stick-col stick-3"></td>':''}${avgCells}<td class="num strong y1">${yvyMoney(Math.round(avgY1sum))}</td><td class="num strong y2">${yvyMoney(Math.round(avgY2sum))}</td><td class="num strong ${avgDifCls}">${avgDif>0?'+':''}${yvyMoney(Math.round(avgDif))}</td></tr>`;
+
+  const totalRow=`<tr class="yvy-totrow"><td class="l stick-col stick-1"><b>TOTALES</b></td>${YVY.view==='vendedores'?'':'<td class="stick-col stick-2"></td>'}${YVY.view==='clientes'?'<td class="stick-col stick-3"></td>':''}${totCells}<td class="num strong y1">${yvyMoney(totY1sum)}</td><td class="num strong y2">${yvyMoney(totY2sum)}</td><td class="num strong ${totDifCls}">${dif>0?'+':''}${yvyMoney(dif)}</td></tr>`;
 
   // Promedios por cliente/producto/vendedor (Total / meses con dato)
-  const nMesesY1=totY1.filter(v=>v!==0).length||1;
-  const nMesesY2=totY2.filter(v=>v!==0).length||1;
+
 
   const extraLabelHead=YVY.view==='vendedores'?'':`<th class="l sortable ${YVY.sort==='code'?'on':''}" data-yvysort="code">C\u00f3digo</th>`;
   const vendorHead=YVY.view==='clientes'?'<th class="l">Vendedor</th>':'';
 
   body.innerHTML=`
   <div class="strat-kpis">
-    <div class="skpi"><div class="sk-l">${esc(YVY_METRICS.find(m=>m[0]===YVY.metric)[1])} ${y1}</div><div class="sk-v mono">${yvyMoney(totY1sum,YVY.metric)}</div><div class="sk-s">total del a\u00f1o (${nMesesY1} meses con dato)</div></div>
-    <div class="skpi amber"><div class="sk-l">${esc(YVY_METRICS.find(m=>m[0]===YVY.metric)[1])} ${y2}</div><div class="sk-v mono">${yvyMoney(totY2sum,YVY.metric)}</div><div class="sk-s">total del a\u00f1o (${nMesesY2} meses con dato)</div></div>
-    <div class="skpi ${dif>=0?'up':'down'}"><div class="sk-l">Diferencia</div><div class="sk-v mono">${dif>0?'+':''}${yvyMoney(dif,YVY.metric)}</div><div class="sk-s">${dif===0||totY1sum===0?'sin cambio':((dif>0?'+':'')+Math.round(dif/totY1sum*100)+'% vs '+y1)}</div></div>
-    <div class="skpi"><div class="sk-l">Promedio mensual</div><div class="sk-v mono" style="font-size:16px">${yvyMoney(totY1sum/nMesesY1,YVY.metric)} \u2192 ${yvyMoney(totY2sum/nMesesY2,YVY.metric)}</div><div class="sk-s">${y1} \u2192 ${y2}</div></div>
+    <div class="skpi"><div class="sk-l">Piezas ${y1}</div><div class="sk-v mono">${yvyMoney(totY1sum)}</div><div class="sk-s">total del a\u00f1o (${nMesesY1} meses con dato)</div></div>
+    <div class="skpi amber"><div class="sk-l">Piezas ${y2}</div><div class="sk-v mono">${yvyMoney(totY2sum)}</div><div class="sk-s">total del a\u00f1o (${nMesesY2} meses con dato)</div></div>
+    <div class="skpi ${dif>=0?'up':'down'}"><div class="sk-l">Diferencia</div><div class="sk-v mono">${dif>0?'+':''}${yvyMoney(dif)}</div><div class="sk-s">${dif===0||totY1sum===0?'sin cambio':((dif>0?'+':'')+Math.round(dif/totY1sum*100)+'% vs '+y1)}</div></div>
+    <div class="skpi"><div class="sk-l">Promedio mensual</div><div class="sk-v mono" style="font-size:16px">${yvyMoney(totY1sum/nMesesY1)} \u2192 ${yvyMoney(totY2sum/nMesesY2)}</div><div class="sk-s">${y1} \u2192 ${y2}</div></div>
   </div>
   <div class="deta-toolbar">
     <div class="deta-orgs">${[['ALL','Ambas'],['llanterama','Llanterama'],['autoelectrica','Autoel\u00e9ctrica']].map(([v,lbl])=>`<button class="btn ${YVY.org===v?'act':'ghost'}" data-yvyorg="${v}">${esc(lbl)}</button>`).join('')}</div>
     <div class="deta-views">${YVY_VIEWS.map(([v,lbl])=>`<button class="btn ${YVY.view===v?'act':'ghost'}" data-yvyv="${v}">${esc(lbl)}</button>`).join('')}</div>
   </div>
   <div class="rd-controls">
-    <div class="ctrl"><label>M\u00e9trica</label><div class="deta-orgs">${YVY_METRICS.map(([v,lbl])=>`<button class="btn sm ${YVY.metric===v?'act':'ghost'}" data-yvym="${v}">${esc(lbl)}</button>`).join('')}</div></div>
     ${detaMultiCtrl('yvyvendor','Vendedor',vendors,YVY.vendor)}
     <div class="ctrl" style="flex:2"><label>Buscar</label><input class="inp" id="yvySearch" placeholder="cliente, producto, vendedor\u2026" value="${esc(YVY.search)}"></div>
-    <button class="btn ghost" onclick="printTablePDF('.yvy-tbl','A\u00f1o vs A\u00f1o ${y1} vs ${y2} \u00b7 ${esc(YVY_VIEWS.find(v=>v[0]===YVY.view)[1])}','M\u00e9trica: ${esc(YVY_METRICS.find(m=>m[0]===YVY.metric)[1])} \u00b7 ${YVY.org==='ALL'?'Ambas razones sociales':(YVY.org==='llanterama'?'Llanterama':'Autoel\u00e9ctrica')}')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15h6M9 18h4"/></svg>PDF</button>
+    <button class="btn ghost" onclick="printTablePDF('.yvy-tbl','A\u00f1o vs A\u00f1o ${y1} vs ${y2} \u00b7 ${esc(YVY_VIEWS.find(v=>v[0]===YVY.view)[1])}','${YVY.org==='ALL'?'Ambas razones sociales':(YVY.org==='llanterama'?'Llanterama':'Autoel\u00e9ctrica')}')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15h6M9 18h4"/></svg>PDF</button>
   </div>
-  <div class="rep-note" style="margin-bottom:12px">Comparativo <b>${y1} vs ${y2}</b> mes a mes por ${esc(labelCol.toLowerCase())}. Cada mes muestra: valor ${y1}, valor ${y2} y la <b>Diferencia</b> (verde crecimiento, rojo ca\u00edda). Haz clic en cualquier fila para ver el desglose. Solo se muestran los meses con datos.</div>
+  <div class="rep-note" style="margin-bottom:12px">Comparativo <b>${y1} vs ${y2}</b> en <b>piezas</b> mes a mes por ${esc(labelCol.toLowerCase())}. Solo considera l\u00edneas duras: <b>5 Acumuladores, 7 Lubricantes, 8 Motobater\u00edas, 6 Filtros, China Auto, 1 Auto, 2 Camioneta, 3 Cami\u00f3n</b>. Verde crecimiento, rojo ca\u00edda. Haz clic en cualquier fila para ver el desglose.</div>
   <div class="rd-wrap"><div class="rd-tblwrap yvy-wrap">
     <table class="rep-tbl hl-table yvy-tbl">
       <thead>
-        <tr><th class="l sortable ${YVY.sort==='label'?'on':''}" data-yvysort="label" rowspan="2">${esc(labelCol)}</th>${YVY.view!=='vendedores'?'<th class="l" rowspan="2">C\u00f3digo</th>':''}${YVY.view==='clientes'?'<th class="l" rowspan="2">Vendedor</th>':''}${monthCells}</tr>
+        <tr><th class="l stick-col stick-1 sortable ${YVY.sort==='label'?'on':''}" data-yvysort="label" rowspan="2">${esc(labelCol)}</th>${YVY.view!=='vendedores'?'<th class="l stick-col stick-2" rowspan="2">C\u00f3digo</th>':''}${YVY.view==='clientes'?'<th class="l stick-col stick-3" rowspan="2">Vendedor</th>':''}${monthCells}</tr>
         <tr>${subHead}</tr>
       </thead>
-      <tbody>${totalRow}${rowsHtml||'<tr><td colspan="99" class="empty-state">Sin datos con esos filtros.</td></tr>'}</tbody>
+      <tbody>${totalRow}${avgRow}${rowsHtml||'<tr><td colspan="99" class="empty-state">Sin datos con esos filtros.</td></tr>'}</tbody>
     </table>
   </div></div>`;
 }
@@ -4157,7 +4180,7 @@ function yvyDetail(k){
   else if(YVY.view==='productos'){subKeyFn=(x)=>x.codC+'||'+x.cli; labelKey='cli'; labelTxt='Clientes que lo compran';}
   else {subKeyFn=(x)=>x.codC+'||'+x.cli; labelKey='cli'; labelTxt='Clientes atendidos';}
   const map=new Map();
-  const M=YVY.metric;
+  
   [...g.rowsY1,...g.rowsY2].forEach(x=>{
     const sk=subKeyFn(x); if(!sk)return;
     if(!map.has(sk))map.set(sk,{key:sk,code:sk.split('||')[0],lbl:sk.split('||').slice(1).join('||')||sk.split('||')[0],y1T:0,y2T:0});
@@ -4167,7 +4190,7 @@ function yvyDetail(k){
   const items=[...map.values()].map(it=>({...it,dif:it.y2T-it.y1T}));
   items.sort((a,b)=>Math.abs(b.dif)-Math.abs(a.dif));
   const top=items.slice(0,15);
-  return `<div class="yvy-detbox"><div class="yvy-dettitle">${labelTxt} \u00b7 top 15 por cambio</div><table class="rep-tbl hl-table yvy-subtbl"><thead><tr><th class="l">${labelTxt.split(' ')[0]}</th><th class="l">C\u00f3d</th><th>${y1}</th><th>${y2}</th><th>Diferencia</th></tr></thead><tbody>${top.map(it=>{const dc=it.dif>0?'up':(it.dif<0?'down':'flat');return `<tr><td class="l">${esc(it.lbl)}</td><td class="l muted mono">${esc(it.code)}</td><td class="num y1">${yvyMoney(it.y1T,M)}</td><td class="num y2">${yvyMoney(it.y2T,M)}</td><td class="num strong ${dc}">${it.dif>0?'+':''}${yvyMoney(it.dif,M)}</td></tr>`;}).join('')}</tbody></table></div>`;
+  return `<div class="yvy-detbox"><div class="yvy-dettitle">${labelTxt} \u00b7 top 15 por cambio</div><table class="rep-tbl hl-table yvy-subtbl"><thead><tr><th class="l">${labelTxt.split(' ')[0]}</th><th class="l">C\u00f3d</th><th>${y1}</th><th>${y2}</th><th>Diferencia</th></tr></thead><tbody>${top.map(it=>{const dc=it.dif>0?'up':(it.dif<0?'down':'flat');return `<tr><td class="l">${esc(it.lbl)}</td><td class="l muted mono">${esc(it.code)}</td><td class="num y1">${yvyMoney(it.y1T)}</td><td class="num y2">${yvyMoney(it.y2T)}</td><td class="num strong ${dc}">${it.dif>0?'+':''}${yvyMoney(it.dif)}</td></tr>`;}).join('')}</tbody></table></div>`;
 }
 function money2(n){if(n==null||isNaN(n))return '\u2014';const s=Math.abs(n).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});return (n<0?'-':'')+'$'+s;}
 let CAMP_DB=null, CAMP_PROMISE=null, CAMP_ERR='';
@@ -4373,7 +4396,6 @@ document.addEventListener('click',e=>{
   const ma=e.target.closest('[data-multiaction]');if(ma){const [id,act]=ma.dataset.multiaction.split('|');const key=id==='clasif'?'clasif':'vendor';if(id==='yvyvendor'){if(act==='all'){const box=ma.closest('.deta-multi').querySelector('.deta-multi-list');[...box.querySelectorAll('input[type=checkbox]')].forEach(c=>YVY.vendor.add(c.value));}else{YVY.vendor=new Set();}renderYvY();e.stopPropagation();return;}if(act==='all'){const box=ma.closest('.deta-multi').querySelector('.deta-multi-list');[...box.querySelectorAll('input[type=checkbox]')].forEach(c=>DETA[key].add(c.value));}else{DETA[key]=new Set();}renderDetalle();e.stopPropagation();return;}
   const yo=e.target.closest('[data-yvyorg]');if(yo){YVY.org=yo.dataset.yvyorg;renderYvY();return;}
   const yv=e.target.closest('[data-yvyv]');if(yv){YVY.view=yv.dataset.yvyv;YVY.expanded=new Set();renderYvY();return;}
-  const ym=e.target.closest('[data-yvym]');if(ym){YVY.metric=ym.dataset.yvym;renderYvY();return;}
   const yx=e.target.closest('[data-yvyx]');if(yx){const k=yx.dataset.yvyx;if(YVY.expanded.has(k)){YVY.expanded=new Set();yx.classList.remove('open');const nxt=yx.nextElementSibling;if(nxt&&nxt.classList.contains('yvy-det'))nxt.remove();}else{document.querySelectorAll('.yvy-row.open').forEach(r=>r.classList.remove('open'));document.querySelectorAll('tr.yvy-det').forEach(r=>r.remove());YVY.expanded=new Set([k]);yx.classList.add('open');const cols=yx.cells.length;const det=document.createElement('tr');det.className='yvy-det';det.innerHTML=`<td colspan="${cols}">${yvyDetail(k)}</td>`;yx.after(det);}return;}
   const ys=e.target.closest('[data-yvysort]');if(ys){const k=ys.dataset.yvysort;if(YVY.sort===k)YVY.dir=-YVY.dir;else{YVY.sort=k;YVY.dir=-1;}renderYvY();return;}
   const doo=e.target.closest('[data-detao]');if(doo){DETA.org=doo.dataset.detao;renderDetalle();return;}
