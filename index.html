@@ -332,6 +332,12 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .pend-chip b{color:var(--lc);font-weight:800;font-size:13.5px} .pend-chip i{font-family:'IBM Plex Mono';font-style:normal;color:var(--txt);font-weight:700;font-size:14px}
 /* reporte ruta por día */
 .rd-controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+.p82-cmt-filter{display:inline-flex;align-items:center}
+.p82-cmt-filter label{display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid var(--line2);border-radius:10px;cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);transition:.15s;background:var(--panel)}
+.p82-cmt-filter label:hover{border-color:var(--accent);color:var(--txt)}
+.p82-cmt-filter input{accent-color:var(--accent);width:15px;height:15px;margin:0}
+.p82-cmt-filter label:has(input:checked){border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--panel));color:var(--accent)}
+:root[data-theme="light"] .p82-cmt-filter label:has(input:checked){color:var(--accent-ink)}
 .rd-wrap{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px}
 .rd-head{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap;border-bottom:2px solid var(--accent);padding-bottom:14px;margin-bottom:16px}
 .rd-org{font-family:'Archivo';font-weight:800;font-size:20px;letter-spacing:-.3px}
@@ -3118,7 +3124,7 @@ function renderCredito(){
 }
 
 /* ===== 80/20: clientes clave por linea de producto ===== */
-let P82={org:'ALL',vend:'ALL',line:'TOTAL',mode:'period',sort:'real',dir:-1};
+let P82={org:'ALL',vend:'ALL',line:'TOTAL',mode:'period',sort:'real',dir:-1,withCmt:false};
 function p82Data(){
   const orgIds=P82.org==='ALL'?CONFIG.orgs.map(o=>o.id):[P82.org];
   const line=LINES.find(l=>l.key===P82.line)||LINES.find(l=>l.key==='TOTAL')||LINES[0];
@@ -3217,12 +3223,87 @@ function p82MonthDetail(code){
   }).join('');
   return `<div class="p82-months"><span class="pm-lbl">Venta de <b>${esc(line.label)}</b> por mes:</span>${chips}</div>`;
 }
+function p82PdfSeguimiento(){
+  const d=p82Data(); const line=d.line;
+  let list=d.list.filter(c=>(c.real!=null&&c.real>0)||(c.obj!=null&&c.obj>0));
+  if(P82.vend!=='ALL')list=list.filter(c=>c.vendor===P82.vend);
+  // Solo los que tienen al menos 1 comentario
+  list=list.filter(c=>p82FollowRead(c.code).some(v=>!isEmpty(v)));
+  // 80/20 flag
+  const totalReal=list.reduce((s,c)=>s+(c.real||0),0);
+  const byReal=list.filter(c=>c.real!=null&&c.real>0).slice().sort((a,b)=>b.real-a.real);
+  let acc=0;byReal.forEach(c=>{c.key=acc<totalReal*0.8;if(c.key)acc+=c.real;});
+  // Agrupar por vendedor
+  const byV=new Map();
+  list.forEach(c=>{const v=c.vendor||'Sin vendedor';if(!byV.has(v))byV.set(v,[]);byV.get(v).push(c);});
+  const vendorNames=[...byV.keys()].sort();
+  const now=new Date();
+  const fecha=now.toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'});
+  const alcance=P82.vend==='ALL'?'Todos los vendedores':P82.vend;
+  const modeLbl=P82.mode==='year'?'Acumulado del a\u00f1o':'Mes seleccionado';
+  const secciones=vendorNames.map(v=>{
+    const clientes=byV.get(v);
+    // ordenar por real desc
+    clientes.sort((a,b)=>(b.real||0)-(a.real||0));
+    const cli=clientes.map(c=>{
+      const cmts=p82FollowRead(c.code);
+      const items=cmts.map((val,i)=>{
+        if(isEmpty(val))return '';
+        return `<div class="pdfs-item"><div class="pdfs-item-lbl">${P82_FU_LBL[i]}</div><div class="pdfs-item-val">${esc(val).replace(/\n/g,'<br>')}</div></div>`;
+      }).filter(Boolean).join('');
+      if(!items)return '';
+      const pct=c.pct!=null?Math.round(c.pct)+'%':'\u2014';
+      return `<div class="pdfs-cli ${c.key?'key':''}"><div class="pdfs-cli-hd"><div class="pdfs-cli-name">${c.key?'\u2605 ':''}${esc(c.cliente)}</div><div class="pdfs-cli-nums">Obj: <b>${c.obj!=null?fmtNum(c.obj):'\u2014'}</b> \u00b7 Real: <b>${c.real!=null?fmtNum(c.real):'\u2014'}</b> \u00b7 ${pct}</div></div><div class="pdfs-cmts">${items}</div></div>`;
+    }).filter(Boolean).join('');
+    if(!cli)return '';
+    return `<section class="pdfs-vsec"><h2 class="pdfs-vhd">${esc(v)}</h2>${cli}</section>`;
+  }).filter(Boolean).join('');
+  const totalCli=list.length;
+  const totalCmt=list.reduce((s,c)=>s+p82FollowRead(c.code).filter(v=>!isEmpty(v)).length,0);
+  const html=`<!doctype html><html><head><meta charset="utf-8"><title>Seguimiento 80/20 \u00b7 ${esc(line.label)}</title>
+  <style>
+    @page{size:letter;margin:14mm 12mm}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#0c1f44;margin:0;padding:0;font-size:11px;line-height:1.4}
+    .pdfs-hd{background:linear-gradient(135deg,#0c1f44,#132c5e);color:#fff;padding:18px 20px;margin-bottom:14px;border-radius:8px}
+    .pdfs-hd .eyebrow{color:#facc15;letter-spacing:2px;font-weight:800;font-size:9px;text-transform:uppercase}
+    .pdfs-hd h1{font-family:'Segoe UI',sans-serif;font-style:italic;font-weight:800;font-size:20px;margin:4px 0 6px}
+    .pdfs-meta{display:flex;gap:22px;flex-wrap:wrap;font-size:10px;color:#c9d6ec}
+    .pdfs-meta b{color:#facc15}
+    .pdfs-vsec{margin-bottom:18px;page-break-inside:avoid}
+    .pdfs-vhd{background:#facc15;color:#0c1f44;padding:6px 12px;font-size:13px;font-weight:800;border-radius:5px;margin:0 0 8px}
+    .pdfs-cli{border:1px solid #cfd8e8;border-radius:6px;padding:9px 12px;margin-bottom:8px;page-break-inside:avoid}
+    .pdfs-cli.key{border-left:4px solid #facc15;background:#fffbf0}
+    .pdfs-cli-hd{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px;padding-bottom:5px;border-bottom:1px dashed #cfd8e8}
+    .pdfs-cli-name{font-weight:800;font-size:12px;color:#0c1f44}
+    .pdfs-cli-nums{font-family:monospace;font-size:10px;color:#4a5a7a}
+    .pdfs-cli-nums b{color:#0c1f44}
+    .pdfs-cmts{display:grid;grid-template-columns:1fr;gap:6px}
+    .pdfs-item{background:#f4f7fc;border-left:3px solid #1f7fe0;padding:6px 10px;border-radius:0 4px 4px 0}
+    .pdfs-item-lbl{font-size:9px;font-weight:800;color:#1f7fe0;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+    .pdfs-item-val{font-size:11px;color:#0c1f44;white-space:pre-wrap}
+    .pdfs-empty{text-align:center;padding:40px;color:#8090ad;font-style:italic}
+    @media print{.pdfs-cli{break-inside:avoid}}
+  </style></head>
+  <body>
+    <div class="pdfs-hd">
+      <div class="eyebrow">Reporte de seguimiento 80/20</div>
+      <h1>Comentarios por cliente \u00b7 ${esc(line.label)}</h1>
+      <div class="pdfs-meta"><span>\ud83d\udcc5 <b>${esc(fecha)}</b></span><span>\ud83d\udc65 Alcance: <b>${esc(alcance)}</b></span><span>\ud83d\udcca Periodo: <b>${esc(modeLbl)}</b></span><span>\ud83d\udcdd <b>${totalCli}</b> clientes \u00b7 <b>${totalCmt}</b> comentarios</span></div>
+    </div>
+    ${secciones||'<div class="pdfs-empty">Ning\u00fan cliente con comentarios registrados en el filtro actual.</div>'}
+  </body></html>`;
+  const w=window.open('','_blank');
+  if(!w){alert('Permite las ventanas emergentes para generar el PDF.');return;}
+  w.document.write(html); w.document.close();
+  setTimeout(()=>{try{w.focus();w.print();}catch(_){}}, 400);
+}
 function renderP8020(){
   const body=document.getElementById('repBody');
   const d=p82Data(); const line=d.line;
   const vendors=[...new Set(d.list.map(c=>c.vendor).filter(Boolean))].sort();
   let list=d.list.filter(c=>(c.real!=null&&c.real>0)||(c.obj!=null&&c.obj>0));
   if(P82.vend!=='ALL')list=list.filter(c=>c.vendor===P82.vend);
+  if(P82.withCmt)list=list.filter(c=>p82FollowRead(c.code).some(v=>!isEmpty(v)));
   const sk=P82.sort, dir=P82.dir;
   list.sort((a,b)=>{
     if(sk==='cliente'||sk==='vendor')return String(a[sk]||'').localeCompare(String(b[sk]||''),'es')*dir;
@@ -3259,6 +3340,8 @@ function renderP8020(){
     <div class="ctrl"><label>Vendedor</label><select class="inp" id="p82Vend">${['ALL',...vendors].map(v=>`<option value="${esc(v)}" ${P82.vend===v?'selected':''}>${v==='ALL'?'Todos':esc(v)}</option>`).join('')}</select></div>
     <div class="ctrl"><label>L\u00ednea de producto</label><select class="inp" id="p82Line">${LINES.map(l=>`<option value="${l.key}" ${P82.line===l.key?'selected':''}>${esc(l.label)}</option>`).join('')}</select></div>
     <div class="ctrl"><label>Periodo</label><select class="inp" id="p82Mode"><option value="period" ${P82.mode==='period'?'selected':''}>Mes seleccionado (arriba)</option><option value="year" ${P82.mode==='year'?'selected':''}>Todo el a\u00f1o \u00b7 acumulado</option></select></div>
+    <div class="ctrl p82-cmt-filter"><label><input type="checkbox" id="p82Cmt" ${P82.withCmt?'checked':''}><span>Solo con comentarios</span></label></div>
+    <button class="btn ghost" onclick="p82PdfSeguimiento()" title="PDF con comentarios de seguimiento (respeta filtro de vendedor)"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h4"/></svg>PDF de seguimiento</button>
     <button class="btn ghost" onclick="printTablePDF('.p82-tbl','Clientes 80/20 \u00b7 ${esc(line.label)}','${avgMode?'Todo el a\u00f1o (acumulado)':'Mes seleccionado'} \u00b7 ${P82.org==='ALL'?'Ambas organizaciones':esc(org(P82.org).label)}')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15h6M9 18h4"/></svg>PDF</button>
   </div>
   <div class="rep-note" style="margin-bottom:12px">Clientes con su <b>${esc(line.label)}</b>: objetivo, real ${avgMode?'acumulado del a\u00f1o':'del mes'} y % de cumplimiento. Los marcados con <span class="p82-star">\u2605</span> son los <b>clientes clave</b>: el grupo que concentra ~80% de la venta de esa l\u00ednea. Haz clic en los <b>encabezados</b> para ordenar de mayor a menor (y viceversa).</div>
@@ -4607,6 +4690,7 @@ document.addEventListener('change',e=>{
   else if(e.target.id==='p82Vend'){P82.vend=e.target.value;renderP8020();}
   else if(e.target.id==='p82Line'){P82.line=e.target.value;renderP8020();}
   else if(e.target.id==='p82Mode'){P82.mode=e.target.value;renderP8020();}
+  else if(e.target.id==='p82Cmt'){P82.withCmt=e.target.checked;renderP8020();}
   else if(e.target.id==='detaSearch'){DETA.search=e.target.value;renderDetalle();}
   else if(e.target.id==='yvySearch'){YVY.search=e.target.value;renderYvY();}
   else if(e.target.matches('input[data-multi]')){const id=e.target.dataset.multi;if(id==='yvyvendor'){if(e.target.checked)YVY.vendor.add(e.target.value);else YVY.vendor.delete(e.target.value);renderYvY();return;}
