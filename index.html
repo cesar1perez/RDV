@@ -4097,10 +4097,16 @@ function renderYvY(){
 
   // Totales por mes agregado
   const totY1=new Array(12).fill(0),totY2=new Array(12).fill(0);
-  arr.forEach(g=>{for(let i=0;i<12;i++){totY1[i]+=g.y1M[i];totY2[i]+=g.y2M[i];}});
+  const _curM=new Date().getMonth();
+  arr.forEach(g=>{
+    let sy1=0,sy2=0;
+    for(let i=0;i<=_curM;i++){sy1+=g.y1M[i]||0;sy2+=g.y2M[i]||0;totY1[i]+=g.y1M[i];totY2[i]+=g.y2M[i];}
+    g.y1T=sy1; g.y2T=sy2; g.dif=sy2-sy1;
+  });
   const totY1sum=totY1.reduce((a,b)=>a+b,0), totY2sum=totY2.reduce((a,b)=>a+b,0);
   const dif=totY2sum-totY1sum;
-  const monthsWithData=YVY_MONTHS.map((m,i)=>({m,i,any:totY1[i]!==0||totY2[i]!==0}));
+  const curMonth=new Date().getMonth();
+  const monthsWithData=YVY_MONTHS.map((m,i)=>({m,i,any:(totY1[i]!==0||totY2[i]!==0)&&i<=curMonth}));
   const shown=monthsWithData.filter(x=>x.any);
   if(!shown.length)shown.push({m:'\u2014',i:0,any:true});
 
