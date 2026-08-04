@@ -4419,7 +4419,7 @@ function parseCampDate(s){
 }
 function dnum(dt){return dt.getFullYear()*10000+(dt.getMonth()+1)*100+dt.getDate();}
 function fdate(dt){return dt.getDate()+' '+MESF[dt.getMonth()+1].slice(0,3).toLowerCase()+' '+dt.getFullYear();}
-const CAMP_START=new Date(2026,5,25), CAMP_END=new Date(2026,6,25);
+const CAMP_START=new Date(2026,5,25), CAMP_END=new Date(2026,6,31);
 let STRAT={refStart:new Date(2026,4,25),refEnd:new Date(2026,5,24),calY:2026,calM:5,pick:'start',clients:new Set()};
 function campAgg(startDt,endDt){
   const H=CAMP_DB.H, s=dnum(startDt), e=dnum(endDt);
