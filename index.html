@@ -865,6 +865,62 @@ tr.deta-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--lin
 .deta-sub .deta-subtbl{width:100%;font-size:11.5px}
 .deta-sub .deta-subtbl th{background:transparent;color:var(--muted);border-bottom:1px solid var(--line);font-size:9.5px;text-transform:uppercase;letter-spacing:.4px}
 .deta-sub .deta-subtbl td{padding:5px 8px}
+/* Desempeño por vendedor (VPV) */
+.vpv-tbl{width:100%;font-size:13px}
+.vpv-tbl th{padding:9px 10px;font-size:11px}
+.vpv-tbl td{padding:9px 10px;white-space:nowrap}
+.vpv-tbl td.num{font-family:'IBM Plex Mono';text-align:right}
+.vpv-tbl td.strong{font-weight:800}
+.vpv-tbl td.up,.vpv-tbl td.strong.up{color:var(--good) !important}
+.vpv-tbl td.down,.vpv-tbl td.strong.down{color:var(--low) !important}
+.vpv-tbl td.flat{color:var(--muted2)}
+.vpv-tbl th.sortable{cursor:pointer;user-select:none}
+.vpv-tbl th.sortable:hover,.vpv-tbl th.sortable.on{color:var(--accent)}
+:root[data-theme="light"] .vpv-tbl th.sortable:hover,:root[data-theme="light"] .vpv-tbl th.sortable.on{color:var(--accent-ink)}
+tr.vpv-row{cursor:pointer;transition:.12s}
+tr.vpv-row:hover td{background:rgba(255,210,30,.05)}
+tr.vpv-row.open td{background:rgba(255,210,30,.09)}
+tr.vpv-row.open .deta-caret{transform:rotate(90deg);color:var(--accent)}
+tr.vpv-row.key td:first-child{border-left:3px solid var(--accent);background:rgba(255,210,30,.06)}
+tr.vpv-totrow td{background:linear-gradient(135deg,rgba(12,31,68,.5),rgba(12,31,68,.3)) !important;font-weight:900;font-size:14px;color:var(--amber) !important;border-top:2px solid var(--accent);border-bottom:2px solid var(--accent)}
+:root[data-theme="light"] tr.vpv-totrow td{background:linear-gradient(135deg,rgba(234,176,0,.15),rgba(234,176,0,.08)) !important;color:var(--accent-ink) !important}
+.vpv-star{color:var(--accent);margin-right:5px}
+.vpv-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:800;margin-left:6px}
+.vpv-badge.good{background:rgba(16,185,129,.15);color:var(--good)}
+.vpv-badge.bad{background:rgba(239,68,68,.15);color:var(--low)}
+tr.vpv-det td{background:rgba(58,166,255,.04);border-bottom:2px solid var(--line2);padding:14px}
+/* Hero card vendedor */
+.vpv-hero{background:linear-gradient(135deg,#0c1f44,#132c5e);color:#fff;border-radius:14px;padding:20px 24px;margin-bottom:16px;border:1px solid rgba(255,210,30,.25)}
+.vpv-hero-name{font-family:'Archivo';font-style:italic;font-weight:900;font-size:26px;color:#fff;margin-bottom:12px;letter-spacing:-.3px}
+.vpv-hero-nums{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:12px}
+.vpv-hero-nums>div{display:flex;flex-direction:column;gap:2px}
+.vpv-hero-nums>div>span{font-size:10px;color:#8093b3;font-weight:800;text-transform:uppercase;letter-spacing:.4px}
+.vpv-hero-nums>div>b{font-family:'IBM Plex Mono';font-size:24px;color:#fff;font-weight:900;line-height:1}
+.vpv-hero-nums .sep{font-size:22px;color:var(--accent);font-weight:900}
+.vpv-hero-dif{padding:6px 14px;border-radius:10px;font-family:'IBM Plex Mono';font-weight:800;font-size:15px;background:rgba(255,255,255,.06)}
+.vpv-hero-dif.up{background:rgba(16,185,129,.2);color:#4ade80}
+.vpv-hero-dif.down{background:rgba(239,68,68,.2);color:#fca5a5}
+.vpv-hero-dif.flat{color:#8093b3}
+.vpv-hero-summary{display:flex;flex-wrap:wrap;gap:8px}
+.vpv-chip{padding:5px 11px;border-radius:14px;font-size:11px;font-weight:800;border:1px solid transparent}
+.vpv-chip.good{background:rgba(16,185,129,.18);color:#4ade80;border-color:rgba(16,185,129,.3)}
+.vpv-chip.bad{background:rgba(239,68,68,.18);color:#fca5a5;border-color:rgba(239,68,68,.3)}
+.vpv-chip.neutral{background:rgba(148,163,184,.15);color:#c9d6ec;border-color:rgba(148,163,184,.25)}
+.vpv-chip.new{background:rgba(58,166,255,.18);color:#7cc4ff;border-color:rgba(58,166,255,.3)}
+.vpv-chip.lost{background:rgba(0,0,0,.25);color:#8093b3;border-color:rgba(255,255,255,.1)}
+.vpv-chip.key{background:linear-gradient(135deg,var(--amber),#ffdf6b);color:#0c1f44;border-color:transparent}
+/* Desglose mensual del cliente */
+.vpv-monthbox{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:6px}
+.vpv-m{background:var(--kpi-bg);border:1px solid var(--kpi-border);border-radius:6px;padding:6px}
+.vpv-m-lbl{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--muted2);text-align:center;margin-bottom:3px}
+.vpv-m-v{display:flex;justify-content:space-between;gap:3px;font-family:'IBM Plex Mono';font-size:11px;font-weight:700}
+.vpv-m-v .y1{color:var(--cyan)}
+.vpv-m-v .y2{color:var(--accent)}
+.vpv-m-v .up{color:var(--good)}
+.vpv-m-v .down{color:var(--low)}
+.vpv-m-v .flat{color:var(--muted2)}
+:root[data-theme="light"] .vpv-m-v .y1{color:#1462a8}
+:root[data-theme="light"] .vpv-m-v .y2{color:var(--accent-ink)}
 /* Año vs Año */
 .yvy-wrap{overflow-x:auto;max-width:100%;position:relative}
 .yvy-tbl{min-width:100%;font-size:13.5px;border-collapse:separate;border-spacing:0}
@@ -2545,6 +2601,7 @@ const REP_TABS=[
   ['p8020','80/20 \u00b7 clientes clave'],
   ['deta','Detalle de ventas \u00b7 productos y clientes'],
   ['yvy','A\u00f1o vs A\u00f1o \u00b7 comparativo mensual por cliente'],
+  ['vpv','Desempe\u00f1o por vendedor \u00b7 25 vs 26 por l\u00ednea'],
   ['acuJul26','Recuperaci\u00f3n Acumulador Julio \u00b7 concluida'],
   ['act1','Act. 1 \u00b7 Carpeta de ruta'],
   ['act2','Act. 2-3 \u00b7 Reporte de visitas'],
@@ -2573,6 +2630,7 @@ function renderActiveReport(){
   else if(REPORT==='p8020')renderP8020();
   else if(REPORT==='deta')renderDetalle();
   else if(REPORT==='yvy')renderYvY();
+  else if(REPORT==='vpv')renderVpV();
   else if(REPORT==='acuJul26')renderAcuJul26();
   else if(REPORT==='fact')renderFactSemanal();
   else if(REPORT==='cmp')renderComparativo();
@@ -4197,6 +4255,365 @@ function yvyMatchClas(c){const k=keyName(c||''); return YVY_ALLOWED_CLAS.some(x=
 const YVY_VIEWS=[['clientes','Por cliente'],['productos','Por producto'],['vendedores','Por vendedor']];
 const YVY_MONTHS=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
 
+let VPV={vendor:'ALL',clasif:new Set(['5 ACUMULAD']),expanded:new Set(),sort:'y2',dir:-1};
+function vpvData(){
+  const all=detaAll();
+  const years=[...new Set(all.map(x=>x.y).filter(y=>y!=null))].sort();
+  const y2=years[years.length-1], y1=years[years.length-2]||(y2-1);
+  const list=all.filter(x=>{
+    if(!yvyMatchClas(x.clas))return false;
+    if(VPV.clasif.size&&!VPV.clasif.has(x.clas))return false;
+    return x.y===y1||x.y===y2;
+  });
+  return {list,y1,y2};
+}
+function vpvVendorAgg(){
+  // Agregar por vendedor
+  const {list,y1,y2}=vpvData();
+  const _curM=new Date().getMonth();
+  const byV=new Map();
+  list.forEach(x=>{
+    const v=x.vendedor||'S/I';
+    if(!byV.has(v))byV.set(v,{vendor:v,y1M:new Array(12).fill(0),y2M:new Array(12).fill(0),y1T:0,y2T:0,rows:[]});
+    const g=byV.get(v); g.rows.push(x);
+    const d=detaParseFecha(x.fecha); if(!d)return;
+    const mo=d.getMonth();
+    if(x.y===y1){g.y1M[mo]+=x.cant;}
+    else if(x.y===y2){g.y2M[mo]+=x.cant;}
+  });
+  // capar totales al mes actual
+  byV.forEach(g=>{
+    let s1=0,s2=0;
+    for(let i=0;i<=_curM;i++){s1+=g.y1M[i]||0;s2+=g.y2M[i]||0;}
+    g.y1T=s1;g.y2T=s2;g.dif=s2-s1;g.pct=s1>0?(s2-s1)/s1*100:(s2>0?100:0);
+  });
+  const arr=[...byV.values()].sort((a,b)=>b.y2T-a.y2T);
+  return {arr,y1,y2};
+}
+function vpvClientAgg(vendorName){
+  // Para un vendedor específico: agregar por cliente con y1/y2 totales
+  const {list,y1,y2}=vpvData();
+  const _curM=new Date().getMonth();
+  const rows=list.filter(x=>(x.vendedor||'S/I')===vendorName);
+  const byC=new Map();
+  rows.forEach(x=>{
+    const k=x.codC+'||'+x.cli; if(!x.codC&&!x.cli)return;
+    if(!byC.has(k))byC.set(k,{code:x.codC,name:x.cli,y1M:new Array(12).fill(0),y2M:new Array(12).fill(0),y1T:0,y2T:0});
+    const g=byC.get(k);
+    const d=detaParseFecha(x.fecha); if(!d)return;
+    const mo=d.getMonth();
+    if(x.y===y1){g.y1M[mo]+=x.cant;}
+    else if(x.y===y2){g.y2M[mo]+=x.cant;}
+  });
+  const arr=[...byC.values()];
+  arr.forEach(g=>{
+    let s1=0,s2=0;
+    for(let i=0;i<=_curM;i++){s1+=g.y1M[i]||0;s2+=g.y2M[i]||0;}
+    g.y1T=s1;g.y2T=s2;g.dif=s2-s1;g.pct=s1>0?(s2-s1)/s1*100:(s2>0?100:0);
+  });
+  // marcar 80/20 por y2 desc
+  arr.sort((a,b)=>b.y2T-a.y2T);
+  const total=arr.reduce((s,g)=>s+g.y2T,0);
+  let acc=0;
+  arr.forEach(g=>{const wasBelow=acc<total*0.8; if(g.y2T>0){acc+=g.y2T;g.isKey=wasBelow;}else g.isKey=false;});
+  return {arr,y1,y2};
+}
+function vpvClasify(clientArr){
+  // Reglas: baja fuerte<-20%, subida fuerte>20%, nuevo (y1=0,y2>0), perdido (y2=0,y1>0)
+  const nuevos=clientArr.filter(c=>c.y1T===0&&c.y2T>0).sort((a,b)=>b.y2T-a.y2T);
+  const perdidos=clientArr.filter(c=>c.y2T===0&&c.y1T>0).sort((a,b)=>b.y1T-a.y1T);
+  const activos=clientArr.filter(c=>c.y1T>0&&c.y2T>0);
+  const bajaron=activos.filter(c=>c.pct<=-20).sort((a,b)=>a.pct-b.pct);
+  const subieron=activos.filter(c=>c.pct>=20).sort((a,b)=>b.pct-a.pct);
+  const estables=activos.filter(c=>c.pct>-20&&c.pct<20);
+  return {nuevos,perdidos,bajaron,subieron,estables};
+}
+function renderVpV(){
+  const body=document.getElementById('repBody');
+  if(!DETA_DB||!DETA_DBAE){
+    body.innerHTML=`<div class="deta-loading"><div class="deta-load-title">Cargando desempe\u00f1o por vendedor\u2026</div><div class="deta-load-sub">Se necesita el detalle de ambas razones sociales.</div><div id="detaLoader"></div></div>`;
+    detaPaintLoader();
+    const p1=DETA_DB?Promise.resolve():loadDetalle();
+    const p2=DETA_DBAE?Promise.resolve():loadDetalleAE();
+    Promise.all([p1,p2]).then(()=>{if(REPORT==='vpv')renderVpV();});
+    return;
+  }
+  const all=detaAll();
+  const clasifsInData=[...new Set(all.filter(x=>yvyMatchClas(x.clas)).map(x=>x.clas).filter(Boolean))].sort();
+  const {arr:vendorArr,y1,y2}=vpvVendorAgg();
+  const _curM=new Date().getMonth();
+
+  // Toolbar: selector de clasificación multi + selector de vendedor
+  const vendorOptions='<option value="ALL">Todos los vendedores (vista comparativa)</option>'+vendorArr.map(v=>`<option value="${esc(v.vendor)}" ${VPV.vendor===v.vendor?'selected':''}>${esc(v.vendor)}</option>`).join('');
+  const clasifLbl=[...VPV.clasif].join(', ')||'Todas las duras';
+
+  let mainHtml='';
+  if(VPV.vendor==='ALL'){
+    // VISTA COMPARATIVA: tabla de todos los vendedores
+    const totY1=vendorArr.reduce((s,v)=>s+v.y1T,0);
+    const totY2=vendorArr.reduce((s,v)=>s+v.y2T,0);
+    const totDif=totY2-totY1;
+    const totPct=totY1>0?(totDif/totY1*100):(totY2>0?100:0);
+    vendorArr.sort((a,b)=>{
+      const k=VPV.sort==='name'?null:(VPV.sort==='y1'?'y1T':(VPV.sort==='y2'?'y2T':(VPV.sort==='dif'?'dif':'pct')));
+      if(!k)return String(a.vendor).localeCompare(String(b.vendor),'es')*VPV.dir;
+      return ((b[k]||0)-(a[k]||0))*(VPV.dir===-1?1:-1);
+    });
+    const rows=vendorArr.map(v=>{
+      const dc=v.dif>0?'up':(v.dif<0?'down':'flat');
+      const badge=v.pct>=20?'<span class="vpv-badge good">\u2b06\ufe0e</span>':(v.pct<=-20?'<span class="vpv-badge bad">\u2b07\ufe0e</span>':'');
+      return `<tr class="vpv-row" data-vpv="${esc(v.vendor)}"><td class="l"><span class="deta-caret">\u25b8</span> <b>${esc(v.vendor)}</b> ${badge}</td><td class="num">${fmtNum(v.y1T)}</td><td class="num strong">${fmtNum(v.y2T)}</td><td class="num strong ${dc}">${v.dif>0?'+':''}${fmtNum(v.dif)}</td><td class="num strong ${dc}">${v.dif>0?'+':''}${Math.round(v.pct)}%</td></tr>`;
+    }).join('');
+    const totCls=totDif>0?'up':(totDif<0?'down':'flat');
+    mainHtml=`<div class="rd-wrap"><table class="rep-tbl hl-table vpv-tbl">
+      <thead><tr>
+        <th class="l sortable ${VPV.sort==='name'?'on':''}" data-vpvsort="name">Vendedor</th>
+        <th class="sortable ${VPV.sort==='y1'?'on':''}" data-vpvsort="y1">Piezas ${y1}</th>
+        <th class="sortable ${VPV.sort==='y2'?'on':''}" data-vpvsort="y2">Piezas ${y2}</th>
+        <th class="sortable ${VPV.sort==='dif'?'on':''}" data-vpvsort="dif">Diferencia</th>
+        <th class="sortable ${VPV.sort==='pct'?'on':''}" data-vpvsort="pct">%</th>
+      </tr></thead>
+      <tbody>
+        <tr class="vpv-totrow"><td class="l"><b>TOTAL</b></td><td class="num">${fmtNum(totY1)}</td><td class="num strong">${fmtNum(totY2)}</td><td class="num strong ${totCls}">${totDif>0?'+':''}${fmtNum(totDif)}</td><td class="num strong ${totCls}">${totDif>0?'+':''}${Math.round(totPct)}%</td></tr>
+        ${rows||'<tr><td colspan="5" class="empty-state">Sin datos con esos filtros.</td></tr>'}
+      </tbody>
+    </table></div>
+    <div class="rep-note" style="margin-top:12px">Haz clic en cualquier vendedor para abrir su detalle completo por cliente.</div>`;
+  } else {
+    // VISTA INDIVIDUAL por vendedor
+    const {arr:clients}=vpvClientAgg(VPV.vendor);
+    const vendorRow=vendorArr.find(v=>v.vendor===VPV.vendor)||{y1T:0,y2T:0,dif:0,pct:0};
+    const claves=clients.filter(c=>c.isKey);
+    const clas=vpvClasify(clients);
+    // Ordenar clientes
+    clients.sort((a,b)=>{
+      const k=VPV.sort==='name'?null:(VPV.sort==='y1'?'y1T':(VPV.sort==='y2'?'y2T':(VPV.sort==='dif'?'dif':'pct')));
+      if(!k)return String(a.name).localeCompare(String(b.name),'es')*VPV.dir;
+      return ((b[k]||0)-(a[k]||0))*(VPV.dir===-1?1:-1);
+    });
+    const MMONTH=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    const rowsHtml=clients.map(c=>{
+      const dc=c.dif>0?'up':(c.dif<0?'down':'flat');
+      const isKey=c.isKey;
+      const monthsHtml=MMONTH.slice(0,_curM+1).map((m,i)=>{
+        const a=c.y1M[i],b=c.y2M[i],d=b-a,dcl=d>0?'up':(d<0?'down':'flat');
+        return `<div class="vpv-m"><div class="vpv-m-lbl">${m}</div><div class="vpv-m-v"><span class="y1">${a||'\u2014'}</span><span class="y2">${b||'\u2014'}</span><span class="${dcl}">${d>0?'+':''}${d||0}</span></div></div>`;
+      }).join('');
+      return `<tr class="vpv-row ${isKey?'key':''}" data-vpvcli="${esc(c.code)}||${esc(c.name)}"><td class="l"><span class="deta-caret">\u25b8</span>${isKey?'<span class="vpv-star">\u2605</span>':''}${esc(c.name)}</td><td class="l muted mono">${esc(c.code||'')}</td><td class="num">${fmtNum(c.y1T)}</td><td class="num strong">${fmtNum(c.y2T)}</td><td class="num strong ${dc}">${c.dif>0?'+':''}${fmtNum(c.dif)}</td><td class="num strong ${dc}">${c.dif>0?'+':''}${c.pct===Infinity?'\u2014':Math.round(c.pct)+'%'}</td></tr>
+      ${VPV.expanded.has(c.code+'||'+c.name)?`<tr class="vpv-det"><td colspan="6"><div class="vpv-monthbox">${monthsHtml}</div></td></tr>`:''}`;
+    }).join('');
+    const totCls=vendorRow.dif>0?'up':(vendorRow.dif<0?'down':'flat');
+    mainHtml=`
+    <div class="vpv-hero">
+      <div class="vpv-hero-name">${esc(VPV.vendor)}</div>
+      <div class="vpv-hero-nums">
+        <div><span>${y1}</span><b>${fmtNum(vendorRow.y1T)}</b></div>
+        <div class="sep">\u2192</div>
+        <div><span>${y2}</span><b>${fmtNum(vendorRow.y2T)}</b></div>
+        <div class="vpv-hero-dif ${totCls}">${vendorRow.dif>0?'+':''}${fmtNum(vendorRow.dif)} (${vendorRow.dif>0?'+':''}${Math.round(vendorRow.pct)}%)</div>
+      </div>
+      <div class="vpv-hero-summary">
+        <span class="vpv-chip good">\u2b06\ufe0e ${clas.subieron.length} subieron</span>
+        <span class="vpv-chip bad">\u2b07\ufe0e ${clas.bajaron.length} bajaron</span>
+        <span class="vpv-chip neutral">\u25a0 ${clas.estables.length} estables</span>
+        <span class="vpv-chip new">\u2728 ${clas.nuevos.length} nuevos</span>
+        <span class="vpv-chip lost">\u2715 ${clas.perdidos.length} perdidos</span>
+        <span class="vpv-chip key">\u2605 ${claves.length} clave 80/20</span>
+      </div>
+    </div>
+    <div class="rd-wrap"><table class="rep-tbl hl-table vpv-tbl">
+      <thead><tr>
+        <th class="l sortable ${VPV.sort==='name'?'on':''}" data-vpvsort="name">Cliente</th>
+        <th class="l">C\u00f3digo</th>
+        <th class="sortable ${VPV.sort==='y1'?'on':''}" data-vpvsort="y1">${y1}</th>
+        <th class="sortable ${VPV.sort==='y2'?'on':''}" data-vpvsort="y2">${y2}</th>
+        <th class="sortable ${VPV.sort==='dif'?'on':''}" data-vpvsort="dif">Diferencia</th>
+        <th class="sortable ${VPV.sort==='pct'?'on':''}" data-vpvsort="pct">%</th>
+      </tr></thead>
+      <tbody>${rowsHtml||'<tr><td colspan="6" class="empty-state">Sin datos con esos filtros.</td></tr>'}</tbody>
+    </table></div>
+    <div class="rep-note" style="margin-top:12px">Los <b>\u2605 clientes clave</b> concentran ~80% del volumen ${y2}. Haz clic en cualquier fila para ver el desglose mes a mes.</div>`;
+  }
+
+  body.innerHTML=`
+  <div class="deta-toolbar">
+    <div class="ctrl" style="min-width:280px"><label>Vendedor</label><select class="inp" id="vpvVend">${vendorOptions}</select></div>
+    ${detaMultiCtrl('vpvclasif','L\u00ednea de producto',clasifsInData,VPV.clasif)}
+    ${VPV.vendor!=='ALL'?'<button class="btn ghost" onclick="vpvPdfEjecutivo()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15h6M9 18h4"/></svg>Resumen ejecutivo PDF</button>':''}
+  </div>
+  <div class="rep-note" style="margin-bottom:14px">Piezas facturadas ${y1} vs ${y2} en la l\u00ednea seleccionada (<b>${esc(clasifLbl)}</b>). Solo se contemplan los meses ya transcurridos del ${y2}. Al elegir un vendedor espec\u00edfico puedes generar el <b>Resumen ejecutivo PDF</b> con an\u00e1lisis de clientes que subieron, bajaron, nuevos, perdidos, y \u00e1reas de oportunidad.</div>
+  ${mainHtml}`;
+}
+
+function vpvPdfEjecutivo(){
+  if(VPV.vendor==='ALL'){alert('Selecciona un vendedor espec\u00edfico primero.');return;}
+  const {arr:clients,y1,y2}=vpvClientAgg(VPV.vendor);
+  const {arr:vendors}=vpvVendorAgg();
+  const vRow=vendors.find(v=>v.vendor===VPV.vendor)||{y1T:0,y2T:0,dif:0,pct:0,y1M:new Array(12).fill(0),y2M:new Array(12).fill(0)};
+  const clas=vpvClasify(clients);
+  const claves=clients.filter(c=>c.isKey);
+  const _curM=new Date().getMonth();
+  const MMONTH=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+  const now=new Date();
+  const fecha=now.toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'});
+  const clasifLbl=[...VPV.clasif].join(', ')||'todas las l\u00edneas duras';
+
+  // Top 5 clientes clave para foco
+  const top5=claves.slice(0,5);
+  // Bajaron top 5 por magnitud
+  const bajTop=clas.bajaron.slice(0,8);
+  // Subieron top 5
+  const subTop=clas.subieron.slice(0,8);
+  // Perdidos top 5
+  const perTop=clas.perdidos.slice(0,8);
+  // Nuevos top 5
+  const nueTop=clas.nuevos.slice(0,8);
+  // Potenciales: clientes que compran clase pero muy poco (menos de mediana) y con dif positiva o estable
+  const activos=clas.subieron.concat(clas.estables);
+  const y2vals=activos.map(c=>c.y2T).sort((a,b)=>a-b);
+  const median=y2vals.length?y2vals[Math.floor(y2vals.length/2)]:0;
+  const potenciales=activos.filter(c=>c.y2T<=median&&c.y2T>0).sort((a,b)=>b.pct-a.pct).slice(0,6);
+
+  // Gráfico de mes: comparativo mensual
+  const monthsHtml=MMONTH.slice(0,_curM+1).map((m,i)=>{
+    const a=vRow.y1M[i], b=vRow.y2M[i], d=b-a;
+    const mx=Math.max(...vRow.y1M.slice(0,_curM+1),...vRow.y2M.slice(0,_curM+1),1);
+    const h1=Math.round((a/mx)*40), h2=Math.round((b/mx)*40);
+    const dc=d>0?'up':(d<0?'down':'flat');
+    return `<div class="vpv-pdf-mcol"><div class="vpv-pdf-bars"><div class="vpv-pdf-bar y1" style="height:${h1}px" title="${y1}: ${a}"></div><div class="vpv-pdf-bar y2" style="height:${h2}px" title="${y2}: ${b}"></div></div><div class="vpv-pdf-m-lbl">${m}</div><div class="vpv-pdf-m-dif ${dc}">${d>0?'+':''}${d}</div></div>`;
+  }).join('');
+
+  // Diagnóstico narrativo
+  const globalPct=Math.round(vRow.pct||0);
+  const diag=[];
+  if(globalPct>=20)diag.push(`\ud83d\udcc8 <b>Desempe\u00f1o s\u00f3lido</b>: crecimiento de ${globalPct}% en piezas vs ${y1}, muy por encima del rango estable.`);
+  else if(globalPct>=5)diag.push(`\u2705 <b>Tendencia positiva</b>: crecimiento moderado de ${globalPct}% en piezas vs ${y1}.`);
+  else if(globalPct>-5)diag.push(`\u2696\ufe0f <b>Desempe\u00f1o estable</b>: variaci\u00f3n de ${globalPct>=0?'+':''}${globalPct}% vs ${y1}, dentro del rango normal.`);
+  else if(globalPct>=-20)diag.push(`\u26a0\ufe0f <b>Ca\u00edda moderada</b>: baja de ${globalPct}% en piezas vs ${y1}. Requiere atenci\u00f3n.`);
+  else diag.push(`\ud83d\udd34 <b>Ca\u00edda pronunciada</b>: baja de ${globalPct}% en piezas vs ${y1}. Requiere acci\u00f3n urgente.`);
+  if(clas.perdidos.length)diag.push(`\ud83d\udce4 <b>${clas.perdidos.length} clientes</b> compraron en ${y1} y no en ${y2} \u2014 recuperables con visita puntual.`);
+  if(clas.nuevos.length)diag.push(`\u2728 <b>${clas.nuevos.length} clientes nuevos</b> se sumaron en ${y2} \u2014 fidelizar para asegurar recompra.`);
+  if(claves.length)diag.push(`\u2b50 <b>${claves.length} clientes clave</b> concentran ~80% del volumen \u2014 son la prioridad de retenci\u00f3n.`);
+  if(clas.bajaron.length>=3)diag.push(`\ud83d\udd0d <b>${clas.bajaron.length} clientes</b> bajaron m\u00e1s de 20% su consumo \u2014 investigar causas.`);
+
+  const html=`<!doctype html><html><head><meta charset="utf-8"><title>Resumen ejecutivo ${esc(VPV.vendor)}</title>
+  <style>
+    @page{size:letter;margin:12mm 11mm}
+    *{box-sizing:border-box}html,body{margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#0c1f44;font-size:10.5px;line-height:1.45}
+    .vpv-pdf-hd{background:linear-gradient(135deg,#0c1f44,#132c5e);color:#fff;padding:16px 20px;margin:0 0 14px;border-radius:8px}
+    .vpv-pdf-eye{color:#facc15;letter-spacing:1.8px;font-weight:800;font-size:9px;text-transform:uppercase}
+    .vpv-pdf-hd h1{font-family:'Segoe UI',sans-serif;font-style:italic;font-weight:800;font-size:22px;margin:4px 0 3px}
+    .vpv-pdf-hd h2{font-size:14px;color:#c9d6ec;margin:0 0 8px;font-weight:600}
+    .vpv-pdf-meta{display:flex;gap:18px;flex-wrap:wrap;font-size:10px;color:#c9d6ec}
+    .vpv-pdf-meta b{color:#facc15}
+    .vpv-pdf-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:14px}
+    .vpv-pdf-kpi{background:#f4f7fc;border:1px solid #cfd8e8;border-radius:6px;padding:10px 12px}
+    .vpv-pdf-kpi.hi{border-left:3px solid #10b981;background:#ecfdf5}
+    .vpv-pdf-kpi.lo{border-left:3px solid #ef4444;background:#fef2f2}
+    .vpv-pdf-kpi.neu{border-left:3px solid #f59e0b;background:#fffbeb}
+    .vpv-pdf-kl{font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:#4a5a7a;margin-bottom:3px}
+    .vpv-pdf-kv{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:900;color:#0c1f44;line-height:1}
+    .vpv-pdf-ks{font-size:9.5px;color:#4a5a7a;margin-top:3px}
+    .vpv-pdf-sec{margin-bottom:14px;page-break-inside:avoid;break-inside:avoid}
+    .vpv-pdf-sec h3{background:#facc15;color:#0c1f44;padding:5px 11px;font-size:11.5px;font-weight:800;border-radius:4px;margin:0 0 8px}
+    .vpv-pdf-sec.diag h3{background:#0c1f44;color:#facc15}
+    .vpv-pdf-diag{background:#f4f7fc;border-left:3px solid #1f7fe0;padding:10px 14px;border-radius:0 4px 4px 0}
+    .vpv-pdf-diag p{margin:0 0 6px;font-size:11px;line-height:1.5}
+    .vpv-pdf-diag p:last-child{margin-bottom:0}
+    .vpv-pdf-diag b{color:#0c1f44}
+    .vpv-pdf-tbl{width:100%;border-collapse:collapse;font-size:10px}
+    .vpv-pdf-tbl th{background:#e5ebf5;color:#0c1f44;font-weight:800;padding:5px 7px;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.3px}
+    .vpv-pdf-tbl td{padding:4px 7px;border-bottom:1px solid #f0f3f9}
+    .vpv-pdf-tbl td.num{text-align:right;font-family:monospace;font-weight:700}
+    .vpv-pdf-tbl td.pct.up{color:#10b981;font-weight:800}
+    .vpv-pdf-tbl td.pct.down{color:#ef4444;font-weight:800}
+    .vpv-pdf-tbl td.pct.flat{color:#4a5a7a}
+    .vpv-pdf-empty{text-align:center;padding:10px;color:#8090ad;font-style:italic;font-size:10px}
+    /* Gráfica mensual */
+    .vpv-pdf-chart{display:flex;justify-content:space-between;align-items:flex-end;padding:8px 6px;background:#fafbfe;border:1px solid #e5ebf5;border-radius:6px;height:80px;gap:4px}
+    .vpv-pdf-mcol{display:flex;flex-direction:column;align-items:center;flex:1;height:100%}
+    .vpv-pdf-bars{display:flex;gap:2px;align-items:flex-end;height:48px;margin-bottom:4px}
+    .vpv-pdf-bar{width:8px;border-radius:2px 2px 0 0}
+    .vpv-pdf-bar.y1{background:#5aa7f0}
+    .vpv-pdf-bar.y2{background:#facc15}
+    .vpv-pdf-m-lbl{font-size:8px;font-weight:800;color:#4a5a7a}
+    .vpv-pdf-m-dif{font-size:7.5px;font-weight:800;margin-top:1px}
+    .vpv-pdf-m-dif.up{color:#10b981}
+    .vpv-pdf-m-dif.down{color:#ef4444}
+    .vpv-pdf-m-dif.flat{color:#8090ad}
+    .vpv-pdf-legend{display:flex;gap:14px;justify-content:center;margin-top:6px;font-size:9px;font-weight:700;color:#4a5a7a}
+    .vpv-pdf-legend .dot{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:4px;vertical-align:middle}
+    .vpv-pdf-legend .y1 .dot{background:#5aa7f0}
+    .vpv-pdf-legend .y2 .dot{background:#facc15}
+    .vpv-pdf-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media print{.vpv-pdf-sec{break-inside:avoid}}
+  </style></head>
+  <body>
+    <div class="vpv-pdf-hd">
+      <div class="vpv-pdf-eye">Resumen ejecutivo de desempe\u00f1o</div>
+      <h1>${esc(VPV.vendor)}</h1>
+      <h2>${esc(clasifLbl)} \u00b7 ${y1} vs ${y2}</h2>
+      <div class="vpv-pdf-meta"><span>\ud83d\udcc5 <b>${esc(fecha)}</b></span><span>\ud83d\udcca <b>${clients.length}</b> clientes activos</span><span>\u2b50 <b>${claves.length}</b> claves (80/20)</span></div>
+    </div>
+
+    <div class="vpv-pdf-kpis">
+      <div class="vpv-pdf-kpi"><div class="vpv-pdf-kl">Piezas ${y1}</div><div class="vpv-pdf-kv">${fmtNum(vRow.y1T)}</div><div class="vpv-pdf-ks">acumulado</div></div>
+      <div class="vpv-pdf-kpi ${vRow.pct>=5?'hi':(vRow.pct<=-5?'lo':'neu')}"><div class="vpv-pdf-kl">Piezas ${y2}</div><div class="vpv-pdf-kv">${fmtNum(vRow.y2T)}</div><div class="vpv-pdf-ks">${globalPct>0?'+':''}${globalPct}% vs ${y1}</div></div>
+      <div class="vpv-pdf-kpi ${vRow.dif>=0?'hi':'lo'}"><div class="vpv-pdf-kl">Diferencia</div><div class="vpv-pdf-kv">${vRow.dif>0?'+':''}${fmtNum(vRow.dif)}</div><div class="vpv-pdf-ks">piezas</div></div>
+      <div class="vpv-pdf-kpi neu"><div class="vpv-pdf-kl">Meses evaluados</div><div class="vpv-pdf-kv">${_curM+1}</div><div class="vpv-pdf-ks">del a\u00f1o ${y2}</div></div>
+    </div>
+
+    <section class="vpv-pdf-sec diag">
+      <h3>Diagn\u00f3stico y \u00e1reas de oportunidad</h3>
+      <div class="vpv-pdf-diag">${diag.map(t=>`<p>${t}</p>`).join('')}</div>
+    </section>
+
+    <section class="vpv-pdf-sec">
+      <h3>Comparativo mensual</h3>
+      <div class="vpv-pdf-chart">${monthsHtml}</div>
+      <div class="vpv-pdf-legend"><span class="y1"><span class="dot"></span>${y1}</span><span class="y2"><span class="dot"></span>${y2}</span></div>
+    </section>
+
+    <section class="vpv-pdf-sec">
+      <h3>\u2b50 Clientes clave (80/20) \u2014 prioridad de retenci\u00f3n</h3>
+      ${top5.length?`<table class="vpv-pdf-tbl"><thead><tr><th>Cliente</th><th style="text-align:right">${y1}</th><th style="text-align:right">${y2}</th><th style="text-align:right">Dif</th><th style="text-align:right">%</th></tr></thead><tbody>${top5.map(c=>{const dc=c.dif>0?'up':(c.dif<0?'down':'flat');return `<tr><td>${esc(c.name)}</td><td class="num">${fmtNum(c.y1T)}</td><td class="num">${fmtNum(c.y2T)}</td><td class="num">${c.dif>0?'+':''}${fmtNum(c.dif)}</td><td class="num pct ${dc}">${c.pct===Infinity?'\u2014':(c.pct>0?'+':'')+Math.round(c.pct)+'%'}</td></tr>`;}).join('')}</tbody></table>`:'<div class="vpv-pdf-empty">Sin clientes clave identificados.</div>'}
+    </section>
+
+    <div class="vpv-pdf-grid">
+      <section class="vpv-pdf-sec">
+        <h3>\ud83d\udd34 Clientes que bajaron (\u226520%)</h3>
+        ${bajTop.length?`<table class="vpv-pdf-tbl"><thead><tr><th>Cliente</th><th style="text-align:right">${y1}</th><th style="text-align:right">${y2}</th><th style="text-align:right">%</th></tr></thead><tbody>${bajTop.map(c=>`<tr><td>${esc(c.name)}</td><td class="num">${fmtNum(c.y1T)}</td><td class="num">${fmtNum(c.y2T)}</td><td class="num pct down">${Math.round(c.pct)}%</td></tr>`).join('')}</tbody></table>`:'<div class="vpv-pdf-empty">Ninguno.</div>'}
+      </section>
+      <section class="vpv-pdf-sec">
+        <h3>\ud83d\udfe2 Clientes que subieron (\u226520%)</h3>
+        ${subTop.length?`<table class="vpv-pdf-tbl"><thead><tr><th>Cliente</th><th style="text-align:right">${y1}</th><th style="text-align:right">${y2}</th><th style="text-align:right">%</th></tr></thead><tbody>${subTop.map(c=>`<tr><td>${esc(c.name)}</td><td class="num">${fmtNum(c.y1T)}</td><td class="num">${fmtNum(c.y2T)}</td><td class="num pct up">+${Math.round(c.pct)}%</td></tr>`).join('')}</tbody></table>`:'<div class="vpv-pdf-empty">Ninguno.</div>'}
+      </section>
+    </div>
+
+    <div class="vpv-pdf-grid">
+      <section class="vpv-pdf-sec">
+        <h3>\u2716\ufe0e Clientes perdidos (compraban ${y1}, sin compra ${y2})</h3>
+        ${perTop.length?`<table class="vpv-pdf-tbl"><thead><tr><th>Cliente</th><th style="text-align:right">${y1}</th></tr></thead><tbody>${perTop.map(c=>`<tr><td>${esc(c.name)}</td><td class="num">${fmtNum(c.y1T)}</td></tr>`).join('')}</tbody></table>`:'<div class="vpv-pdf-empty">Ninguno.</div>'}
+      </section>
+      <section class="vpv-pdf-sec">
+        <h3>\u2728 Clientes nuevos (sin compra ${y1})</h3>
+        ${nueTop.length?`<table class="vpv-pdf-tbl"><thead><tr><th>Cliente</th><th style="text-align:right">${y2}</th></tr></thead><tbody>${nueTop.map(c=>`<tr><td>${esc(c.name)}</td><td class="num">${fmtNum(c.y2T)}</td></tr>`).join('')}</tbody></table>`:'<div class="vpv-pdf-empty">Ninguno.</div>'}
+      </section>
+    </div>
+
+    <section class="vpv-pdf-sec">
+      <h3>\ud83c\udf31 Potenciales \u2014 clientes con volumen bajo pero tendencia positiva</h3>
+      ${potenciales.length?`<table class="vpv-pdf-tbl"><thead><tr><th>Cliente</th><th style="text-align:right">${y1}</th><th style="text-align:right">${y2}</th><th style="text-align:right">%</th></tr></thead><tbody>${potenciales.map(c=>{const dc=c.pct>0?'up':(c.pct<0?'down':'flat');return `<tr><td>${esc(c.name)}</td><td class="num">${fmtNum(c.y1T)}</td><td class="num">${fmtNum(c.y2T)}</td><td class="num pct ${dc}">${c.pct>0?'+':''}${Math.round(c.pct)}%</td></tr>`;}).join('')}</tbody></table>`:'<div class="vpv-pdf-empty">Sin candidatos identificados con esta l\u00ednea.</div>'}
+    </section>
+
+  </body></html>`;
+  const w=window.open('','_blank');
+  if(!w){alert('Permite las ventanas emergentes para generar el PDF.');return;}
+  w.document.write(html); w.document.close();
+  setTimeout(()=>{try{w.focus();w.print();}catch(_){}},400);
+}
+
 function yvyData(){
   // Requiere ambos detalles cargados
   const all=detaAll();
@@ -4585,7 +5002,11 @@ document.addEventListener('click',e=>{
   const c31=e.target.closest('#credOnly31');if(c31){CRED.only31=!CRED.only31;renderCredito();return;}
   const mt=e.target.closest('[data-multitoggle]');if(mt){const id=mt.dataset.multitoggle;const menu=document.getElementById('dmm_'+id);const open=!menu.hasAttribute('hidden');document.querySelectorAll('.deta-multi-menu').forEach(m=>m.setAttribute('hidden',''));if(!open)menu.removeAttribute('hidden');e.stopPropagation();return;}
   const ma=e.target.closest('[data-multiaction]');if(ma){const [id,act]=ma.dataset.multiaction.split('|');const key=id==='clasif'?'clasif':'vendor';if(id==='yvyvendor'){if(act==='all'){const box=ma.closest('.deta-multi').querySelector('.deta-multi-list');[...box.querySelectorAll('input[type=checkbox]')].forEach(c=>YVY.vendor.add(c.value));}else{YVY.vendor=new Set();}renderYvY();e.stopPropagation();return;}
-    if(id==='yvyclasif'){if(act==='all'){const box=ma.closest('.deta-multi').querySelector('.deta-multi-list');[...box.querySelectorAll('input[type=checkbox]')].forEach(c=>YVY.clasif.add(c.value));}else{YVY.clasif=new Set();}renderYvY();e.stopPropagation();return;}if(act==='all'){const box=ma.closest('.deta-multi').querySelector('.deta-multi-list');[...box.querySelectorAll('input[type=checkbox]')].forEach(c=>DETA[key].add(c.value));}else{DETA[key]=new Set();}renderDetalle();e.stopPropagation();return;}
+    if(id==='yvyclasif'){if(act==='all'){const box=ma.closest('.deta-multi').querySelector('.deta-multi-list');[...box.querySelectorAll('input[type=checkbox]')].forEach(c=>YVY.clasif.add(c.value));}else{YVY.clasif=new Set();}renderYvY();e.stopPropagation();return;}
+    if(id==='vpvclasif'){if(act==='all'){const box=ma.closest('.deta-multi').querySelector('.deta-multi-list');[...box.querySelectorAll('input[type=checkbox]')].forEach(c=>VPV.clasif.add(c.value));}else{VPV.clasif=new Set();}renderVpV();e.stopPropagation();return;}if(act==='all'){const box=ma.closest('.deta-multi').querySelector('.deta-multi-list');[...box.querySelectorAll('input[type=checkbox]')].forEach(c=>DETA[key].add(c.value));}else{DETA[key]=new Set();}renderDetalle();e.stopPropagation();return;}
+  const vps=e.target.closest('[data-vpvsort]');if(vps){const k=vps.dataset.vpvsort;if(VPV.sort===k)VPV.dir=-VPV.dir;else{VPV.sort=k;VPV.dir=-1;}renderVpV();return;}
+  const vpv=e.target.closest('[data-vpv]');if(vpv){VPV.vendor=vpv.dataset.vpv;VPV.expanded=new Set();renderVpV();return;}
+  const vpc=e.target.closest('[data-vpvcli]');if(vpc){const k=vpc.dataset.vpvcli;if(VPV.expanded.has(k)){VPV.expanded=new Set();vpc.classList.remove('open');const nxt=vpc.nextElementSibling;if(nxt&&nxt.classList.contains('vpv-det'))nxt.remove();}else{document.querySelectorAll('.vpv-row.open').forEach(r=>r.classList.remove('open'));document.querySelectorAll('tr.vpv-det').forEach(r=>r.remove());VPV.expanded=new Set([k]);vpc.classList.add('open');const MMONTH=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];const {arr}=vpvClientAgg(VPV.vendor);const [code,name]=k.split('||');const c=arr.find(x=>(x.code||'')===code&&(x.name||'')===name);if(c){const _curM=new Date().getMonth();const months=MMONTH.slice(0,_curM+1).map((m,i)=>{const a=c.y1M[i],b=c.y2M[i],d=b-a,dcl=d>0?'up':(d<0?'down':'flat');return `<div class="vpv-m"><div class="vpv-m-lbl">${m}</div><div class="vpv-m-v"><span class="y1">${a||'\u2014'}</span><span class="y2">${b||'\u2014'}</span><span class="${dcl}">${d>0?'+':''}${d||0}</span></div></div>`;}).join('');const cols=vpc.cells.length;const det=document.createElement('tr');det.className='vpv-det';det.innerHTML=`<td colspan="${cols}"><div class="vpv-monthbox">${months}</div></td>`;vpc.after(det);}}return;}
   const yo=e.target.closest('[data-yvyorg]');if(yo){YVY.org=yo.dataset.yvyorg;renderYvY();return;}
   const yv=e.target.closest('[data-yvyv]');if(yv){YVY.view=yv.dataset.yvyv;YVY.expanded=new Set();renderYvY();return;}
   const yx=e.target.closest('[data-yvyx]');if(yx){const k=yx.dataset.yvyx;if(YVY.expanded.has(k)){YVY.expanded=new Set();yx.classList.remove('open');const nxt=yx.nextElementSibling;if(nxt&&nxt.classList.contains('yvy-det'))nxt.remove();}else{document.querySelectorAll('.yvy-row.open').forEach(r=>r.classList.remove('open'));document.querySelectorAll('tr.yvy-det').forEach(r=>r.remove());YVY.expanded=new Set([k]);yx.classList.add('open');const cols=yx.cells.length;const det=document.createElement('tr');det.className='yvy-det';det.innerHTML=`<td colspan="${cols}">${yvyDetail(k)}</td>`;yx.after(det);}return;}
@@ -4750,8 +5171,10 @@ document.addEventListener('change',e=>{
   else if(e.target.id==='p82Cmt'){P82.withCmt=e.target.checked;renderP8020();}
   else if(e.target.id==='detaSearch'){DETA.search=e.target.value;renderDetalle();}
   else if(e.target.id==='yvySearch'){YVY.search=e.target.value;renderYvY();}
+  else if(e.target.id==='vpvVend'){VPV.vendor=e.target.value;VPV.expanded=new Set();renderVpV();}
   else if(e.target.matches('input[data-multi]')){const id=e.target.dataset.multi;if(id==='yvyvendor'){if(e.target.checked)YVY.vendor.add(e.target.value);else YVY.vendor.delete(e.target.value);renderYvY();return;}
-    if(id==='yvyclasif'){if(e.target.checked)YVY.clasif.add(e.target.value);else YVY.clasif.delete(e.target.value);renderYvY();return;}const key=id==='clasif'?'clasif':'vendor';if(e.target.checked)DETA[key].add(e.target.value);else DETA[key].delete(e.target.value);DETA_SCROLL=window.scrollY||0;renderDetalle();setTimeout(()=>{try{window.scrollTo(0,DETA_SCROLL);document.getElementById('dmm_'+id)?.removeAttribute('hidden');}catch(_){}},20);}
+    if(id==='yvyclasif'){if(e.target.checked)YVY.clasif.add(e.target.value);else YVY.clasif.delete(e.target.value);renderYvY();return;}
+    if(id==='vpvclasif'){if(e.target.checked)VPV.clasif.add(e.target.value);else VPV.clasif.delete(e.target.value);renderVpV();return;}const key=id==='clasif'?'clasif':'vendor';if(e.target.checked)DETA[key].add(e.target.value);else DETA[key].delete(e.target.value);DETA_SCROLL=window.scrollY||0;renderDetalle();setTimeout(()=>{try{window.scrollTo(0,DETA_SCROLL);document.getElementById('dmm_'+id)?.removeAttribute('hidden');}catch(_){}},20);}
 });
 function rerender(){paintPace();if(STATE.screen==='home')renderHome();else if(STATE.screen==='vend')renderVendors();else if(STATE.screen==='cli')renderClients();else if(STATE.screen==='rep')renderReportes();else if(STATE.screen==='camp')renderCampaign();else if(STATE.screen==='strat')renderStrategy();else if(STATE.screen==='ger')renderGerente();else if(STATE.screen==='ficha'){renderClients();goCli(STATE.vendor);}}
 
