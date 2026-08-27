@@ -3976,6 +3976,27 @@ function detaPaintLoader(){
     <div class="deta-load-row"><span class="deta-load-lbl">Autoel\u00e9ctrica Roma</span><span class="deta-load-st ${stCls(DETA_LOADPROG.ae)}">${stTxt(DETA_LOADPROG.ae)}</span></div>
     <div class="deta-load-bar"><i style="width:${Math.round(((Math.max(0,DETA_LOADPROG.ll)+Math.max(0,DETA_LOADPROG.ae))/4)*100)}%"></i></div>`;
 }
+// Mapa de códigos de vendedor por razón social (fallback cuando el cliente no está en la hoja principal)
+const VENDOR_CODE_MAP={
+  llanterama:{ // Cod Vend 1 → nombre
+    '023':'Enrique R.','003':'Carlos C.','006':'Miguel L','012':'Rub\u00e9n L.'
+  },
+  autoelectrica:{ // Cod Vend 1 → nombre (con reglas especiales por almacén para 003)
+    '022':'Celene S.','023':'Jose L.','021':'Celene S.'
+  }
+};
+function resolveVendorByCode(codVend,almacen,orgId){
+  const cv=String(codVend||'').trim().replace(/^0+/,'').padStart(3,'0'); // normaliza a 3 dígitos
+  if(!cv)return null;
+  if(orgId==='autoelectrica'&&cv==='003'){
+    const alm=String(almacen||'').trim().replace(/^0+/,'').padStart(3,'0');
+    if(alm==='001')return 'Colosio-Mayoreo';
+    if(alm==='003')return 'Oscar F.';
+    return null; // 003 sin almacén reconocido → no asigna
+  }
+  const map=VENDOR_CODE_MAP[orgId]||{};
+  return map[cv]||null;
+}
 function detaCliVend(codC,cliName){
   const norm=(x)=>String(x||'').trim().replace(/^0+/,'').toUpperCase();
   if(!DETA_CLI2VEND){
@@ -4045,11 +4066,15 @@ function detaMapRow(r,H,orgId){
   const cli =String(getCell(r,'Cliente',H)||'').trim();
   const codC=String(getCell(r,'Cod de cliente',H)||'').trim();
   const clas=String(getCell(r,'Clasificacion',H)||'').trim();
+  const almacen=String(getCell(r,'Almacen',H)||'').trim();
   const fac =String(getCell(r,'Factura',H)||'').trim();
   const fecha=getCell(r,'Fecha',H);
   const y=detaYear(fecha);
-  const vendedor=detaCliVend(codC,cli)||'S/I';
-  return {codP,desc,codV,cant,imp,costo,util:imp-costo,cli,codC,clas,fac,fecha,y,org:orgId,vendedor};
+  // 1) Intenta mapear por cliente. 2) Si no, fallback por Cod Vend 1 + Almacen + razón social.
+  let vendedor=detaCliVend(codC,cli);
+  if(!vendedor){vendedor=resolveVendorByCode(codV,almacen,orgId);}
+  if(!vendedor)vendedor='S/I';
+  return {codP,desc,codV,cant,imp,costo,util:imp-costo,cli,codC,clas,almacen,fac,fecha,y,org:orgId,vendedor};
 }
 function detaAll(){
   const out=[];
