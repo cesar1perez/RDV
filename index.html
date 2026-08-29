@@ -3999,20 +3999,32 @@ function resolveVendorByCode(codVend,almacen,orgId){
 }
 function detaCliVend(codC,cliName){
   const norm=(x)=>String(x||'').trim().replace(/^0+/,'').toUpperCase();
+  const MONTHS_ORDER={ENERO:1,FEBRERO:2,MARZO:3,ABRIL:4,MAYO:5,JUNIO:6,JULIO:7,AGOSTO:8,SEPTIEMBRE:9,OCTUBRE:10,NOVIEMBRE:11,DICIEMBRE:12};
   if(!DETA_CLI2VEND){
     DETA_CLI2VEND={};
     DETA_NAME2VEND={};
+    // Guardamos vendedor MÁS RECIENTE por cliente (para reflejar cambios de asignación)
+    const cliBest={}; // {ccKey: {vendor, year, month}}
+    const nameBest={};
     if(DB&&DB.rows){
       const H=DB.H;
       DB.rows.forEach(r=>{
         const cc=norm(getCell(r,'COD CLIENTE',H)); if(!cc)return;
         const raw=getCell(r,'VENDEDOR',H); if(!raw)return;
         const v=resolveVendor(raw).display||String(raw).trim();
-        if(v&&!DETA_CLI2VEND[cc])DETA_CLI2VEND[cc]=v;
+        if(!v)return;
+        const y=parseInt(String(getCell(r,'A\u00d1O',H)||getCell(r,'ANO',H)||getCell(r,'ANIO',H)||'0'),10)||0;
+        const mtxt=String(getCell(r,'MES',H)||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+        const m=MONTHS_ORDER[mtxt]||0;
+        const rank=y*100+m;
+        const prev=cliBest[cc];
+        if(!prev||rank>=prev.rank)cliBest[cc]={vendor:v,rank};
         const nm=keyName(getCell(r,'CLIENTE',H));
-        if(nm&&v&&!DETA_NAME2VEND[nm])DETA_NAME2VEND[nm]=v;
+        if(nm){const pn=nameBest[nm];if(!pn||rank>=pn.rank)nameBest[nm]={vendor:v,rank};}
       });
     }
+    Object.keys(cliBest).forEach(k=>DETA_CLI2VEND[k]=cliBest[k].vendor);
+    Object.keys(nameBest).forEach(k=>DETA_NAME2VEND[k]=nameBest[k].vendor);
   }
   const key=norm(codC);
   if(key&&DETA_CLI2VEND[key])return DETA_CLI2VEND[key];
