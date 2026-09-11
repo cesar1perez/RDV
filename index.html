@@ -378,8 +378,10 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
   .lt-bar{grid-area:bar;margin-top:2px}
 }
 /* botones segmentados con/sin objetivo */
-.segmented{display:inline-flex;gap:0;border:1px solid var(--line2);border-radius:12px;overflow:hidden;margin:2px 0 14px}
-.seg-btn{appearance:none;background:transparent;border:none;color:var(--muted);font-family:'Manrope';font-weight:700;font-size:13.5px;padding:11px 20px;cursor:pointer;transition:.2s}
+.segmented{display:inline-flex;gap:0;border:1px solid var(--line2);border-radius:12px;overflow:hidden;margin:2px 0 14px;flex-wrap:wrap}
+.seg-btn{appearance:none;background:transparent;border:none;color:var(--muted);font-family:'Manrope';font-weight:700;font-size:13.5px;padding:11px 20px;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:7px}
+.seg-badge{background:rgba(0,0,0,.2);color:inherit;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:800;min-width:22px;text-align:center}
+.seg-btn.act .seg-badge{background:rgba(12,31,68,.15)}
 .seg-btn+.seg-btn{border-left:1px solid var(--line2)}
 .seg-btn.act{background:var(--accent);color:#07142e}
 .seg-btn:not(.act):hover{background:rgba(255,255,255,.05);color:var(--txt)}
@@ -1655,6 +1657,8 @@ tr.chk-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--line
     <div class="segmented" id="objSeg">
       <button class="seg-btn act" data-obj="con">Clientes con objetivo</button>
       <button class="seg-btn" data-obj="sin">Clientes sin objetivo</button>
+      <button class="seg-btn seg-vend" data-obj="ruta" style="display:none">Ruta fija permanente</button>
+      <button class="seg-btn seg-vend" data-obj="lista" style="display:none">Lista completa <span class="seg-badge" id="vvListaCount">0</span></button>
     </div>
     <div class="toolbar">
       <div class="search">
@@ -1673,12 +1677,6 @@ tr.chk-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--line
         <option value="JUEVES">Jueves</option><option value="VIERNES">Viernes</option><option value="SABADO">Sábado</option><option value="ESPORADICO">Esporádico</option>
       </select></div>
       <div class="count-pill" id="cliCount">0 clientes</div>
-    </div>
-    <!-- Switch de vistas del vendedor: normal / ruta fija / lista completa -->
-    <div class="vend-view-bar" id="vendViewBar" style="display:none">
-      <button class="vv-btn on" data-vv="std">Con objetivo / Sin objetivo</button>
-      <button class="vv-btn" data-vv="ruta">Ruta fija permanente</button>
-      <button class="vv-btn" data-vv="lista">Lista completa <span class="vv-badge" id="vvListaCount">0</span></button>
     </div>
     <div class="cli-list" id="cliGrid"></div>
   </section>
@@ -1999,8 +1997,8 @@ const STATE={org:null,vendor:null,period:null,screen:'home'};
 function org(id){return CONFIG.orgs.find(o=>o.id===id);}
 function setAccent(id){const o=org(id);document.body.dataset.accent=o?o.accent:'amber';document.getElementById('brandMark').textContent=o?o.initial:'LL';}
 function showScreen(n){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+n).classList.add('active');STATE.screen=n;renderCrumbs();window.scrollTo({top:0,behavior:'smooth'});
-  const vvb=document.getElementById('vendViewBar');
-  if(vvb){vvb.style.display=(n==='cli'&&ROLE==='vendedor')?'':'none';if(n==='cli'&&ROLE==='vendedor'){VEND_VIEW='std';document.querySelectorAll('.vv-btn').forEach(b=>b.classList.toggle('on',b.dataset.vv==='std'));}}
+  // Mostrar los 2 botones nuevos (Ruta fija / Lista completa) solo si es vendedor y estamos en pantalla de clientes
+  document.querySelectorAll('#objSeg .seg-vend').forEach(b=>{b.style.display=(n==='cli'&&ROLE==='vendedor')?'':'none';});
 }
 function renderCrumbs(){
   if(STATE.screen==='welcome'){document.getElementById('crumbs').innerHTML='';return;}
@@ -2574,7 +2572,7 @@ const VEND_DAY_LBL={LUNES:'L',MARTES:'M',MIERCOLES:'Mi',JUEVES:'J',VIERNES:'V',S
 function vendGetPeriodParts(){
   const p=currentPeriodObj();
   if(!p||p.key==='ALL')return null;
-  return {mes:p.mes,anio:String(p.anio)};
+  return {mes:p.mes,anio:String(p.ano||p.y||'')};
 }
 function vendClientList(){
   // Devuelve todos los clientes del vendedor activo en el periodo actual (una fila por cliente)
@@ -2765,15 +2763,6 @@ document.addEventListener('click',(e)=>{
   }
   const vf=e.target.closest('[data-vfull]');
   if(vf){vendOpenFullModal(vf.dataset.vfull);return;}
-  const vb=e.target.closest('[data-vv]');
-  if(vb){
-    document.querySelectorAll('.vv-btn').forEach(b=>b.classList.remove('on'));
-    vb.classList.add('on');
-    VEND_VIEW=vb.dataset.vv;
-    if(VEND_VIEW==='std'){render();}
-    else{renderVendTable(VEND_VIEW);}
-    return;
-  }
   // click fuera del modal → cerrar
   if(e.target.id==='vendModalBd')vendCloseModal();
 });
@@ -3147,7 +3136,7 @@ function goCli(v){
   }
   _goCli(v);
 }
-function _goCli(v){STATE.vendor=v;document.getElementById('cliSearch').value='';LINE_FILTER='ALL';OBJF='con';DAY_FILTER='ALL';ORDER='regular';document.getElementById('daySel').value='ALL';document.getElementById('orderSel').value='regular';document.querySelectorAll('#objSeg .seg-btn').forEach(b=>b.classList.toggle('act',b.dataset.obj==='con'));buildLineSelector();renderClients();showScreen('cli');if(!CRED_DB)loadCredito().then(()=>{if(STATE.screen==='cli')filterClients();});}
+function _goCli(v){STATE.vendor=v;document.getElementById('cliSearch').value='';LINE_FILTER='ALL';OBJF='con';DAY_FILTER='ALL';ORDER='regular';document.getElementById('daySel').value='ALL';document.getElementById('orderSel').value='regular';document.querySelectorAll('#objSeg .seg-btn').forEach(b=>b.classList.toggle('act',b.dataset.obj==='con'));buildLineSelector();renderClients();showScreen('cli');const vc=document.getElementById('vvListaCount');if(vc)vc.textContent=vendClientList().length;if(!CRED_DB)loadCredito().then(()=>{if(STATE.screen==='cli')filterClients();});}
 let SCROLL_CLI=0;
 function goFicha(uid){const c=CLI.find(x=>x.uid===uid);if(!c)return;SCROLL_CLI=window.scrollY||0;renderFicha(c.rec);showScreen('ficha');}
 function returnCli(){if(!STATE.vendor){goHome();return;}showScreen('cli');setTimeout(()=>{try{window.scrollTo(0,SCROLL_CLI||0);}catch(_){}}
@@ -5441,7 +5430,7 @@ document.addEventListener('click',e=>{
   const pe=e.target.closest('[data-p82exp]');if(pe){const tr=pe.closest('tr');const nxt=tr.nextElementSibling;if(nxt&&nxt.classList.contains('p82-det')){nxt.remove();pe.classList.remove('open');}else{const det=document.createElement('tr');det.className='p82-det';det.innerHTML=`<td colspan="${tr.cells.length}">${p82MonthDetail(pe.dataset.p82exp)}</td>`;tr.after(det);pe.classList.add('open');}return;}
   const a6=e.target.closest('#act106Seg .seg-btn');if(a6){ACT106_SCOPE=a6.dataset.sc;renderAct106();return;}
   const mp=e.target.closest('.map-pin');if(mp){document.querySelectorAll('.map-pin.sel').forEach(x=>x.classList.remove('sel'));mp.classList.add('sel');showMapInfo(parseInt(mp.dataset.pin));return;}
-  const sg=e.target.closest('#objSeg .seg-btn');if(sg){OBJF=sg.dataset.obj;document.querySelectorAll('#objSeg .seg-btn').forEach(b=>b.classList.toggle('act',b===sg));filterClients();return;}
+  const sg=e.target.closest('#objSeg .seg-btn');if(sg){OBJF=sg.dataset.obj;document.querySelectorAll('#objSeg .seg-btn').forEach(b=>b.classList.toggle('act',b===sg));if(OBJF==='ruta'||OBJF==='lista'){renderVendTable(OBJF);}else{filterClients();}return;}
   const wc=e.target.closest('[data-welcome]');if(wc){gotoWelcome();return;}
   const bk=e.target.closest('[data-go]');if(bk){const g=bk.dataset.go;if(g==='home')goHome();else if(g==='vend'){if(GLOBAL_VEND&&ROLE==='directivo')goGlobalVend();else goVend(STATE.org);}else if(g==='cli')returnCli();return;}
 });
