@@ -227,9 +227,18 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .vend-inp.wide{max-width:180px;text-align:left;font-family:inherit;font-weight:600}
 .vend-inp:focus{outline:none;border-color:var(--accent);background:var(--panel);box-shadow:0 0 0 3px rgba(250,204,21,.15)}
 .vend-inp.dirty{border-color:var(--accent);background:rgba(250,204,21,.08)}
-.vend-inp.saved{border-color:var(--good);animation:vendSaved .8s}
-@keyframes vendSaved{0%{background:rgba(16,185,129,.25)}100%{background:var(--kpi-bg)}}
-.vend-inp.err{border-color:var(--low);background:rgba(239,68,68,.1)}
+.vend-inp.saved{border-color:var(--good) !important;background:rgba(16,185,129,.25) !important;color:var(--good) !important;animation:vendSaved 1.4s ease-out;box-shadow:0 0 0 3px rgba(16,185,129,.3)}
+@keyframes vendSaved{
+  0%{background:rgba(16,185,129,.55);box-shadow:0 0 0 6px rgba(16,185,129,.4);transform:scale(1.04)}
+  30%{background:rgba(16,185,129,.4);box-shadow:0 0 0 4px rgba(16,185,129,.3);transform:scale(1)}
+  100%{background:var(--kpi-bg);box-shadow:0 0 0 0 rgba(16,185,129,0)}
+}
+.vend-inp.err{border-color:var(--low) !important;background:rgba(239,68,68,.25) !important;color:var(--low) !important;animation:vendErr .5s ease-out 3;box-shadow:0 0 0 3px rgba(239,68,68,.3)}
+@keyframes vendErr{
+  0%,100%{transform:translateX(0)}
+  25%{transform:translateX(-4px)}
+  75%{transform:translateX(4px)}
+}
 .vend-day{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;cursor:pointer;user-select:none;font-weight:800;font-size:11px;color:var(--muted2);background:var(--kpi-bg);border:1px solid var(--line2);transition:.12s}
 .vend-day:hover{border-color:var(--accent);color:var(--txt)}
 .vend-day.on{background:linear-gradient(135deg,var(--good),#4ade80);color:#fff;border-color:transparent}
@@ -2624,30 +2633,55 @@ function vendSaveField(code,head,value,statusEl,cellEl){
 function vendPushChange(code,fields,statusEl,cellEl){
   const p=vendGetPeriodParts();
   if(!p){if(statusEl){statusEl.className='vend-save-status err';statusEl.innerHTML='<span class="vend-save-dot"></span>Selecciona mes espec\u00edfico';}return;}
+  // Recalcular campos derivados si cambian sus componentes
+  // OBJ TOTAL (acumuladores) = OBJ PREM + OBJ AGM + OBJ ESTANDAR (+ OBJ VALUE cuando exista)
+  // OBJ LLANTAS = OBJ AUTO + OBJ CTA + OBJ CAMION
+  const ACUM_COMP=['OBJ PREM','OBJ AGM','OBJ ESTANDAR','OBJ VALUE'];
+  const LLANTA_COMP=['OBJ AUTO','OBJ CTA','OBJ CAMION'];
+  const changedKeys=Object.keys(fields);
+  const H=DB.H;
+  const currentRow=DB.rows.find(r=>String(getCell(r,'COD CLIENTE',H)||'').trim()===code && norm(getCell(r,'MES',H))===norm(p.mes) && String(getCell(r,'A\u00d1O',H))===p.anio);
+  const readNum=(head)=>{if(head in fields){const n=parseFloat(String(fields[head]||'').replace(/,/g,''));return isNaN(n)?0:n;}if(currentRow){const raw=getCell(currentRow,head,H);const n=parseFloat(String(raw||'').replace(/,/g,''));return isNaN(n)?0:n;}return 0;};
+  const touchesAcum=changedKeys.some(k=>ACUM_COMP.indexOf(k)>=0);
+  const touchesLlanta=changedKeys.some(k=>LLANTA_COMP.indexOf(k)>=0);
+  const fieldsFull={...fields};
+  if(touchesAcum){
+    const newTotal=ACUM_COMP.reduce((s,c)=>s+readNum(c),0);
+    fieldsFull['OBJ TOTAL']=newTotal;
+  }
+  if(touchesLlanta){
+    const newLlantas=LLANTA_COMP.reduce((s,c)=>s+readNum(c),0);
+    fieldsFull['OBJ LLANTAS']=newLlantas;
+  }
   if(statusEl){statusEl.className='vend-save-status saving';statusEl.innerHTML='<span class="vend-save-dot"></span>Guardando\u2026';}
-  const body={action:'guardarCliente',codCliente:code,mes:p.mes,anio:p.anio,vendedor:STATE.vendor||'',campos:fields};
+  const body={action:'guardarCliente',codCliente:code,mes:p.mes,anio:p.anio,vendedor:STATE.vendor||'',campos:fieldsFull};
   fetch(SAVE_URL,{method:'POST',body:JSON.stringify(body),redirect:'follow'})
     .then(r=>r.json()).then(j=>{
       if(j&&j.ok){
         // reflejar en DB local
-        const H=DB.H;
         const row=DB.rows.find(r=>String(getCell(r,'COD CLIENTE',H)||'').trim()===code && norm(getCell(r,'MES',H))===norm(p.mes) && String(getCell(r,'A\u00d1O',H))===p.anio);
         if(row){
-          Object.keys(fields).forEach(h=>{const idx=H.idx(h);if(idx>=0)row[idx]=fields[h];});
+          Object.keys(fieldsFull).forEach(h=>{const idx=H.idx(h);if(idx>=0)row[idx]=fieldsFull[h];});
         }
-        if(statusEl){statusEl.className='vend-save-status ok';statusEl.innerHTML='<span class="vend-save-dot"></span>Guardado';setTimeout(()=>{statusEl.className='vend-save-status idle';statusEl.innerHTML='<span class="vend-save-dot"></span>Listo';},2200);}
-        if(cellEl){cellEl.classList.remove('dirty');cellEl.classList.add('saved');setTimeout(()=>cellEl.classList.remove('saved'),900);}
+        if(statusEl){statusEl.className='vend-save-status ok';statusEl.innerHTML='<span class="vend-save-dot"></span>Guardado';setTimeout(()=>{statusEl.className='vend-save-status idle';statusEl.innerHTML='<span class="vend-save-dot"></span>Listo';},2500);}
+        if(cellEl){cellEl.classList.remove('dirty','err');cellEl.classList.add('saved');setTimeout(()=>cellEl.classList.remove('saved'),1500);}
+        // Reflejar el cambio derivado en la celda visual del total si está en la tabla
+        if(touchesAcum||touchesLlanta){
+          const totalHead=touchesAcum?'OBJ TOTAL':'OBJ LLANTAS';
+          const totalCell=document.querySelector(`input.vend-inp[data-code="${code}"][data-head="${totalHead}"]`);
+          if(totalCell){totalCell.value=fieldsFull[totalHead];totalCell.classList.add('saved');setTimeout(()=>totalCell.classList.remove('saved'),1500);}
+        }
         // Si estamos en 80/20 con input editable, refrescar la tabla sin perder scroll para actualizar % y clave 80/20
-        if(cellEl&&cellEl.classList.contains('p82-obj-inp')&&REPORT==='p8020'){setTimeout(()=>{const sy=window.scrollY;renderP8020();window.scrollTo({top:sy});},1000);}
+        if(cellEl&&cellEl.classList.contains('p82-obj-inp')&&REPORT==='p8020'){setTimeout(()=>{const sy=window.scrollY;renderP8020();window.scrollTo({top:sy});},1200);}
         // Si estamos en la vista vendedor Con/Sin objetivo, reconstruir CLI para reflejar el cambio en % de línea
-        if(STATE.screen==='cli'&&ROLE==='vendedor'&&(OBJF==='con'||OBJF==='sin')){setTimeout(()=>{const sy=window.scrollY;renderClients();window.scrollTo({top:sy});},1000);}
+        if(STATE.screen==='cli'&&ROLE==='vendedor'&&(OBJF==='con'||OBJF==='sin')){setTimeout(()=>{const sy=window.scrollY;renderClients();window.scrollTo({top:sy});},1200);}
       } else {
         if(statusEl){statusEl.className='vend-save-status err';statusEl.innerHTML='<span class="vend-save-dot"></span>Error: '+esc(j&&j.error||'?');}
-        if(cellEl)cellEl.classList.add('err');
+        if(cellEl){cellEl.classList.remove('dirty','saved');cellEl.classList.add('err');setTimeout(()=>cellEl.classList.remove('err'),2500);}
       }
     }).catch(err=>{
       if(statusEl){statusEl.className='vend-save-status err';statusEl.innerHTML='<span class="vend-save-dot"></span>Error de red';}
-      if(cellEl)cellEl.classList.add('err');
+      if(cellEl){cellEl.classList.remove('dirty','saved');cellEl.classList.add('err');setTimeout(()=>cellEl.classList.remove('err'),2500);}
     });
 }
 
