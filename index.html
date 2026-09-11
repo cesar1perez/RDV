@@ -210,6 +210,8 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .vend-tbl-wrap{background:var(--panel);border:1px solid var(--line2);border-radius:12px;overflow:auto;box-shadow:0 4px 16px -6px rgba(0,0,0,.15)}
 .vend-tbl{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px;min-width:1400px}
 .vend-tbl thead th{background:var(--kpi-bg);color:var(--txt);font-weight:800;padding:10px 8px;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;text-align:center;border-bottom:2px solid var(--line2);position:sticky;top:0;z-index:2;white-space:nowrap}
+.vend-tbl thead th.sortable{cursor:pointer;user-select:none;transition:.12s}
+.vend-tbl thead th.sortable:hover{background:rgba(255,210,30,.1);color:var(--accent)}
 .vend-tbl thead th.gline{background:linear-gradient(135deg,var(--navy2),var(--navy));color:var(--accent);border-radius:0}
 .vend-tbl thead th.gzone{background:rgba(58,166,255,.15);color:var(--cyan)}
 .vend-tbl thead th.groute{background:rgba(16,185,129,.15);color:var(--good)}
@@ -869,6 +871,11 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .hist-tbl tr.hist-parent.open .g-chev{transform:rotate(90deg)}
 /* reporte 80/20 */
 .p82-tbl td.num{font-family:'IBM Plex Mono';text-align:right}
+.p82-tbl input.p82-obj-inp{max-width:80px;text-align:right;padding:5px 8px;background:rgba(58,166,255,.06);border:1px solid rgba(58,166,255,.25)}
+.p82-tbl input.p82-obj-inp:focus{border-color:var(--accent);background:var(--panel)}
+.p82-tbl input.p82-obj-inp.dirty{border-color:var(--accent);background:rgba(250,204,21,.1)}
+.p82-tbl input.p82-obj-inp.saved{border-color:var(--good);animation:vendSaved .8s}
+:root[data-theme="light"] .p82-tbl input.p82-obj-inp{background:rgba(31,127,224,.06);border-color:rgba(31,127,224,.35)}
 .p82-tbl td.strong{font-weight:800;color:var(--accent)}
 :root[data-theme="light"] .p82-tbl td.strong{color:var(--accent-ink)}
 .p82-tbl td.muted{color:var(--muted2)}
@@ -2396,6 +2403,8 @@ function comentInline(c){
   return `<div class="lr-coment cmt-edit"><div class="lrc-btns">${btns}</div><div class="lrc-eds">${editors}</div></div>`;
 }
 function filterClients(){
+  // Si el vendedor eligió Ruta fija o Lista completa, renderizamos su tabla editable
+  if(ROLE==='vendedor'&&(OBJF==='ruta'||OBJF==='lista')){renderVendTable(OBJF);return;}
   const q=keyName(document.getElementById('cliSearch').value);
   let base=CLI.filter(c=>!q||c.search.includes(q));
   if(DAY_FILTER!=='ALL')base=base.filter(c=>!isEmpty(c.rec.text(DAY_FILTER)));
@@ -2560,6 +2569,7 @@ function clientLineTable(rec,lines,pace){
 }
 /* ===== Vendedor: vistas nuevas (Ruta fija / Lista completa) + edición inline + modal ==== */
 let VEND_VIEW='std'; // 'std' | 'ruta' | 'lista'
+let VEND_SORT={key:null,dir:-1}; // sortable columns for vendor edit table
 const VEND_LINE_COLS=[
   {h:'OBJ PREM',lbl:'Prem'},{h:'OBJ AGM',lbl:'AGM'},{h:'OBJ ESTANDAR',lbl:'Est'},
   {h:'OBJ LUB',lbl:'Lub'},{h:'OBJ MOTO',lbl:'Moto'},{h:'OBJ FILTRO',lbl:'Filtro'},
@@ -2575,24 +2585,28 @@ function vendGetPeriodParts(){
   return {mes:p.mes,anio:String(p.ano||p.y||'')};
 }
 function vendClientList(){
-  // Devuelve todos los clientes del vendedor activo en el periodo actual (una fila por cliente)
+  // Devuelve todos los clientes del vendedor activo en el periodo actual (una fila por cliente,
+  // agrupando duplicados igual que la ficha del vendedor con clientGroups)
   const p=vendGetPeriodParts(); if(!p)return [];
-  const H=DB.H;
-  const rows=DB.rows.filter(r=>{
-    const v=resolveVendor(getCell(r,'VENDEDOR',H)).display||String(getCell(r,'VENDEDOR',H)||'').trim();
-    if(v!==STATE.vendor)return false;
-    if(norm(getCell(r,'MES',H))!==norm(p.mes))return false;
-    if(String(getCell(r,'A\u00d1O',H))!==p.anio)return false;
-    return true;
-  });
-  // Deduplicar por COD CLIENTE
-  const map=new Map();
-  rows.forEach(r=>{
-    const code=String(getCell(r,'COD CLIENTE',H)||'').trim();
-    if(!code)return;
-    if(!map.has(code))map.set(code,r);
-  });
-  return [...map.values()].map(r=>({row:r,code:String(getCell(r,'COD CLIENTE',H)||'').trim(),name:String(getCell(r,'CLIENTE',H)||'').trim(),zona:String(getCell(r,'ZONA',H)||'').trim(),giro:String(getCell(r,'GIRO',H)||'').trim(),dir:String(getCell(r,'DIRECCION',H)||'').trim()}));
+  // Reutilizamos clientGroups (agrupa por COD CLIENTE, suma duplicados) para que los totales
+  // COINCIDAN 1:1 con la ficha del vendedor.
+  const groups=clientGroups(STATE.org, STATE.period);
+  const list=groups.filter(rec=>rec.vendor===STATE.vendor);
+  // Para editar necesitamos UNA fila representativa (la más reciente del cliente en el periodo);
+  // los cambios se aplican vía backend por COD CLIENTE+MES+AÑO, así que da igual cuál fila
+  // tengamos aquí — se afecta la fila del mes correspondiente.
+  return list.map(rec=>{
+    const code=String(rec.text('COD CLIENTE')||'').trim();
+    // fila representativa: la última del grupo (que es la del mes en curso ya que están filtradas)
+    const row=rec.group[rec.group.length-1];
+    return {
+      row, rec, code,
+      name:String(rec.text('CLIENTE')||'').trim(),
+      zona:String(rec.text('ZONA')||'').trim(),
+      giro:String(rec.text('GIRO')||'').trim(),
+      dir:String(rec.text('DIRECCION')||'').trim()
+    };
+  }).filter(c=>c.code);
 }
 function vendHasRoute(row){
   // Considera ruta fija si tiene alguna X en LUN..SAB (esporádico NO cuenta)
@@ -2619,10 +2633,14 @@ function vendPushChange(code,fields,statusEl,cellEl){
         const H=DB.H;
         const row=DB.rows.find(r=>String(getCell(r,'COD CLIENTE',H)||'').trim()===code && norm(getCell(r,'MES',H))===norm(p.mes) && String(getCell(r,'A\u00d1O',H))===p.anio);
         if(row){
-          Object.keys(fields).forEach(h=>{const idx=H.indexOf(h);if(idx>=0)row[idx]=fields[h];});
+          Object.keys(fields).forEach(h=>{const idx=H.idx(h);if(idx>=0)row[idx]=fields[h];});
         }
         if(statusEl){statusEl.className='vend-save-status ok';statusEl.innerHTML='<span class="vend-save-dot"></span>Guardado';setTimeout(()=>{statusEl.className='vend-save-status idle';statusEl.innerHTML='<span class="vend-save-dot"></span>Listo';},2200);}
         if(cellEl){cellEl.classList.remove('dirty');cellEl.classList.add('saved');setTimeout(()=>cellEl.classList.remove('saved'),900);}
+        // Si estamos en 80/20 con input editable, refrescar la tabla sin perder scroll para actualizar % y clave 80/20
+        if(cellEl&&cellEl.classList.contains('p82-obj-inp')&&REPORT==='p8020'){setTimeout(()=>{const sy=window.scrollY;renderP8020();window.scrollTo({top:sy});},1000);}
+        // Si estamos en la vista vendedor Con/Sin objetivo, reconstruir CLI para reflejar el cambio en % de línea
+        if(STATE.screen==='cli'&&ROLE==='vendedor'&&(OBJF==='con'||OBJF==='sin')){setTimeout(()=>{const sy=window.scrollY;renderClients();window.scrollTo({top:sy});},1000);}
       } else {
         if(statusEl){statusEl.className='vend-save-status err';statusEl.innerHTML='<span class="vend-save-dot"></span>Error: '+esc(j&&j.error||'?');}
         if(cellEl)cellEl.classList.add('err');
@@ -2637,20 +2655,33 @@ function renderVendTable(mode){
   const grid=document.getElementById('cliGrid');
   const p=vendGetPeriodParts();
   if(!p){grid.innerHTML='<div class="empty-state">Selecciona un mes espec\u00edfico para editar (no funciona con "todo el a\u00f1o").</div>';return;}
-  let list=vendClientList();
+  const fullList=vendClientList();
+  let list=fullList.slice();
   if(mode==='ruta')list=list.filter(c=>vendHasRoute(c.row));
-  // ordenar por nombre
-  list.sort((a,b)=>String(a.name).localeCompare(String(b.name),'es'));
-  document.getElementById('vvListaCount').textContent=vendClientList().length;
+  // Aplicar filtro por día (del daySel)
+  if(DAY_FILTER&&DAY_FILTER!=='ALL')list=list.filter(c=>vendIsDayOn(c.row,DAY_FILTER));
+  // Ordenamiento
+  const sortKey=VEND_SORT.key, dir=VEND_SORT.dir;
+  list.sort((a,b)=>{
+    if(sortKey==='name')return String(a.name).localeCompare(String(b.name),'es')*dir;
+    if(sortKey==='zona')return String(a.zona).localeCompare(String(b.zona),'es')*dir;
+    if(sortKey&&sortKey.indexOf('OBJ ')===0){
+      const va=(a.rec.numLit(sortKey).n||0), vb=(b.rec.numLit(sortKey).n||0);
+      return (vb-va)*dir;
+    }
+    return String(a.name).localeCompare(String(b.name),'es');
+  });
+  document.getElementById('vvListaCount').textContent=fullList.length;
   document.getElementById('cliCount').textContent=`${list.length} cliente${list.length!==1?'s':''} \u00b7 ${mode==='ruta'?'Ruta fija permanente':'Lista completa'} \u00b7 ${p.mes} ${p.anio}`;
 
-  // Totales por línea (suma de objetivos de la lista actual)
+  // Totales por línea (suma real usando numLit para incluir todas las filas del cliente en el periodo)
   const totals={};
   VEND_LINE_COLS.forEach(l=>totals[l.h]=0);
-  list.forEach(c=>{VEND_LINE_COLS.forEach(l=>{const n=parseFloat(String(vendGetVal(c.row,l.h)).replace(/,/g,''));if(!isNaN(n))totals[l.h]+=n;});});
+  list.forEach(c=>{VEND_LINE_COLS.forEach(l=>{const n=c.rec.numLit(l.h).n;if(n!=null)totals[l.h]+=n;});});
 
+  const dayArrow=(k)=>sortKey===k?(dir===-1?' \u25bc':' \u25b2'):'';
   const daysH=VEND_DAY_COLS.map(d=>`<th class="groute">${VEND_DAY_LBL[d]}</th>`).join('');
-  const linesH=VEND_LINE_COLS.map(l=>`<th class="gline">${l.lbl}</th>`).join('');
+  const linesH=VEND_LINE_COLS.map(l=>`<th class="gline sortable" data-vsort="${esc(l.h)}">${l.lbl}${dayArrow(l.h)}</th>`).join('');
   const totalsRow=`<tr><td class="stick-col">Totales \u00b7 ${list.length} cliente${list.length!==1?'s':''}</td><td></td>${VEND_DAY_COLS.map(_=>'<td></td>').join('')}${VEND_LINE_COLS.map(l=>`<td>${fmtNum(totals[l.h]||0)}</td>`).join('')}<td></td></tr>`;
 
   const bodyRows=list.map(c=>{
@@ -2660,7 +2691,9 @@ function renderVendTable(mode){
       return `<td><span class="${cls}" data-vday="${d}" data-code="${esc(c.code)}">${VEND_DAY_LBL[d]}</span></td>`;
     }).join('');
     const linesCells=VEND_LINE_COLS.map(l=>{
-      const val=vendGetVal(c.row,l.h);
+      // Usar el valor sumado del periodo (numLit) para reflejar total real
+      const nlit=c.rec.numLit(l.h);
+      const val=nlit.n!=null?String(nlit.n):'';
       return `<td><input class="vend-inp" type="text" inputmode="decimal" value="${esc(val)}" data-code="${esc(c.code)}" data-head="${esc(l.h)}"></td>`;
     }).join('');
     return `<tr>
@@ -2679,8 +2712,8 @@ function renderVendTable(mode){
     </div>
     <div class="vend-tbl-wrap"><table class="vend-tbl">
       <thead><tr>
-        <th class="stick-col">Cliente</th>
-        <th class="gzone">Zona</th>
+        <th class="stick-col sortable" data-vsort="name">Cliente${dayArrow('name')}</th>
+        <th class="gzone sortable" data-vsort="zona">Zona${dayArrow('zona')}</th>
         ${daysH}
         ${linesH}
         <th class="gaction">Ficha</th>
@@ -2752,6 +2785,9 @@ document.addEventListener('change',(e)=>{
   vendSaveField(code,head,t.value,status,t);
 });
 document.addEventListener('click',(e)=>{
+  // Ordenamiento en cabeceras de la tabla del vendedor
+  const vs=e.target.closest('[data-vsort]');
+  if(vs){const k=vs.dataset.vsort;if(VEND_SORT.key===k)VEND_SORT.dir=-VEND_SORT.dir;else{VEND_SORT.key=k;VEND_SORT.dir=-1;}renderVendTable(OBJF==='ruta'?'ruta':'lista');return;}
   const dc=e.target.closest('[data-vday]');
   if(dc){
     const code=dc.dataset.code,day=dc.dataset.vday;
@@ -3735,11 +3771,14 @@ function renderP8020(){
   const avgMode=P82.mode==='year';
   const ar=(k)=>P82.sort===k?(P82.dir>0?' \u25b2':' \u25bc'):'';
   const on=(k)=>P82.sort===k?'on':'';
+  const p82Period=vendGetPeriodParts(); // {mes,anio} para saber si podemos editar
+  const canEdit=(P82.mode==='period')&&!!p82Period;
+  const objHead=line.obj; // ej 'OBJ TOTAL', 'OBJ LUB', etc.
   const rows=list.map(c=>`<tr class="${c.key?'p82-key':''}">
     <td class="l name">${c.key?'<span class="p82-star" title="Cliente clave: parte del grupo que concentra ~80% de la venta">\u2605</span>':''}${esc(c.cliente)}</td>
     <td class="l"><span class="p82-org" style="color:var(--${c.o.accent==='cyan'?'cyan':'amber'})">${esc(c.o.label)}</span></td>
     <td class="l">${esc(c.vendor||'\u2014')}</td>
-    <td class="num">${c.obj!=null?fmtNum(c.obj):'\u2014'}</td>
+    <td class="num">${canEdit?`<input class="vend-inp p82-obj-inp" type="text" inputmode="decimal" value="${c.obj!=null?fmtNum(c.obj):''}" data-code="${esc(c.code)}" data-head="${esc(objHead)}">`:(c.obj!=null?fmtNum(c.obj):'\u2014')}</td>
     <td class="num strong">${c.real!=null?fmtNum(c.real):'\u2014'}</td>
     <td class="num ${c.pct!=null?('t-'+(c.pct>=100?'good':(c.pct>=70?'mid':'low'))):''}">${c.pct!=null?Math.round(c.pct)+'%':'\u2014'}</td>
     <td class="p82-fu">${p82FollowDots(c)}</td>
