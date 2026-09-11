@@ -198,6 +198,85 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 
 /* tarjeta cliente (vista general) */
 .cli-list{display:flex;flex-direction:column;gap:20px}
+/* ===== Vendedor: switch de vistas ===== */
+.vend-view-bar{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 18px;padding-bottom:14px;border-bottom:1px solid var(--line2)}
+.vv-btn{background:var(--panel);border:1px solid var(--line2);color:var(--muted);padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:8px}
+.vv-btn:hover{border-color:var(--accent);color:var(--txt)}
+.vv-btn.on{background:linear-gradient(135deg,var(--accent),#ffdf6b);color:var(--navy);border-color:transparent;box-shadow:0 4px 14px -4px rgba(250,204,21,.5)}
+:root[data-theme="light"] .vv-btn.on{color:#0c1f44}
+.vv-badge{background:rgba(0,0,0,.15);color:inherit;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:800;min-width:22px;text-align:center}
+.vv-btn.on .vv-badge{background:rgba(12,31,68,.15)}
+/* Tabla editable de clientes (Ruta fija / Lista completa) */
+.vend-tbl-wrap{background:var(--panel);border:1px solid var(--line2);border-radius:12px;overflow:auto;box-shadow:0 4px 16px -6px rgba(0,0,0,.15)}
+.vend-tbl{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px;min-width:1400px}
+.vend-tbl thead th{background:var(--kpi-bg);color:var(--txt);font-weight:800;padding:10px 8px;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;text-align:center;border-bottom:2px solid var(--line2);position:sticky;top:0;z-index:2;white-space:nowrap}
+.vend-tbl thead th.gline{background:linear-gradient(135deg,var(--navy2),var(--navy));color:var(--accent);border-radius:0}
+.vend-tbl thead th.gzone{background:rgba(58,166,255,.15);color:var(--cyan)}
+.vend-tbl thead th.groute{background:rgba(16,185,129,.15);color:var(--good)}
+.vend-tbl thead th.gaction{background:rgba(255,210,30,.15);color:var(--accent)}
+.vend-tbl thead th.stick-col{position:sticky;left:0;z-index:3;background:var(--panel);text-align:left;padding-left:12px;min-width:220px;border-right:2px solid var(--line2)}
+.vend-tbl tbody td{padding:6px 6px;border-bottom:1px solid var(--line2);text-align:center;vertical-align:middle}
+.vend-tbl tbody td.stick-col{position:sticky;left:0;background:var(--panel);text-align:left;padding-left:12px;border-right:2px solid var(--line2);z-index:1;font-weight:700}
+.vend-tbl tbody tr:hover td{background:rgba(255,210,30,.04)}
+.vend-tbl tbody tr:hover td.stick-col{background:rgba(255,210,30,.08)}
+.vend-tbl .vend-name{display:block;font-weight:800;color:var(--txt);font-size:12.5px;line-height:1.2}
+.vend-tbl .vend-code{display:block;font-family:'IBM Plex Mono';font-size:10.5px;color:var(--muted2);margin-top:2px}
+.vend-inp{width:100%;max-width:60px;background:var(--kpi-bg);border:1px solid var(--line2);border-radius:5px;color:var(--txt);padding:5px 6px;font-family:'IBM Plex Mono';font-size:12px;font-weight:700;text-align:center;transition:.12s}
+.vend-inp.wide{max-width:180px;text-align:left;font-family:inherit;font-weight:600}
+.vend-inp:focus{outline:none;border-color:var(--accent);background:var(--panel);box-shadow:0 0 0 3px rgba(250,204,21,.15)}
+.vend-inp.dirty{border-color:var(--accent);background:rgba(250,204,21,.08)}
+.vend-inp.saved{border-color:var(--good);animation:vendSaved .8s}
+@keyframes vendSaved{0%{background:rgba(16,185,129,.25)}100%{background:var(--kpi-bg)}}
+.vend-inp.err{border-color:var(--low);background:rgba(239,68,68,.1)}
+.vend-day{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;cursor:pointer;user-select:none;font-weight:800;font-size:11px;color:var(--muted2);background:var(--kpi-bg);border:1px solid var(--line2);transition:.12s}
+.vend-day:hover{border-color:var(--accent);color:var(--txt)}
+.vend-day.on{background:linear-gradient(135deg,var(--good),#4ade80);color:#fff;border-color:transparent}
+.vend-day.on.esp{background:linear-gradient(135deg,#94a3b8,#64748b)}
+.vend-btn-edit{background:var(--panel);border:1px solid var(--accent);color:var(--accent);padding:5px 10px;border-radius:6px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;transition:.12s}
+.vend-btn-edit:hover{background:var(--accent);color:var(--navy)}
+:root[data-theme="light"] .vend-btn-edit{color:var(--accent-ink);border-color:var(--accent-ink)}
+:root[data-theme="light"] .vend-btn-edit:hover{background:var(--accent-ink);color:#fff}
+.vend-tbl tfoot td{background:linear-gradient(135deg,var(--navy2),var(--navy)) !important;color:var(--accent) !important;font-weight:900;padding:10px 8px;border-top:2px solid var(--accent);position:sticky;bottom:0;z-index:2;font-family:'IBM Plex Mono';font-size:12.5px}
+.vend-tbl tfoot td.stick-col{color:var(--accent) !important;background:linear-gradient(135deg,var(--navy2),var(--navy)) !important;font-family:inherit}
+/* Toolbar arriba de la tabla */
+.vend-tools{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.vend-tools .lbl{color:var(--muted);font-size:12.5px}
+.vend-tools .lbl b{color:var(--txt)}
+.vend-save-status{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:12px;font-size:11px;font-weight:700}
+.vend-save-status.idle{background:rgba(148,163,184,.15);color:var(--muted2)}
+.vend-save-status.saving{background:rgba(250,204,21,.15);color:var(--accent)}
+.vend-save-status.ok{background:rgba(16,185,129,.15);color:var(--good)}
+.vend-save-status.err{background:rgba(239,68,68,.15);color:var(--low)}
+.vend-save-dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+.vend-save-status.saving .vend-save-dot{animation:vendPulse .8s ease-in-out infinite}
+@keyframes vendPulse{0%,100%{opacity:.3}50%{opacity:1}}
+/* Modal ficha completa */
+.vend-modal-bd{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9998;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.vend-modal-bd.open{display:flex;animation:vendFadeIn .2s}
+@keyframes vendFadeIn{from{opacity:0}to{opacity:1}}
+.vend-modal{background:var(--panel);border-radius:16px;max-width:820px;width:100%;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 30px 80px -20px rgba(0,0,0,.6);border:1px solid var(--line2)}
+.vend-modal-hd{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:18px 24px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.vend-modal-hd h3{margin:0;font-family:'Archivo';font-style:italic;font-weight:800;font-size:20px;color:#fff}
+.vend-modal-hd .code{font-family:'IBM Plex Mono';font-size:11.5px;color:var(--accent);margin-top:3px;letter-spacing:.5px}
+.vend-modal-x{background:transparent;border:none;color:#c9d6ec;font-size:22px;width:34px;height:34px;border-radius:8px;cursor:pointer;transition:.12s;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.vend-modal-x:hover{background:rgba(255,255,255,.1);color:#fff}
+.vend-modal-bd-inner{padding:22px 24px;overflow-y:auto;flex:1}
+.vend-modal-grp{margin-bottom:20px}
+.vend-modal-grp h4{margin:0 0 10px;color:var(--accent);font-size:11px;text-transform:uppercase;letter-spacing:1px;font-weight:900}
+.vend-modal-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px}
+.vend-modal-fld label{display:block;font-size:10.5px;font-weight:800;color:var(--muted2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px}
+.vend-modal-fld input,.vend-modal-fld textarea,.vend-modal-fld select{width:100%;background:var(--kpi-bg);border:1px solid var(--line2);color:var(--txt);padding:8px 11px;border-radius:6px;font-size:13px;font-family:inherit;transition:.12s}
+.vend-modal-fld input:focus,.vend-modal-fld textarea:focus,.vend-modal-fld select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(250,204,21,.15)}
+.vend-modal-fld textarea{resize:vertical;min-height:60px;font-family:inherit}
+.vend-modal-days{display:flex;gap:6px;flex-wrap:wrap}
+.vend-modal-days .vend-day{width:auto;padding:0 10px;min-width:44px;height:30px;font-size:12px}
+.vend-modal-lines{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.vend-modal-lines .vend-modal-fld input{max-width:100%;text-align:center;font-family:'IBM Plex Mono';font-weight:700}
+.vend-modal-ft{padding:14px 24px;background:var(--kpi-bg);border-top:1px solid var(--line2);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.vend-modal-ft .btn{padding:9px 18px}
+.vend-modal-ft .btn.primary{background:linear-gradient(135deg,var(--accent),#ffdf6b);color:var(--navy);border-color:transparent;font-weight:800}
+.vend-modal-ft .btn.primary:hover{filter:brightness(1.1)}
+:root[data-theme="light"] .vend-modal-ft .btn.primary{color:#0c1f44}
 .cli-card{border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(165deg,var(--panel),var(--bg2));padding:17px 19px 17px 54px;cursor:pointer;transition:.2s;position:relative;overflow:hidden;box-shadow:0 2px 0 rgba(0,0,0,.18)}
 .cli-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--accent);opacity:.5}
 .cli-num{position:absolute;left:13px;top:16px;font-family:'IBM Plex Mono';font-weight:800;font-size:15px;color:var(--muted2);min-width:26px;text-align:center}
@@ -1595,7 +1674,19 @@ tr.chk-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--line
       </select></div>
       <div class="count-pill" id="cliCount">0 clientes</div>
     </div>
+    <!-- Switch de vistas del vendedor: normal / ruta fija / lista completa -->
+    <div class="vend-view-bar" id="vendViewBar" style="display:none">
+      <button class="vv-btn on" data-vv="std">Con objetivo / Sin objetivo</button>
+      <button class="vv-btn" data-vv="ruta">Ruta fija permanente</button>
+      <button class="vv-btn" data-vv="lista">Lista completa <span class="vv-badge" id="vvListaCount">0</span></button>
+    </div>
     <div class="cli-list" id="cliGrid"></div>
+  </section>
+
+  <!-- Modal ficha completa del vendedor -->
+  <div class="vend-modal-bd" id="vendModalBd" onclick="if(event.target.id==='vendModalBd')vendCloseModal()"></div>
+
+
   </section>
 
   <!-- FICHA -->
@@ -1907,7 +1998,10 @@ function lineData(rec,line){
 const STATE={org:null,vendor:null,period:null,screen:'home'};
 function org(id){return CONFIG.orgs.find(o=>o.id===id);}
 function setAccent(id){const o=org(id);document.body.dataset.accent=o?o.accent:'amber';document.getElementById('brandMark').textContent=o?o.initial:'LL';}
-function showScreen(n){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+n).classList.add('active');STATE.screen=n;renderCrumbs();window.scrollTo({top:0,behavior:'smooth'});}
+function showScreen(n){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+n).classList.add('active');STATE.screen=n;renderCrumbs();window.scrollTo({top:0,behavior:'smooth'});
+  const vvb=document.getElementById('vendViewBar');
+  if(vvb){vvb.style.display=(n==='cli'&&ROLE==='vendedor')?'':'none';if(n==='cli'&&ROLE==='vendedor'){VEND_VIEW='std';document.querySelectorAll('.vv-btn').forEach(b=>b.classList.toggle('on',b.dataset.vv==='std'));}}
+}
 function renderCrumbs(){
   if(STATE.screen==='welcome'){document.getElementById('crumbs').innerHTML='';return;}
   const c=[{t:'Inicio',welcome:true},{t:'Organizaciones',go:'home'}];
@@ -2466,6 +2560,224 @@ function clientLineTable(rec,lines,pace){
   }).join('');
   return `<div class="lt"><div class="lt-head"><span>L\u00ednea</span><span>OBJ</span><span>REAL</span><span>Avance</span><span></span></div>${rows}</div>`;
 }
+/* ===== Vendedor: vistas nuevas (Ruta fija / Lista completa) + edición inline + modal ==== */
+let VEND_VIEW='std'; // 'std' | 'ruta' | 'lista'
+const VEND_LINE_COLS=[
+  {h:'OBJ PREM',lbl:'Prem'},{h:'OBJ AGM',lbl:'AGM'},{h:'OBJ ESTANDAR',lbl:'Est'},
+  {h:'OBJ LUB',lbl:'Lub'},{h:'OBJ MOTO',lbl:'Moto'},{h:'OBJ FILTRO',lbl:'Filtro'},
+  {h:'OBJ ALCALIN',lbl:'Alcal'},{h:'OBJ LLANTAS',lbl:'Llantas'},
+  {h:'OBJ AUTO',lbl:'Auto'},{h:'OBJ CTA',lbl:'Cta'},{h:'OBJ CAMION',lbl:'Cami\u00f3n'}
+];
+const VEND_DAY_COLS=['LUNES','MARTES','MIERCOLES','JUEVES','VIERNES','SABADO','ESPORADICO'];
+const VEND_DAY_LBL={LUNES:'L',MARTES:'M',MIERCOLES:'Mi',JUEVES:'J',VIERNES:'V',SABADO:'S',ESPORADICO:'Esp'};
+
+function vendGetPeriodParts(){
+  const p=currentPeriodObj();
+  if(!p||p.key==='ALL')return null;
+  return {mes:p.mes,anio:String(p.anio)};
+}
+function vendClientList(){
+  // Devuelve todos los clientes del vendedor activo en el periodo actual (una fila por cliente)
+  const p=vendGetPeriodParts(); if(!p)return [];
+  const H=DB.H;
+  const rows=DB.rows.filter(r=>{
+    const v=resolveVendor(getCell(r,'VENDEDOR',H)).display||String(getCell(r,'VENDEDOR',H)||'').trim();
+    if(v!==STATE.vendor)return false;
+    if(norm(getCell(r,'MES',H))!==norm(p.mes))return false;
+    if(String(getCell(r,'A\u00d1O',H))!==p.anio)return false;
+    return true;
+  });
+  // Deduplicar por COD CLIENTE
+  const map=new Map();
+  rows.forEach(r=>{
+    const code=String(getCell(r,'COD CLIENTE',H)||'').trim();
+    if(!code)return;
+    if(!map.has(code))map.set(code,r);
+  });
+  return [...map.values()].map(r=>({row:r,code:String(getCell(r,'COD CLIENTE',H)||'').trim(),name:String(getCell(r,'CLIENTE',H)||'').trim(),zona:String(getCell(r,'ZONA',H)||'').trim(),giro:String(getCell(r,'GIRO',H)||'').trim(),dir:String(getCell(r,'DIRECCION',H)||'').trim()}));
+}
+function vendHasRoute(row){
+  // Considera ruta fija si tiene alguna X en LUN..SAB (esporádico NO cuenta)
+  return ['LUNES','MARTES','MIERCOLES','JUEVES','VIERNES','SABADO'].some(d=>!isEmpty(getCell(row,d,DB.H)));
+}
+function vendGetVal(row,head){return String(getCell(row,head,DB.H)||'').trim();}
+function vendIsDayOn(row,day){return !isEmpty(getCell(row,day,DB.H));}
+
+/* Guardado con debounce por (cod+campo) */
+const VEND_PENDING={};
+function vendSaveField(code,head,value,statusEl,cellEl){
+  clearTimeout(VEND_PENDING[code+'|'+head]);
+  VEND_PENDING[code+'|'+head]=setTimeout(()=>{ vendPushChange(code,{[head]:value},statusEl,cellEl); }, 700);
+}
+function vendPushChange(code,fields,statusEl,cellEl){
+  const p=vendGetPeriodParts();
+  if(!p){if(statusEl){statusEl.className='vend-save-status err';statusEl.innerHTML='<span class="vend-save-dot"></span>Selecciona mes espec\u00edfico';}return;}
+  if(statusEl){statusEl.className='vend-save-status saving';statusEl.innerHTML='<span class="vend-save-dot"></span>Guardando\u2026';}
+  const body={action:'guardarCliente',codCliente:code,mes:p.mes,anio:p.anio,vendedor:STATE.vendor||'',campos:fields};
+  fetch(SAVE_URL,{method:'POST',body:JSON.stringify(body),redirect:'follow'})
+    .then(r=>r.json()).then(j=>{
+      if(j&&j.ok){
+        // reflejar en DB local
+        const H=DB.H;
+        const row=DB.rows.find(r=>String(getCell(r,'COD CLIENTE',H)||'').trim()===code && norm(getCell(r,'MES',H))===norm(p.mes) && String(getCell(r,'A\u00d1O',H))===p.anio);
+        if(row){
+          Object.keys(fields).forEach(h=>{const idx=H.indexOf(h);if(idx>=0)row[idx]=fields[h];});
+        }
+        if(statusEl){statusEl.className='vend-save-status ok';statusEl.innerHTML='<span class="vend-save-dot"></span>Guardado';setTimeout(()=>{statusEl.className='vend-save-status idle';statusEl.innerHTML='<span class="vend-save-dot"></span>Listo';},2200);}
+        if(cellEl){cellEl.classList.remove('dirty');cellEl.classList.add('saved');setTimeout(()=>cellEl.classList.remove('saved'),900);}
+      } else {
+        if(statusEl){statusEl.className='vend-save-status err';statusEl.innerHTML='<span class="vend-save-dot"></span>Error: '+esc(j&&j.error||'?');}
+        if(cellEl)cellEl.classList.add('err');
+      }
+    }).catch(err=>{
+      if(statusEl){statusEl.className='vend-save-status err';statusEl.innerHTML='<span class="vend-save-dot"></span>Error de red';}
+      if(cellEl)cellEl.classList.add('err');
+    });
+}
+
+function renderVendTable(mode){
+  const grid=document.getElementById('cliGrid');
+  const p=vendGetPeriodParts();
+  if(!p){grid.innerHTML='<div class="empty-state">Selecciona un mes espec\u00edfico para editar (no funciona con "todo el a\u00f1o").</div>';return;}
+  let list=vendClientList();
+  if(mode==='ruta')list=list.filter(c=>vendHasRoute(c.row));
+  // ordenar por nombre
+  list.sort((a,b)=>String(a.name).localeCompare(String(b.name),'es'));
+  document.getElementById('vvListaCount').textContent=vendClientList().length;
+  document.getElementById('cliCount').textContent=`${list.length} cliente${list.length!==1?'s':''} \u00b7 ${mode==='ruta'?'Ruta fija permanente':'Lista completa'} \u00b7 ${p.mes} ${p.anio}`;
+
+  // Totales por línea (suma de objetivos de la lista actual)
+  const totals={};
+  VEND_LINE_COLS.forEach(l=>totals[l.h]=0);
+  list.forEach(c=>{VEND_LINE_COLS.forEach(l=>{const n=parseFloat(String(vendGetVal(c.row,l.h)).replace(/,/g,''));if(!isNaN(n))totals[l.h]+=n;});});
+
+  const daysH=VEND_DAY_COLS.map(d=>`<th class="groute">${VEND_DAY_LBL[d]}</th>`).join('');
+  const linesH=VEND_LINE_COLS.map(l=>`<th class="gline">${l.lbl}</th>`).join('');
+  const totalsRow=`<tr><td class="stick-col">Totales \u00b7 ${list.length} cliente${list.length!==1?'s':''}</td><td></td>${VEND_DAY_COLS.map(_=>'<td></td>').join('')}${VEND_LINE_COLS.map(l=>`<td>${fmtNum(totals[l.h]||0)}</td>`).join('')}<td></td></tr>`;
+
+  const bodyRows=list.map(c=>{
+    const daysCells=VEND_DAY_COLS.map(d=>{
+      const on=vendIsDayOn(c.row,d);
+      const cls='vend-day'+(on?' on':'')+(d==='ESPORADICO'?' esp':'');
+      return `<td><span class="${cls}" data-vday="${d}" data-code="${esc(c.code)}">${VEND_DAY_LBL[d]}</span></td>`;
+    }).join('');
+    const linesCells=VEND_LINE_COLS.map(l=>{
+      const val=vendGetVal(c.row,l.h);
+      return `<td><input class="vend-inp" type="text" inputmode="decimal" value="${esc(val)}" data-code="${esc(c.code)}" data-head="${esc(l.h)}"></td>`;
+    }).join('');
+    return `<tr>
+      <td class="stick-col"><span class="vend-name">${esc(c.name||SD)}</span><span class="vend-code">${esc(c.code)}</span></td>
+      <td><input class="vend-inp wide" type="text" value="${esc(c.zona)}" data-code="${esc(c.code)}" data-head="ZONA"></td>
+      ${daysCells}
+      ${linesCells}
+      <td><button class="vend-btn-edit" data-vfull="${esc(c.code)}">Ficha completa</button></td>
+    </tr>`;
+  }).join('');
+
+  grid.innerHTML=`
+    <div class="vend-tools">
+      <div class="lbl">Editando <b>${p.mes} ${p.anio}</b> \u00b7 los cambios se guardan autom\u00e1ticamente al salir de cada campo.</div>
+      <span class="vend-save-status idle" id="vendStatus"><span class="vend-save-dot"></span>Listo</span>
+    </div>
+    <div class="vend-tbl-wrap"><table class="vend-tbl">
+      <thead><tr>
+        <th class="stick-col">Cliente</th>
+        <th class="gzone">Zona</th>
+        ${daysH}
+        ${linesH}
+        <th class="gaction">Ficha</th>
+      </tr></thead>
+      <tbody>${bodyRows||'<tr><td colspan="'+(2+VEND_DAY_COLS.length+VEND_LINE_COLS.length+1)+'" class="empty-state" style="text-align:center;padding:30px">Sin clientes en esta vista.</td></tr>'}</tbody>
+      <tfoot>${totalsRow}</tfoot>
+    </table></div>`;
+}
+
+/* Modal ficha completa */
+function vendOpenFullModal(code){
+  const p=vendGetPeriodParts(); if(!p)return;
+  const H=DB.H;
+  const row=DB.rows.find(r=>String(getCell(r,'COD CLIENTE',H)||'').trim()===code && norm(getCell(r,'MES',H))===norm(p.mes) && String(getCell(r,'A\u00d1O',H))===p.anio);
+  if(!row){alert('No se encontr\u00f3 el cliente en el mes actual.');return;}
+  const val=(h)=>String(getCell(row,h,H)||'').trim();
+  const daysHtml=VEND_DAY_COLS.map(d=>{const on=!isEmpty(getCell(row,d,H));return `<span class="vend-day ${on?'on':''}${d==='ESPORADICO'?' esp':''}" data-vday="${d}" data-code="${esc(code)}">${VEND_DAY_LBL[d]}</span>`;}).join('');
+  const linesHtml=VEND_LINE_COLS.map(l=>`<div class="vend-modal-fld"><label>${l.lbl}</label><input class="vend-inp" type="text" inputmode="decimal" value="${esc(val(l.h))}" data-code="${esc(code)}" data-head="${esc(l.h)}"></div>`).join('');
+  const bd=document.getElementById('vendModalBd');
+  bd.innerHTML=`<div class="vend-modal" onclick="event.stopPropagation()">
+    <div class="vend-modal-hd">
+      <div><h3>${esc(val('CLIENTE')||SD)}</h3><div class="code">${esc(code)} \u00b7 ${esc(p.mes)} ${p.anio}</div></div>
+      <button class="vend-modal-x" onclick="vendCloseModal()">\u2715</button>
+    </div>
+    <div class="vend-modal-bd-inner">
+      <div class="vend-modal-grp">
+        <h4>Informaci\u00f3n general</h4>
+        <div class="vend-modal-row">
+          <div class="vend-modal-fld"><label>Zona</label><input class="vend-inp wide" type="text" value="${esc(val('ZONA'))}" data-code="${esc(code)}" data-head="ZONA"></div>
+          <div class="vend-modal-fld"><label>Giro del cliente</label><input class="vend-inp wide" type="text" value="${esc(val('GIRO'))}" data-code="${esc(code)}" data-head="GIRO"></div>
+        </div>
+        <div class="vend-modal-fld"><label>Direcci\u00f3n</label><input class="vend-inp wide" type="text" value="${esc(val('DIRECCION'))}" data-code="${esc(code)}" data-head="DIRECCION" style="max-width:100%"></div>
+      </div>
+      <div class="vend-modal-grp">
+        <h4>D\u00edas de visita</h4>
+        <div class="vend-modal-days">${daysHtml}</div>
+      </div>
+      <div class="vend-modal-grp">
+        <h4>Objetivos por l\u00ednea</h4>
+        <div class="vend-modal-lines">${linesHtml}</div>
+      </div>
+    </div>
+    <div class="vend-modal-ft">
+      <span class="vend-save-status idle" id="vendModalStatus"><span class="vend-save-dot"></span>Guardado autom\u00e1tico</span>
+      <button class="btn primary" onclick="vendCloseModal()">Cerrar</button>
+    </div>
+  </div>`;
+  bd.classList.add('open');
+}
+function vendCloseModal(){
+  const bd=document.getElementById('vendModalBd');
+  bd.classList.remove('open');
+  // Al cerrar, refresca la tabla si estamos en ruta/lista
+  if(VEND_VIEW!=='std')renderVendTable(VEND_VIEW);
+}
+
+/* Handlers globales para los inputs/día chips (delegación) */
+document.addEventListener('input',(e)=>{
+  const t=e.target;
+  if(!t.classList.contains('vend-inp'))return;
+  t.classList.add('dirty');
+});
+document.addEventListener('change',(e)=>{
+  const t=e.target;
+  if(!t.classList.contains('vend-inp'))return;
+  const code=t.dataset.code,head=t.dataset.head;
+  if(!code||!head)return;
+  const status=document.getElementById('vendModalStatus')||document.getElementById('vendStatus');
+  vendSaveField(code,head,t.value,status,t);
+});
+document.addEventListener('click',(e)=>{
+  const dc=e.target.closest('[data-vday]');
+  if(dc){
+    const code=dc.dataset.code,day=dc.dataset.vday;
+    const on=dc.classList.contains('on');
+    dc.classList.toggle('on');
+    const status=document.getElementById('vendModalStatus')||document.getElementById('vendStatus');
+    vendPushChange(code,{[day]:on?'':'X'},status,dc);
+    return;
+  }
+  const vf=e.target.closest('[data-vfull]');
+  if(vf){vendOpenFullModal(vf.dataset.vfull);return;}
+  const vb=e.target.closest('[data-vv]');
+  if(vb){
+    document.querySelectorAll('.vv-btn').forEach(b=>b.classList.remove('on'));
+    vb.classList.add('on');
+    VEND_VIEW=vb.dataset.vv;
+    if(VEND_VIEW==='std'){render();}
+    else{renderVendTable(VEND_VIEW);}
+    return;
+  }
+  // click fuera del modal → cerrar
+  if(e.target.id==='vendModalBd')vendCloseModal();
+});
+
 function renderLineFocus(base,grid,line,pace){
   const conObj=[],sinObj=[];
   base.forEach(c=>{const ld=lineData(c.rec,line);const it={...c,ld};if(ld.obj.n!=null&&ld.obj.n>0)conObj.push(it);else if(ld.real.n!=null&&ld.real.n!==0)sinObj.push(it);});
