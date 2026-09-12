@@ -288,6 +288,22 @@ select.inp{padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xm
 .vend-modal-ft .btn.primary{background:linear-gradient(135deg,var(--accent),#ffdf6b);color:var(--navy);border-color:transparent;font-weight:800}
 .vend-modal-ft .btn.primary:hover{filter:brightness(1.1)}
 :root[data-theme="light"] .vend-modal-ft .btn.primary{color:#0c1f44}
+/* ==== Ficha del cliente editable ==== */
+.ficha-edit-hint{background:rgba(58,166,255,.08);border-left:3px solid var(--cyan);color:var(--muted);padding:9px 14px;border-radius:0 8px 8px 0;font-size:12.5px;margin:0 0 14px;display:flex;align-items:center;gap:8px}
+:root[data-theme="light"] .ficha-edit-hint{background:rgba(31,127,224,.08);color:var(--txt);border-color:#1462a8}
+.ficha-hint{font-size:10.5px;color:var(--muted2);font-weight:600;text-transform:none;letter-spacing:0;margin-left:8px;font-style:italic}
+.ficha-edit{cursor:pointer;position:relative;transition:.12s;border-bottom:1px dashed transparent;padding:1px 2px;border-radius:3px}
+.ficha-edit:not(.editing):hover{background:rgba(255,210,30,.09);border-bottom-color:var(--accent);color:var(--accent)}
+:root[data-theme="light"] .ficha-edit:not(.editing):hover{color:var(--accent-ink);background:rgba(234,176,0,.12)}
+.ficha-edit.editing{background:transparent;border-bottom:none;padding:0;display:block}
+.ficha-edit.saved{background:rgba(16,185,129,.25) !important;color:var(--good) !important;border-bottom-color:var(--good);animation:vendSaved 1.4s ease-out}
+.ficha-edit.err{background:rgba(239,68,68,.25) !important;color:var(--low) !important;border-bottom-color:var(--low);animation:vendErr .5s ease-out 3}
+.ficha-edit-inp{width:100%;background:var(--kpi-bg);border:2px solid var(--accent);border-radius:5px;color:var(--txt);padding:5px 8px;font-family:inherit;font-size:inherit;font-weight:inherit;line-height:inherit;outline:none;box-shadow:0 0 0 3px rgba(250,204,21,.2);min-height:30px;resize:vertical}
+textarea.ficha-edit-inp{min-height:60px;font-family:inherit;line-height:1.4}
+.ficha-apoyo-chip{cursor:pointer;transition:.12s}
+.ficha-apoyo-chip:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.25)}
+.ficha-day-chip{cursor:pointer;transition:.12s}
+.ficha-day-chip:hover{border-color:var(--accent);color:var(--txt)}
 .cli-card{border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(165deg,var(--panel),var(--bg2));padding:17px 19px 17px 54px;cursor:pointer;transition:.2s;position:relative;overflow:hidden;box-shadow:0 2px 0 rgba(0,0,0,.18)}
 .cli-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--accent);opacity:.5}
 .cli-num{position:absolute;left:13px;top:16px;font-family:'IBM Plex Mono';font-weight:800;font-size:15px;color:var(--muted2);min-width:26px;text-align:center}
@@ -2583,6 +2599,7 @@ function clientLineTable(rec,lines,pace){
 /* ===== Vendedor: vistas nuevas (Ruta fija / Lista completa) + edición inline + modal ==== */
 let VEND_VIEW='std'; // 'std' | 'ruta' | 'lista'
 let VEND_SORT={key:null,dir:-1}; // sortable columns for vendor edit table
+let FICHA_CURRENT_REC=null;
 const VEND_LINE_COLS=[
   {h:'OBJ PREM',lbl:'Prem'},{h:'OBJ AGM',lbl:'AGM'},{h:'OBJ ESTANDAR',lbl:'Est'},
   {h:'OBJ LUB',lbl:'Lub'},{h:'OBJ MOTO',lbl:'Moto'},{h:'OBJ FILTRO',lbl:'Filtro'},
@@ -2636,7 +2653,12 @@ function vendSaveField(code,head,value,statusEl,cellEl){
 }
 function vendPushChange(code,fields,statusEl,cellEl){
   const p=vendGetPeriodParts();
-  if(!p){if(statusEl){statusEl.className='vend-save-status err';statusEl.innerHTML='<span class="vend-save-dot"></span>Selecciona mes espec\u00edfico';}return;}  // Recalcular campos derivados si cambian sus componentes
+  if(!p){
+    if(statusEl){statusEl.className='vend-save-status err';statusEl.innerHTML='<span class="vend-save-dot"></span>Selecciona mes espec\u00edfico';}
+    if(cellEl){cellEl.classList.remove('dirty','saved');cellEl.classList.add('err');setTimeout(()=>cellEl.classList.remove('err'),2500);}
+    alert('Para editar necesitas seleccionar un mes espec\u00edfico (no "todo el a\u00f1o").');
+    return;
+  }  // Recalcular campos derivados si cambian sus componentes
   // OBJ TOTAL (acumuladores) = OBJ PREM + OBJ AGM + OBJ ESTANDAR (+ OBJ VALUE cuando exista)
   // OBJ LLANTAS = OBJ AUTO + OBJ CTA + OBJ CAMION
   const ACUM_COMP=['OBJ PREM','OBJ AGM','OBJ ESTANDAR','OBJ VALUE'];
@@ -2729,9 +2751,8 @@ function refreshCurrentView(info){
       else if(typeof renderClients==='function')renderClients();
     }
     // Ficha del cliente
-    if(scr==='ficha'&&typeof renderFicha==='function'){
-      // Si la ficha es del cliente afectado o si es cualquier ficha, la re-pintamos
-      try{renderFicha();}catch(_){}
+    if(scr==='ficha'&&typeof renderFicha==='function'&&FICHA_CURRENT_REC){
+      try{renderFicha(FICHA_CURRENT_REC);}catch(_){}
     }
     // Reportes
     if(scr==='rep'&&typeof renderActiveReport==='function'){try{renderActiveReport();}catch(_){}}
@@ -2921,6 +2942,49 @@ document.addEventListener('click',(e)=>{
   }
   const vf=e.target.closest('[data-vfull]');
   if(vf){vendOpenFullModal(vf.dataset.vfull);return;}
+  // Chips POP en la ficha (toggle X)
+  const fac=e.target.closest('.ficha-apoyo-chip');
+  if(fac){
+    const cur=fac.dataset.fdstate||'';
+    const next=cur?'':'X';
+    fac.dataset.fdstate=next;
+    fac.classList.toggle('on',!!next);
+    vendPushChange(fac.dataset.fdcode,{[fac.dataset.fdcol]:next},null,fac);
+    return;
+  }
+  // Edición inline de la ficha del cliente (clic → input)
+  const fe=e.target.closest('.ficha-edit');
+  if(fe && !fe.classList.contains('editing')){
+    const cur=fe.textContent===SD?'':fe.textContent;
+    const col=fe.dataset.fdcol, code=fe.dataset.fdcode;
+    if(!col||!code)return;
+    fe.classList.add('editing');
+    const isLongField=/DIRECCION|NEGOCIO|CLIENTE/.test(col);
+    const inp=document.createElement(isLongField?'textarea':'input');
+    if(!isLongField)inp.type='text';
+    inp.className='ficha-edit-inp';
+    inp.value=cur;
+    fe.textContent='';
+    fe.appendChild(inp);
+    inp.focus();
+    if(inp.select)inp.select();
+    let saving=false;
+    const commit=()=>{
+      if(saving)return; saving=true;
+      const newVal=inp.value.trim();
+      fe.classList.remove('editing');
+      fe.textContent=newVal||SD;
+      fe.classList.toggle('empty',!newVal);
+      if(newVal!==(cur||''))vendPushChange(code,{[col]:newVal},null,fe);
+    };
+    const cancel=()=>{fe.classList.remove('editing');fe.textContent=cur||SD;fe.classList.toggle('empty',!cur);};
+    inp.addEventListener('blur',commit);
+    inp.addEventListener('keydown',(ev)=>{
+      if(ev.key==='Enter'&&!ev.shiftKey&&!isLongField){ev.preventDefault();commit();}
+      else if(ev.key==='Escape'){ev.preventDefault();cancel();}
+    });
+    return;
+  }
   // click fuera del modal → cerrar
   if(e.target.id==='vendModalBd')vendCloseModal();
 });
@@ -3001,7 +3065,16 @@ function historyTable(rec,compact){
   const promNote=periods.some(p=>p.rank===curRank)?`<div class="rep-note" style="margin-top:8px;font-size:11.5px">\u2022 El <b>Prom/mes</b> no considera el mes en curso (mes incompleto); el Total del a\u00f1o s\u00ed lo incluye.</div>`:'';
   return `<div class="rd-tblwrap"><table class="hist-tbl hl-table ${compact?'hist-mini':''}"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>${promNote}`;
 }
-function dl(pairs){return '<dl class="dl">'+pairs.map(([k,v])=>{const e=isEmpty(v);return `<dt>${esc(k)}</dt><dd class="${e?'empty':''}">${esc(e?SD:v)}</dd>`;}).join('')+'</dl>';}
+function dl(pairs,editCode){
+  // pairs: [[label, value, columnaExcel?]] — si trae 3er campo Y editCode, hace editable
+  return '<dl class="dl">'+pairs.map(p=>{
+    const [k,v,col]=p; const e=isEmpty(v);
+    if(editCode&&col){
+      return `<dt>${esc(k)}</dt><dd class="ficha-edit ${e?'empty':''}" data-fdcol="${esc(col)}" data-fdcode="${esc(editCode)}" title="Clic para editar">${esc(e?SD:v)}</dd>`;
+    }
+    return `<dt>${esc(k)}</dt><dd class="${e?'empty':''}">${esc(e?SD:v)}</dd>`;
+  }).join('')+'</dl>';
+}
 function fotoBlock(rec){
   const code=rec.text('FOTO GOOGLE'),lat=rec.text('LATITUD'),lng=rec.text('LONGITUD'),dir=rec.text('DIRECCION');
   let src='';const c=(code||'').trim();
@@ -3020,29 +3093,33 @@ function renderFicha(rec){
   const foto=fotoBlock(info);
   const perf=orderedLines().map(line=>{const ld=lineData(rec,line);const cls=paceClass(ld.pctN,pace);let pctTxt,flag='';if(ld.status==='nodata'){pctTxt='\u2014';flag='<span class="flag nd">sin data</span>';}else if(ld.status==='sinobj'){pctTxt='\u2014';flag='<span class="flag so">venta s/objetivo</span>';}else pctTxt=ld.pctLit?esc(ld.pctLit):(ld.pctN!=null?Math.round(ld.pctN)+'%':'\u2014');const mk=(pace!=null&&ld.status==='ok')?`<span class="mk" style="left:${Math.min(100,pace)}%"></span>`:'';
     return `<div class="perf-item"><div class="perf-top"><span class="perf-name">${esc(line.label)}${flag}</span><span class="perf-pct t-${cls}">${pctTxt}</span></div><div class="bar ${cls}"><i style="width:${clampW(ld.pctN)}%"></i>${mk}</div><div class="perf-nums"><span><span class="nlbl">Objetivo</span><b>${esc(ld.obj.lit||SD)}</b></span><span style="text-align:right"><span class="nlbl">Real</span><b>${esc(ld.real.lit||SD)}</b></span></div></div>`;}).join('');
-  const apoyo=APOYO.map(n=>{const v=rec.text(n);const on=!isEmpty(v);const s=n.replace('MINUTA CREDITO / DESCUENTO','Minuta cr\u00e9dito/desc.').replace('MINUTA DE POP','Minuta POP').replace('EXHIBIDOR ','Exh. ').replace('ACTIVACIONES','Activaciones').replace('FACHADA','Fachada');return `<span class="chip ${on?'on':''}"><b>${esc(s)}:</b> ${esc(on?v:SD)}</span>`;}).join('');
-  const desc=dl(DESCUENTOS.map(n=>[n.replace(' (HI TEC)',' (Hi-Tec)'),rec.text(n)]));
+  // Chips POP editables (toggle: clic pone/quita X)
+  const apoyo=APOYO.map(n=>{const v=rec.text(n);const on=!isEmpty(v);const s=n.replace('MINUTA CREDITO / DESCUENTO','Minuta cr\u00e9dito/desc.').replace('MINUTA DE POP','Minuta POP').replace('EXHIBIDOR ','Exh. ').replace('ACTIVACIONES','Activaciones').replace('FACHADA','Fachada');return `<span class="chip ${on?'on':''} ficha-apoyo-chip" data-fdcol="${esc(n)}" data-fdcode="${esc(code)}" data-fdstate="${on?'X':''}" title="Clic para alternar"><b>${esc(s)}:</b> ${esc(on?v:SD)}</span>`;}).join('');
+  // Descuentos: cada uno editable
+  const desc=dl(DESCUENTOS.map(n=>[n.replace(' (HI TEC)',' (Hi-Tec)'),rec.text(n),n]),code);
   const cm=cmtObj(rec);
   document.getElementById('fichaBody').innerHTML=`
     <div class="print-head ficha-ph"><div class="ph-org">${esc(org(STATE.org).label)}</div><div class="ph-title">Ficha informativa de cliente \u00b7 ${esc(cliente||SD)}</div></div>
+    <div class="ficha-edit-hint">\u270f\ufe0f Haz clic en cualquier dato subrayado para editarlo. Los cambios se guardan autom\u00e1ticamente y se reflejan en todas las vistas.</div>
     <div class="ficha-head">
       <div class="card" style="--sc:#ffd21e">
-        <div class="fh-name display">${esc(cliente||SD)}</div><div class="fh-neg">${esc(negocio||SD)}</div>
+        <div class="fh-name display ficha-edit" data-fdcol="CLIENTE" data-fdcode="${esc(code)}" title="Clic para editar">${esc(cliente||SD)}</div>
+        <div class="fh-neg ficha-edit" data-fdcol="NOMBRE DE NEGOCIO" data-fdcode="${esc(code)}" title="Clic para editar">${esc(negocio||SD)}</div>
         <div class="fh-code">COD ${esc(disp(code))} \u00b7 ${esc(rec.text('MES'))} ${esc(rec.text('A\u00d1O'))}</div>
-        <div class="chips"><span class="chip"><b>Vendedor:</b> ${esc(disp(info.vendor))}</span><span class="chip"><b>Giro:</b> ${esc(disp(info.text('GIRO')))}</span><span class="chip"><b>Zona:</b> ${esc(disp(info.text('ZONA')))}</span></div>
-        <div class="section-block" style="--sc:#ffd21e"><div class="card-title"><span class="dot"></span>Condici\u00f3n de cr\u00e9dito</div>${dl([['Tipo',info.text('TIPO')],['D\u00edas de cr\u00e9dito',info.text('DIAS')],['L\u00edmite',info.text('LIMITE')],['PLR',info.text('PLR')],['Fecha de alta',info.text('FECHA DE ALTA')]])}</div>
-        <div class="section-block" style="--sc:#a78bfa"><div class="card-title"><span class="dot"></span>D\u00edas de visita</div><div class="days">${DAYS.map(([col,ab])=>`<div class="day ${!isEmpty(info.text(col))?'on':''}">${ab}</div>`).join('')}</div></div>
+        <div class="chips"><span class="chip"><b>Vendedor:</b> ${esc(disp(info.vendor))}</span><span class="chip"><b>Giro:</b> <span class="ficha-edit" data-fdcol="GIRO" data-fdcode="${esc(code)}" title="Clic para editar">${esc(disp(info.text('GIRO')))}</span></span><span class="chip"><b>Zona:</b> <span class="ficha-edit" data-fdcol="ZONA" data-fdcode="${esc(code)}" title="Clic para editar">${esc(disp(info.text('ZONA')))}</span></span></div>
+        <div class="section-block" style="--sc:#ffd21e"><div class="card-title"><span class="dot"></span>Condici\u00f3n de cr\u00e9dito</div>${dl([['Tipo',info.text('TIPO'),'TIPO'],['D\u00edas de cr\u00e9dito',info.text('DIAS'),'DIAS'],['L\u00edmite',info.text('LIMITE'),'LIMITE'],['PLR',info.text('PLR'),'PLR'],['Fecha de alta',info.text('FECHA DE ALTA'),'FECHA DE ALTA']],code)}</div>
+        <div class="section-block" style="--sc:#a78bfa"><div class="card-title"><span class="dot"></span>D\u00edas de visita</div><div class="days">${DAYS.map(([col,ab])=>`<div class="day ${!isEmpty(info.text(col))?'on':''} ficha-day-chip" data-vday="${col}" data-code="${esc(code)}" title="Clic para alternar">${ab}</div>`).join('')}</div></div>
       </div>
       <div class="card flat" style="--sc:#3aa6ff">
         <div class="card-title"><span class="dot"></span>Fachada y ubicaci\u00f3n</div>
         <div class="foto-wrap">${foto.img}</div>${foto.btn}
-        <div class="section-block">${dl([['Encargado de compras',info.text('ENCARGADO DE COMPRAS')],['Celular',info.text('NUMERO CELULAR')],['Direcci\u00f3n',info.text('DIRECCION')],['Latitud',info.text('LATITUD')],['Longitud',info.text('LONGITUD')]])}</div>
+        <div class="section-block">${dl([['Encargado de compras',info.text('ENCARGADO DE COMPRAS'),'ENCARGADO DE COMPRAS'],['Celular',info.text('NUMERO CELULAR'),'NUMERO CELULAR'],['Direcci\u00f3n',info.text('DIRECCION'),'DIRECCION'],['Latitud',info.text('LATITUD'),'LATITUD'],['Longitud',info.text('LONGITUD'),'LONGITUD']],code)}</div>
       </div>
     </div>
     <div class="card section-block perf-section" style="--sc:#3fd18a"><div class="card-title"><span class="dot"></span>Desempe\u00f1o por l\u00ednea \u00b7 Real vs Objetivo</div><div class="perf-grid">${perf}</div></div>
     <div class="card section-block" style="--sc:#38bdf8"><div class="card-title"><span class="dot"></span>Historial de compra por mes (unidades reales)</div>${historyTable(rec)}</div>
     <div class="two-col section-block">
-      <div class="card flat" style="--sc:#a78bfa"><div class="card-title"><span class="dot"></span>Apoyo comercial (POP)</div><div class="chips">${apoyo}</div></div>
+      <div class="card flat" style="--sc:#a78bfa"><div class="card-title"><span class="dot"></span>Apoyo comercial (POP) <span class="ficha-hint">clic para alternar</span></div><div class="chips">${apoyo}</div></div>
       <div class="card flat" style="--sc:#2dd4bf"><div class="card-title"><span class="dot"></span>Descuentos otorgados</div>${desc}</div>
     </div>
     <div class="card section-block" style="--sc:#f472b6"><div class="card-title"><span class="dot"></span>Comentarios del vendedor \u00b7 por semana</div>
@@ -3296,7 +3373,7 @@ function goCli(v){
 }
 function _goCli(v){STATE.vendor=v;document.getElementById('cliSearch').value='';LINE_FILTER='ALL';OBJF='con';DAY_FILTER='ALL';ORDER='regular';document.getElementById('daySel').value='ALL';document.getElementById('orderSel').value='regular';document.querySelectorAll('#objSeg .seg-btn').forEach(b=>b.classList.toggle('act',b.dataset.obj==='con'));buildLineSelector();renderClients();showScreen('cli');const vc=document.getElementById('vvListaCount');if(vc)vc.textContent=vendClientList().length;if(!CRED_DB)loadCredito().then(()=>{if(STATE.screen==='cli')filterClients();});}
 let SCROLL_CLI=0;
-function goFicha(uid){const c=CLI.find(x=>x.uid===uid);if(!c)return;SCROLL_CLI=window.scrollY||0;renderFicha(c.rec);showScreen('ficha');}
+function goFicha(uid){const c=CLI.find(x=>x.uid===uid);if(!c)return;SCROLL_CLI=window.scrollY||0;FICHA_CURRENT_REC=c.rec;renderFicha(c.rec);showScreen('ficha');}
 function returnCli(){if(!STATE.vendor){goHome();return;}showScreen('cli');setTimeout(()=>{try{window.scrollTo(0,SCROLL_CLI||0);}catch(_){}}
 ,60);}
 function goRep(){if(ROLE!=='directivo')return;renderReportes();showScreen('rep');}
