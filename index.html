@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
@@ -1571,9 +1571,6 @@ tr.chk-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--line
         <span class="zoom-lbl" id="zoomLbl">100%</span>
         <button class="icon-btn zoom-btn" id="zoomIn" title="Aumentar">+</button>
       </div>
-      <button class="icon-btn" id="themeBtn" title="Cambiar tema claro/oscuro">
-        <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-      </button>
       <button class="icon-btn" id="refreshBtn" title="Actualizar datos">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
       </button>
@@ -1603,13 +1600,6 @@ tr.chk-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--line
           <p>Cada vendedor consulta únicamente su propia cartera con su contraseña personal.</p>
           <div class="go">Entrar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
         </div>
-      </div>
-      <div class="wl-strat" id="accStrat">
-        <div class="wl-strat-ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#07142e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg></div>
-        <div class="wl-strat-txt"><div class="wl-strat-tag">Estrategia especial · 25 jun – 31 jul 2026 · acceso libre</div>
-          <div class="wl-strat-title">Recuperación de venta de Acumuladores</div>
-          <div class="wl-strat-sub">Progreso por día, comparativo contra un periodo de referencia y apoyo otorgado · sin contraseña</div></div>
-        <div class="wl-strat-cta">Ver estrategia <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
       </div>
       <div class="wl-priv">
         <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Aviso de confidencialidad y uso interno</h4>
@@ -5707,8 +5697,9 @@ function applyTheme(t){
   const b=document.getElementById('themeBtn'); if(b)b.title = t==='light'?'Cambiar a tema oscuro':'Cambiar a tema claro';
   try{localStorage.setItem('rdv-theme',t);}catch(_){}
 }
-(function(){let t='dark';try{t=localStorage.getItem('rdv-theme')||'dark';}catch(_){}applyTheme(t);})();
-document.getElementById('themeBtn').addEventListener('click',()=>{const cur=document.documentElement.getAttribute('data-theme')==='light'?'light':'dark';applyTheme(cur==='light'?'dark':'light');});
+// Tema fijo en LIGHT (dark mode removido a petición del usuario)
+applyTheme('light');
+try{localStorage.setItem('rdv-theme','light');}catch(_){}
 // Zoom global persistente
 function applyZoom(z){z=Math.max(0.7,Math.min(1.5,z));document.body.style.zoom=z;try{localStorage.setItem('tabZoom',String(z));}catch(_){}const lbl=document.getElementById('zoomLbl');if(lbl)lbl.textContent=Math.round(z*100)+'%';}
 (function(){let z=1;try{const saved=parseFloat(localStorage.getItem('tabZoom')||'1');if(saved>0)z=saved;}catch(_){}applyZoom(z);})();
@@ -5716,7 +5707,7 @@ document.getElementById('zoomIn').addEventListener('click',()=>{const cur=parseF
 document.getElementById('zoomOut').addEventListener('click',()=>{const cur=parseFloat(document.body.style.zoom||'1');applyZoom(Math.round((cur-0.1)*10)/10);});
 document.getElementById('accDir').addEventListener('click',()=>openAuth('Acceso directivos','Ingresa la contrase\u00f1a directiva para ver todo.',v=>v===passKey(DIRECTIVO_PASS),()=>{ROLE='directivo';afterLogin();}));
 document.getElementById('accVen').addEventListener('click',()=>{ROLE='vendedor';afterLogin();});
-document.getElementById('accStrat').addEventListener('click',goStrategy);
+// accStrat removido de la portada — sigue accesible desde Reportes → "Recuperación Acumulador Julio · concluida"
 document.getElementById('stratBack').addEventListener('click',()=>{if(ROLE)goHome();else showWelcome();});
 document.getElementById('logoutBtn').addEventListener('click',logout);
 document.getElementById('authOk').addEventListener('click',submitAuth);
