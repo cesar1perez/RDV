@@ -3942,7 +3942,8 @@ function renderP8020(){
   const body=document.getElementById('repBody');
   const d=p82Data(); const line=d.line;
   const vendors=[...new Set(d.list.map(c=>c.vendor).filter(Boolean))].sort();
-  let list=d.list.filter(c=>(c.real!=null&&c.real>0)||(c.obj!=null&&c.obj>0));
+  // Mostrar clientes con venta O con objetivo definido (obj!=null incluye el 0 explícito capturado en la hoja).
+  let list=d.list.filter(c=>(c.real!=null&&c.real>0)||(c.obj!=null));
   if(P82.vend!=='ALL')list=list.filter(c=>c.vendor===P82.vend);
   if(P82.withCmt)list=list.filter(c=>p82FollowRead(c.code).some(v=>!isEmpty(v)));
   const sk=P82.sort, dir=P82.dir;
