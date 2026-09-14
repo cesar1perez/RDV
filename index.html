@@ -2686,6 +2686,8 @@ function vendPushChange(code,fields,statusEl,cellEl){
           const totalCell=document.querySelector(`input.vend-inp[data-code="${code}"][data-head="${totalHead}"]`);
           if(totalCell){totalCell.value=fieldsFull[totalHead];totalCell.classList.add('saved');setTimeout(()=>totalCell.classList.remove('saved'),1500);}
         }
+        // Si estamos en 80/20 con input editable, marcar el código como "recién editado" para que no se pierda de la vista
+        if(cellEl&&cellEl.classList.contains('p82-obj-inp')){try{P82_JUST_EDITED.add(String(code).trim());}catch(_){}}
         // ACTUALIZAR TODAS LAS VISTAS: refresca la pantalla activa cualquiera que sea
         setTimeout(()=>refreshCurrentView({code,fields:fieldsFull,mes:p.mes,anio:p.anio}),1200);
         // Notificar a otras pestañas del mismo navegador
@@ -2726,6 +2728,18 @@ if(CROSS_TAB){
 }
 
 function refreshCurrentView(info){
+  // NO refrescar si hay un editor de comentario 80/20 abierto o si el usuario está escribiendo
+  // (protegido específicamente para textareas de comentarios y edición inline de ficha)
+  try{
+    if(document.querySelector('tr.p82-det .fu-ta'))return; // editor 80/20 activo
+    const ae=document.activeElement;
+    if(ae && (ae.tagName==='TEXTAREA' || (ae.tagName==='INPUT' && ae.type==='text' && !ae.classList.contains('vend-inp')) || ae.classList.contains('ficha-edit-inp'))){
+      // Reintentar cuando pierda el foco
+      const retry=()=>{ae.removeEventListener('blur',retry);setTimeout(()=>refreshCurrentView(info),300);};
+      ae.addEventListener('blur',retry,{once:true});
+      return;
+    }
+  }catch(_){}
   // Reconstruye la vista que esté activa ahora — respeta scroll, filtros y estado local.
   // NO recarga desde el backend (los datos locales ya están actualizados por vendPushChange).
   try{
@@ -2763,6 +2777,10 @@ async function pollForRemoteChanges(){
     if(!SAVE_URL||SAVE_URL.indexOf('http')!==0)return;
     if(document.hidden)return; // no gastes red si el tab no está visible
     if(Date.now()<POLL_PAUSED_UNTIL)return;
+    // No refrescar si hay editor de comentario 80/20 abierto o textarea con foco
+    if(document.querySelector('tr.p82-det .fu-ta'))return;
+    const ae=document.activeElement;
+    if(ae && (ae.tagName==='TEXTAREA' || ae.classList.contains('ficha-edit-inp')))return;
     // Pedir solo lastMod (usamos getData porque el backend actual lo devuelve; si ya es reciente igual comparamos rápido)
     const r=await fetch(SAVE_URL,{method:'POST',body:JSON.stringify({action:'getData'}),redirect:'follow'});
     const j=await r.json();
@@ -3737,6 +3755,9 @@ function renderCredito(){
 
 /* ===== 80/20: clientes clave por linea de producto ===== */
 let P82={org:'ALL',vend:'ALL',line:'TOTAL',mode:'period',sort:'real',dir:-1,withCmt:false};
+// Set de códigos que se acaban de editar en esta sesión — siempre visibles en el 80/20 aunque
+// bajen a 0, para que el usuario pueda seguir ajustándolos sin que "desaparezcan".
+const P82_JUST_EDITED=new Set();
 function p82Data(){
   const orgIds=P82.org==='ALL'?CONFIG.orgs.map(o=>o.id):[P82.org];
   const line=LINES.find(l=>l.key===P82.line)||LINES.find(l=>l.key==='TOTAL')||LINES[0];
@@ -3942,8 +3963,8 @@ function renderP8020(){
   const body=document.getElementById('repBody');
   const d=p82Data(); const line=d.line;
   const vendors=[...new Set(d.list.map(c=>c.vendor).filter(Boolean))].sort();
-  // Mostrar clientes con venta O con objetivo definido (obj!=null incluye el 0 explícito capturado en la hoja).
-  let list=d.list.filter(c=>(c.real!=null&&c.real>0)||(c.obj!=null));
+  // Mostrar clientes con venta, con objetivo capturado (incluye 0 explícito) O recién editados en esta sesión.
+  let list=d.list.filter(c=>(c.real!=null&&c.real>0)||(c.obj!=null)||P82_JUST_EDITED.has(String(c.code||'').trim()));
   if(P82.vend!=='ALL')list=list.filter(c=>c.vendor===P82.vend);
   if(P82.withCmt)list=list.filter(c=>p82FollowRead(c.code).some(v=>!isEmpty(v)));
   const sk=P82.sort, dir=P82.dir;
