@@ -1915,6 +1915,8 @@ async function loadAll(){
   rows=rows.filter(r=>getCell(r,'CLIENTE',H)!==''||getCell(r,'COD CLIENTE',H)!=='');
   DB={H,rows};
   DATA_TS=new Date();
+  // Invalidar caches derivados
+  try{CLI_CURRENT_VENDOR=null;DETA_CLI2VEND=null;DETA_NAME2VEND=null;}catch(_){}
 }
 function fmtTS(d){if(!d)return '';const MM=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];let h=d.getHours(),m=d.getMinutes();const ap=h<12?'a.m.':'p.m.';let h12=h%12;if(h12===0)h12=12;return `${d.getDate()} ${MM[d.getMonth()]} ${d.getFullYear()}, ${h12}:${String(m).padStart(2,'0')} ${ap}`;}
 function paintPace(){
@@ -1979,13 +1981,62 @@ function paceText(){
 /* ============================================================
    4. MODELO (registros, l\u00edneas)
    ============================================================ */
+// Cache del vendedor M\u00c1S RECIENTE por COD CLIENTE (invalidado cuando cambia DB.rows).
+let CLI_CURRENT_VENDOR=null;
+function _buildCurrentVendorMap(){
+  const H=DB.H; if(!H) return {};
+  const best={}; // {code: {vendor, rank}}
+  DB.rows.forEach(r=>{
+    const code=String(getCell(r,'COD CLIENTE',H)||getCell(r,'CLIENTE',H)||'').trim();
+    if(!code)return;
+    const vRaw=getCell(r,'VENDEDOR',H); if(!vRaw)return;
+    const rank=periodRank(getCell(r,'A\u00d1O',H)||getCell(r,'ANIO',H)||getCell(r,'ANO',H), getCell(r,'MES',H));
+    const prev=best[code];
+    if(!prev||rank>=prev.rank)best[code]={vendor:vRaw,rank};
+  });
+  const out={};
+  Object.keys(best).forEach(k=>{out[k]=resolveVendor(best[k].vendor).org;});
+  return out;
+}
+function _currentOrgOf(code){
+  if(!CLI_CURRENT_VENDOR)CLI_CURRENT_VENDOR=_buildCurrentVendorMap();
+  return CLI_CURRENT_VENDOR[String(code||'').trim()]||null;
+}
 function clientGroups(orgId,periodKey){
   const H=DB.H; if(periodKey===undefined)periodKey=STATE.period;
-  let rows=DB.rows.filter(r=>resolveVendor(getCell(r,'VENDEDOR',H)).org===orgId);
+  // Filtrar por org del vendedor M\u00c1S RECIENTE del cliente (no por vendedor de cada fila).
+  // As\u00ed, si un cliente pas\u00f3 de Carlos C. (Llanterama) a Celene S. (Autoel\u00e9ctrica),
+  // aparece SOLO en Autoel\u00e9ctrica, con todas sus filas.
+  let rows=DB.rows.filter(r=>{
+    const code=String(getCell(r,'COD CLIENTE',H)||getCell(r,'CLIENTE',H)||'').trim();
+    const curOrg=code?_currentOrgOf(code):null;
+    if(curOrg)return curOrg===orgId;
+    // fallback: si no tenemos vendedor actual, uso el de la fila
+    return resolveVendor(getCell(r,'VENDEDOR',H)).org===orgId;
+  });
   if(periodKey!=='ALL') rows=rows.filter(r=>(norm(getCell(r,'A\u00d1O',H)||getCell(r,'ANIO',H)||getCell(r,'ANO',H))+'||'+norm(getCell(r,'MES',H)))===periodKey);
   const g=new Map();
   rows.forEach(r=>{const code=getCell(r,'COD CLIENTE',H)||getCell(r,'CLIENTE',H)||JSON.stringify(r);if(!g.has(code))g.set(code,[]);g.get(code).push(r);});
-  return [...g.values()].map(arr=>{arr.sort((a,b)=>periodRank(getCell(a,'A\u00d1O',H),getCell(a,'MES',H))-periodRank(getCell(b,'A\u00d1O',H),getCell(b,'MES',H)));return makeRecord(arr,H);});
+  // Al construir el record, sobreescribimos rec.vendor con el vendedor M\u00c1S RECIENTE del cliente
+  // (para que aparezca el actual, no uno viejo).
+  return [...g.values()].map(arr=>{
+    arr.sort((a,b)=>periodRank(getCell(a,'A\u00d1O',H),getCell(a,'MES',H))-periodRank(getCell(b,'A\u00d1O',H),getCell(b,'MES',H)));
+    const rec=makeRecord(arr,H);
+    // Buscar la \u00faltima fila (m\u00e1s reciente) del cliente en TODA la hoja (no solo el periodo filtrado)
+    const code=String(getCell(arr[0],'COD CLIENTE',H)||'').trim();
+    if(code){
+      let mostRecent=null,mostRank=-1;
+      DB.rows.forEach(r=>{
+        const c=String(getCell(r,'COD CLIENTE',H)||'').trim();
+        if(c!==code)return;
+        const v=getCell(r,'VENDEDOR',H); if(!v)return;
+        const rk=periodRank(getCell(r,'A\u00d1O',H)||getCell(r,'ANIO',H)||getCell(r,'ANO',H), getCell(r,'MES',H));
+        if(rk>=mostRank){mostRank=rk;mostRecent=v;}
+      });
+      if(mostRecent)rec.vendor=resolveVendor(mostRecent).display;
+    }
+    return rec;
+  });
 }
 function makeRecord(group,H){
   const single=group.length===1;
@@ -2677,6 +2728,8 @@ function vendPushChange(code,fields,statusEl,cellEl){
         const row=DB.rows.find(r=>String(getCell(r,'COD CLIENTE',H)||'').trim()===code && norm(getCell(r,'MES',H))===norm(p.mes) && String(getCell(r,'A\u00d1O',H))===p.anio);
         if(row){
           Object.keys(fieldsFull).forEach(h=>{const idx=H.idx(h);if(idx>=0)row[idx]=fieldsFull[h];});
+          // Invalidar caches derivados por si cambió el vendedor del cliente
+          try{CLI_CURRENT_VENDOR=null;DETA_CLI2VEND=null;DETA_NAME2VEND=null;}catch(_){}
         }
         if(statusEl){statusEl.className='vend-save-status ok';statusEl.innerHTML='<span class="vend-save-dot"></span>Guardado';setTimeout(()=>{statusEl.className='vend-save-status idle';statusEl.innerHTML='<span class="vend-save-dot"></span>Listo';},2500);}
         if(cellEl){cellEl.classList.remove('dirty','err');cellEl.classList.add('saved');setTimeout(()=>cellEl.classList.remove('saved'),1500);}
@@ -2793,7 +2846,7 @@ async function pollForRemoteChanges(){
       // Recargar CSV completo (nueva versión)
       await loadAll();
       // Invalidar mapa cliente→vendedor derivado
-      try{DETA_CLI2VEND=null;DETA_NAME2VEND=null;}catch(_){}
+      try{DETA_CLI2VEND=null;DETA_NAME2VEND=null;CLI_CURRENT_VENDOR=null;}catch(_){}
       refreshCurrentView({silent:true});
     }
   }catch(_){}
