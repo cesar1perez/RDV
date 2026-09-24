@@ -1770,6 +1770,7 @@ const LINES = [
   {key:'PREM',label:'Premium',obj:'OBJ PREM',real:'REAL PREM'},
   {key:'AGM',label:'AGM',obj:'OBJ AGM',real:'REAL AGM'},
   {key:'ESTANDAR',label:'Est\u00e1ndar',obj:'OBJ ESTANDAR',real:'REAL ESTANDAR'},
+  {key:'VALUE',label:'Value',obj:'OBJ VALUE',real:'REAL VALUE'},
   {key:'TOTAL',label:'Total Acum.',obj:'OBJ TOTAL',real:'REAL TOTAL'},
   {key:'FILTRO',label:'Filtros',obj:'OBJ FILTRO',real:'REAL FILTRO'},
   {key:'LUB',label:'Lubricantes',obj:'OBJ LUB',real:'REAL LUB'},
@@ -1813,7 +1814,7 @@ function tier(pctN,pace){if(pctN==null)return 'na';const ref=(pace==null?100:pac
 const TIER_INFO={good:{txt:'\u25b2 Buen progreso',card:'aok',ring:'good'},medio:{txt:'\u25c6 Medio',card:'medio',ring:'mid'},regular:{txt:'\u25bc Regular',card:'behind',ring:'low'},na:{txt:'',card:'',ring:'na'}};
 function zoneColor(z){z=(z||'').trim();if(!z)return '#6b82a8';let h=0;for(let i=0;i<z.length;i++)h=(h*31+z.charCodeAt(i))%360;return `hsl(${h} 72% 60%)`;}
 /* color distintivo por l\u00ednea de producto */
-const LINE_COLORS={TOTAL:'#ffd21e',LUB:'#3aa6ff',MOTO:'#a78bfa',LLANTAS:'#3fd18a',FILTRO:'#fb923c',ALCALIN:'#2dd4bf',PREM:'#f472b6',AGM:'#f59e0b',ESTANDAR:'#60a5fa',USADO:'#94a3b8',AUTO:'#34d399',CTA:'#e879f9',CAMION:'#22d3ee'};
+const LINE_COLORS={TOTAL:'#ffd21e',LUB:'#3aa6ff',MOTO:'#a78bfa',LLANTAS:'#3fd18a',FILTRO:'#fb923c',ALCALIN:'#2dd4bf',PREM:'#f472b6',AGM:'#f59e0b',ESTANDAR:'#60a5fa',VALUE:'#c084fc',USADO:'#94a3b8',AUTO:'#34d399',CTA:'#e879f9',CAMION:'#22d3ee'};
 function lineColor(k){return LINE_COLORS[k]||'#6b82a8';}
 
 /* ===== ACCESO (edita contrase\u00f1as aqu\u00ed; no distinguen may\u00fasculas) ===== */
@@ -2606,8 +2607,8 @@ function pendingChips(rec){
   return `<div class="pend-row"><span class="pend-lbl">Falta por cumplir:</span>${chips}</div>`;
 }
 /* tabla de l\u00edneas: L\u00ednea | OBJ | REAL | Avance (con color por l\u00ednea) */
-const LINE_GROUPS={TOTAL:['PREM','AGM','ESTANDAR'],LLANTAS:['AUTO','CTA','CAMION']};
-const GROUP_CHILDREN=new Set(['PREM','AGM','ESTANDAR','AUTO','CTA','CAMION']);
+const LINE_GROUPS={TOTAL:['PREM','AGM','ESTANDAR','VALUE'],LLANTAS:['AUTO','CTA','CAMION']};
+const GROUP_CHILDREN=new Set(['PREM','AGM','ESTANDAR','VALUE','AUTO','CTA','CAMION']);
 const G_CHEV='<span class="g-chev"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>';
 function ltRow(rec,line,pace,opts){
   opts=opts||{};
@@ -2642,7 +2643,7 @@ let VEND_VIEW='std'; // 'std' | 'ruta' | 'lista'
 let VEND_SORT={key:null,dir:-1}; // sortable columns for vendor edit table
 let FICHA_CURRENT_REC=null;
 const VEND_LINE_COLS=[
-  {h:'OBJ PREM',lbl:'Prem'},{h:'OBJ AGM',lbl:'AGM'},{h:'OBJ ESTANDAR',lbl:'Est'},
+  {h:'OBJ PREM',lbl:'Prem'},{h:'OBJ AGM',lbl:'AGM'},{h:'OBJ ESTANDAR',lbl:'Est'},{h:'OBJ VALUE',lbl:'Value'},
   {h:'OBJ LUB',lbl:'Lub'},{h:'OBJ MOTO',lbl:'Moto'},{h:'OBJ FILTRO',lbl:'Filtro'},
   {h:'OBJ ALCALIN',lbl:'Alcal'},{h:'OBJ LLANTAS',lbl:'Llantas'},
   {h:'OBJ AUTO',lbl:'Auto'},{h:'OBJ CTA',lbl:'Cta'},{h:'OBJ CAMION',lbl:'Cami\u00f3n'}
@@ -3077,7 +3078,7 @@ function renderLineFocus(base,grid,line,pace){
 }
 
 /* ---- FICHA ---- */
-const HIST_ORDER=['PREM','AGM','ESTANDAR','TOTAL','LUB','MOTO','FILTRO','AUTO','CTA','CAMION','LLANTAS'];
+const HIST_ORDER=['PREM','AGM','ESTANDAR','VALUE','TOTAL','LUB','MOTO','FILTRO','AUTO','CTA','CAMION','LLANTAS'];
 function histLines(){const seen=new Set();const out=[];HIST_ORDER.forEach(k=>{const l=LINES.find(x=>x.key===k);if(l){out.push(l);seen.add(k);}});LINES.forEach(l=>{if(!seen.has(l.key))out.push(l);});return out;}
 /* recuadritos compactos de totales por linea (tarjeta de cliente) */
 const TILE_DEFS=[['TOTAL','Total acumuladores'],['LUB','Total lubricantes'],['MOTO','Total motobater\u00edas'],['FILTRO','Total filtros'],['LLANTAS','Total llantas']];
