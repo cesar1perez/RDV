@@ -4838,9 +4838,20 @@ function detaMapRow(r,H,orgId){
   const fecha=getCell(r,'Fecha',H);
   const y=detaYear(fecha);
   // 1) Intenta mapear por cliente. 2) Si no, fallback por Cod Vend 1 + Almacen + razón social.
+  // 3) Si todavía no se identifica, usa el código tal cual (en vez de agrupar todos como "S/I").
   let vendedor=detaCliVend(codC,cli);
   if(!vendedor){vendedor=resolveVendorByCode(codV,almacen,orgId);}
-  if(!vendedor)vendedor='S/I';
+  if(!vendedor){
+    // Fallback: mostrar código tal cual + razón para distinguirlos (ej "Cod 045 · AE")
+    if(codV){
+      const codNorm=String(codV).trim().replace(/^0+/,'').padStart(3,'0');
+      const almNorm=String(almacen||'').trim().replace(/^0+/,'');
+      const orgLbl=orgId==='autoelectrica'?'AE':'LL';
+      vendedor='Cod '+codNorm+(almNorm?(' alm '+almNorm):'')+' · '+orgLbl;
+    } else {
+      vendedor='S/I';
+    }
+  }
   return {codP,desc,codV,cant,imp,costo,util:imp-costo,cli,codC,clas,almacen,fac,fecha,y,org:orgId,vendedor};
 }
 function detaAll(){
@@ -5843,7 +5854,7 @@ function renderYvY(){
     ${detaMultiCtrl('yvyclasif','Clasificaci\u00f3n',yvyClasifsInData,YVY.clasif)}
     <button class="btn ghost" onclick="printTablePDF('.yvy-tbl','A\u00f1o vs A\u00f1o ${y1} vs ${y2} \u00b7 ${esc(YVY_VIEWS.find(v=>v[0]===YVY.view)[1])}','${YVY.org==='ALL'?'Ambas razones sociales':(YVY.org==='llanterama'?'Llanterama':'Autoel\u00e9ctrica')}')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15h6M9 18h4"/></svg>PDF</button>
   </div>
-  <div class="rep-note" style="margin-bottom:12px">Comparativo <b>${y1} vs ${y2}</b> en <b>piezas</b> mes a mes por ${esc(labelCol.toLowerCase())}. Solo considera l\u00edneas duras: <b>5 Acumuladores, 7 Lubricantes, 8 Motobater\u00edas, 6 Filtros, China Auto, 1 Auto, 2 Camioneta, 3 Cami\u00f3n</b> y solo clientes identificados por vendedor. Ordenados por <b>impacto 80/20</b>: los marcados con <span class="yvy-star">\u2605</span> concentran ~80% del volumen total. Verde crecimiento, rojo ca\u00edda.</div>
+  <div class="rep-note" style="margin-bottom:12px">Comparativo <b>${y1} vs ${y2}</b> en <b>piezas</b> mes a mes por ${esc(labelCol.toLowerCase())}. Solo considera l\u00edneas duras: <b>5 Acumuladores, 7 Lubricantes, 8 Motobater\u00edas, 6 Filtros, China Auto, 1 Auto, 2 Camioneta, 3 Cami\u00f3n</b>. Los vendedores sin identificar aparecen con su c\u00f3digo tal cual (ej: <b>Cod 045 \u00b7 LL</b>). Ordenados por <b>impacto 80/20</b>: los marcados con <span class="yvy-star">\u2605</span> concentran ~80% del volumen total. Verde crecimiento, rojo ca\u00edda.</div>
   <div class="rd-wrap"><div class="rd-tblwrap yvy-wrap">
     <table class="rep-tbl hl-table yvy-tbl">
       <thead>
