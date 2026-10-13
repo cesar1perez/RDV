@@ -5522,10 +5522,40 @@ function lltMatchClas(c){
 }
 let LLT={org:'ALL',vendor:'ALL',clasif:new Set(LLT_CLASIFS),view:'resumen',sort:'y2',dir:-1};
 
+// INDEPENDIENTE: lee el detalle crudo y asigna vendedor SOLO por Cod Vend 1 de cada factura.
+// No mapea por cliente (así los totales cuadran 1:1 con filtros de Google Sheets por Cod Vend).
+// Sí excluye los 3 clientes internos (LLANTERAMA HIDALGUENSE, VENTAS MOSTRADOR GARANTIAS, AUTOELECTRICA ROMA).
+function _lltMapRowRaw(r,H,orgId){
+  const codP=String(getCell(r,'Codigo',H)||'').trim();
+  const desc=String(getCell(r,'Descripcion',H)||'').trim();
+  const codV=String(getCell(r,'Cod Vend 1',H)||'').trim();
+  const cant=detaNum(getCell(r,'Cantidad',H));
+  const cli=String(getCell(r,'Cliente',H)||'').trim();
+  const codC=String(getCell(r,'Cod de cliente',H)||'').trim();
+  const clas=String(getCell(r,'Clasificacion',H)||'').trim();
+  const almacen=String(getCell(r,'Almacen',H)||'').trim();
+  const fecha=getCell(r,'Fecha',H);
+  const y=detaYear(fecha);
+  // Asignación de vendedor EXCLUSIVAMENTE por Cod Vend 1 + Almacen + razón social
+  let vendedor=resolveVendorByCode(codV,almacen,orgId);
+  if(!vendedor){
+    if(codV){
+      const codNorm=String(codV).trim().replace(/^0+/,'').padStart(3,'0');
+      const almNorm=String(almacen||'').trim().replace(/^0+/,'');
+      const orgLbl=orgId==='autoelectrica'?'AE':'LL';
+      vendedor='Cod '+codNorm+(almNorm?(' alm '+almNorm):'')+' · '+orgLbl;
+    } else {
+      vendedor='S/I';
+    }
+  }
+  return {codP,desc,codV,cant,cli,codC,clas,almacen,fecha,y,org:orgId,vendedor};
+}
 function lltAll(){
-  // Devuelve TODAS las filas de detalle (ambas razones), ya mapeadas con vendedor correcto,
-  // filtradas por clasificaciones de llanta.
-  return detaAll().filter(x=>lltMatchClas(x.clas));
+  const out=[];
+  if(DETA_DB)DETA_DB.rows.forEach(r=>out.push(_lltMapRowRaw(r,DETA_DB.H,'llanterama')));
+  if(DETA_DBAE)DETA_DBAE.rows.forEach(r=>out.push(_lltMapRowRaw(r,DETA_DBAE.H,'autoelectrica')));
+  // Excluir clientes internos (nosotros mismos) y filtrar solo clasificaciones de llanta
+  return out.filter(x=>!isExcludedClient(x.cli) && lltMatchClas(x.clas));
 }
 function lltYears(){
   const ys=[...new Set(lltAll().map(x=>x.y).filter(Boolean))].sort();
@@ -5745,7 +5775,7 @@ function renderLlantas(){
   <div class="llt-head">
     <div class="llt-eyebrow">🚛 Reporte especial de llantas</div>
     <h2 class="llt-title">Venta de llantas · <b>${y1}</b> vs <b>${y2}</b></h2>
-    <div class="llt-sub">Agregado por vendedor, mes a mes. Dispersión por tipo (Auto, Camioneta, China Auto, Camión). Análisis de medidas y clientes.</div>
+    <div class="llt-sub">Agregado por vendedor según el <b>Cód Vend 1</b> de cada factura (independiente del cliente). Dispersión por tipo (Auto, Camioneta, China Auto, Camión). Análisis de medidas y clientes. Totales coinciden 1:1 con filtros de Google Sheets.</div>
   </div>
   <div class="llt-kpis">
     <div class="llt-kpi"><div class="k-l">Piezas ${y1}</div><div class="k-v">${fmtNum(totY1)}</div><div class="k-s">acumulado al mes ${MMONTH[_curM]}</div></div>
