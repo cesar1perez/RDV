@@ -1042,6 +1042,11 @@ tr.deta-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--lin
 .llt-mini td.down{color:var(--low);font-weight:800}
 .llt-mini td.flat{color:var(--muted2)}
 .llt-empty{text-align:center;padding:12px;color:var(--muted2);font-style:italic;font-size:11px}
+.llt-diag-pop{display:none;margin-top:12px;background:var(--kpi-bg);border:1px solid var(--line2);border-left:4px solid var(--cyan);border-radius:10px;padding:14px 16px;max-height:400px;overflow:auto}
+.llt-diag-pop.open{display:block}
+.llt-diag-pop-hd{font-weight:900;color:var(--cyan);font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+:root[data-theme="light"] .llt-diag-pop-hd{color:#1462a8}
+:root[data-theme="light"] .llt-diag-pop{border-left-color:#1462a8}
 .llt-mini-desc{table-layout:auto}
 .llt-mini-desc td.llt-desc{max-width:280px;white-space:normal;line-height:1.3;font-size:11px;font-weight:600;color:var(--txt);word-break:break-word}
 .llt-mini-desc td.mono{font-size:10px;white-space:nowrap}
@@ -5586,9 +5591,14 @@ function lltVendorAgg(){
     if(x.y===y1){g.y1M[mo]+=x.cant;} else if(x.y===y2){g.y2M[mo]+=x.cant;}
   });
   byV.forEach(g=>{
+    // y1T = AÑO COMPLETO (12 meses) de y1 — para cuadrar con totales anuales de Sheets.
+    // y2T = hasta el mes actual (único que tenemos de y2).
     let s1=0,s2=0;
-    for(let i=0;i<=_curM;i++){s1+=g.y1M[i]||0;s2+=g.y2M[i]||0;}
+    for(let i=0;i<12;i++)s1+=g.y1M[i]||0;
+    for(let i=0;i<=_curM;i++)s2+=g.y2M[i]||0;
     g.y1T=s1;g.y2T=s2;g.dif=s2-s1;g.pct=s1>0?((s2-s1)/s1*100):(s2>0?100:0);
+    // y1T_cmp = y1 capado al mismo mes de y2 (para comparación mes-a-mes equivalente)
+    let s1c=0;for(let i=0;i<=_curM;i++)s1c+=g.y1M[i]||0; g.y1T_cmp=s1c;
   });
   return {arr:[...byV.values()].sort((a,b)=>b.y2T-a.y2T),y1,y2};
 }
@@ -5609,7 +5619,8 @@ function lltClasifAgg(){
   });
   byC.forEach(g=>{
     let s1=0,s2=0;
-    for(let i=0;i<=_curM;i++){s1+=g.y1M[i]||0;s2+=g.y2M[i]||0;}
+    for(let i=0;i<12;i++)s1+=g.y1M[i]||0;
+    for(let i=0;i<=_curM;i++)s2+=g.y2M[i]||0;
     g.y1T=s1;g.y2T=s2;g.dif=s2-s1;g.pct=s1>0?((s2-s1)/s1*100):(s2>0?100:0);
   });
   return {arr:[...byC.values()],y1,y2};
@@ -5633,7 +5644,8 @@ function lltClienteAgg(vendor){
   const arr=[...byC.values()];
   arr.forEach(g=>{
     let s1=0,s2=0;
-    for(let i=0;i<=_curM;i++){s1+=g.y1M[i]||0;s2+=g.y2M[i]||0;}
+    for(let i=0;i<12;i++)s1+=g.y1M[i]||0;
+    for(let i=0;i<=_curM;i++)s2+=g.y2M[i]||0;
     g.y1T=s1;g.y2T=s2;g.dif=s2-s1;g.pct=s1>0?((s2-s1)/s1*100):(s2>0?100:0);
   });
   arr.sort((a,b)=>b.y2T-a.y2T);
@@ -5672,6 +5684,46 @@ function lltAnalysis(vendor){
   const medidasPerdidas=med.arr.filter(m=>m.y2===0&&m.y1>0).sort((a,b)=>b.y1-a.y1).slice(0,8);
   const medidasNuevas=med.arr.filter(m=>m.y1===0&&m.y2>0).sort((a,b)=>b.y2-a.y2).slice(0,8);
   return {cli:cli.arr,med:med.arr,nuevos,perdidos,subieron,bajaron,estables,clave,medidasTop,medidasPerdidas,medidasNuevas,y1:cli.y1,y2:cli.y2};
+}
+
+// Descarga CSV de auditoría: TODAS las filas que el reporte Llantas está contando,
+// con el vendedor asignado por Cod Vend 1. Para abrir en Excel y filtrar sin problemas.
+function lltExportCSV(){
+  const rows=lltAll(); // ya respeta org y clasificación de llantas, pero no filtro año/vendedor
+  const header=['Org','Vendedor','Cod Vend 1','Almacen','Cod Cliente','Cliente','Clasificacion','Codigo Prod','Descripcion','Fecha','Año','Cantidad'];
+  const lines=[header.join(',')];
+  rows.forEach(x=>{
+    const d=detaParseFecha(x.fecha);
+    const fecLbl=d?(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')):String(x.fecha||'');
+    const esc=(v)=>{let s=String(v==null?'':v);if(s.indexOf('"')>=0||s.indexOf(',')>=0||s.indexOf('\n')>=0)s='"'+s.replace(/"/g,'""')+'"';return s;};
+    lines.push([
+      x.org==='autoelectrica'?'AE':'LL',esc(x.vendedor),esc(x.codV),esc(x.almacen),esc(x.codC),esc(x.cli),esc(x.clas),esc(x.codP),esc(x.desc),esc(fecLbl),esc(x.y||''),esc(x.cant)
+    ].join(','));
+  });
+  const csv=lines.join('\n');
+  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='llantas_auditoria_'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},100);
+}
+// Diagnóstico resumen: desglose por vendedor + año que el tablero cuenta
+function lltDiagResumen(){
+  const rows=lltAll();
+  const byVY={};
+  rows.forEach(x=>{
+    const v=x.vendedor||'S/I';
+    const y=x.y||'sin_año';
+    const k=v+'||'+y;
+    if(!byVY[k])byVY[k]={v,y,cnt:0,rows:0};
+    byVY[k].cnt+=x.cant; byVY[k].rows++;
+  });
+  const arr=Object.values(byVY).sort((a,b)=>String(a.v).localeCompare(String(b.v))||b.y-a.y);
+  let html='<table class="llt-mini llt-mini-desc"><thead><tr><th class="l">Vendedor</th><th>Año</th><th>Filas</th><th>Piezas</th></tr></thead><tbody>';
+  arr.forEach(r=>{html+=`<tr><td class="l">${esc(r.v)}</td><td class="num">${r.y}</td><td class="num muted">${fmtNum(r.rows)}</td><td class="num strong">${fmtNum(r.cnt)}</td></tr>`;});
+  html+='</tbody></table>';
+  return html;
 }
 
 function renderLlantas(){
@@ -5778,8 +5830,8 @@ function renderLlantas(){
     <div class="llt-sub">Agregado por vendedor según el <b>Cód Vend 1</b> de cada factura (independiente del cliente). Dispersión por tipo (Auto, Camioneta, China Auto, Camión). Análisis de medidas y clientes. Totales coinciden 1:1 con filtros de Google Sheets.</div>
   </div>
   <div class="llt-kpis">
-    <div class="llt-kpi"><div class="k-l">Piezas ${y1}</div><div class="k-v">${fmtNum(totY1)}</div><div class="k-s">acumulado al mes ${MMONTH[_curM]}</div></div>
-    <div class="llt-kpi ${totCls}"><div class="k-l">Piezas ${y2}</div><div class="k-v">${fmtNum(totY2)}</div><div class="k-s">${totPct>0?'+':''}${totPct}% vs ${y1}</div></div>
+    <div class="llt-kpi"><div class="k-l">Piezas ${y1}</div><div class="k-v">${fmtNum(totY1)}</div><div class="k-s">año completo</div></div>
+    <div class="llt-kpi ${totCls}"><div class="k-l">Piezas ${y2}</div><div class="k-v">${fmtNum(totY2)}</div><div class="k-s">hasta ${MMONTH[_curM]} ${y2}</div></div>
     <div class="llt-kpi ${totDif>=0?'up':'down'}"><div class="k-l">Diferencia</div><div class="k-v">${totDif>0?'+':''}${fmtNum(totDif)}</div><div class="k-s">unidades</div></div>
     <div class="llt-kpi"><div class="k-l">Vendedores</div><div class="k-v">${vendors.length}</div><div class="k-s">con venta de llantas</div></div>
   </div>
@@ -5790,6 +5842,12 @@ function renderLlantas(){
     <div class="ctrl"><label>Organización</label><select class="inp" id="lltOrg">${orgOptions}</select></div>
     <div class="ctrl" style="min-width:260px"><label>Vendedor (análisis)</label><select class="inp" id="lltVend">${vendorOptions}</select></div>
     <div class="llt-clas-chips"><label class="chip-lbl">Clasificación:</label>${clasifChips}</div>
+    <button class="btn ghost" onclick="lltExportCSV()" title="Descarga Excel con todas las filas que el reporte cuenta — para auditar con filtros libres">📅 Descargar CSV auditoría</button>
+    <button class="btn ghost" onclick="document.getElementById('lltDiagBox').classList.toggle('open')" title="Ver desglose RAW por vendedor y año">🤖 Diagnóstico</button>
+  </div>
+  <div id="lltDiagBox" class="llt-diag-pop">
+    <div class="llt-diag-pop-hd">Resumen de filas que el tablero está contando (por vendedor y año)</div>
+    ${lltDiagResumen()}
   </div>
 
   <section class="llt-sec">
