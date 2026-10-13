@@ -1042,6 +1042,10 @@ tr.deta-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--lin
 .llt-mini td.down{color:var(--low);font-weight:800}
 .llt-mini td.flat{color:var(--muted2)}
 .llt-empty{text-align:center;padding:12px;color:var(--muted2);font-style:italic;font-size:11px}
+.llt-mini-desc{table-layout:auto}
+.llt-mini-desc td.llt-desc{max-width:280px;white-space:normal;line-height:1.3;font-size:11px;font-weight:600;color:var(--txt);word-break:break-word}
+.llt-mini-desc td.mono{font-size:10px;white-space:nowrap}
+.llt-mini-desc th.l{text-align:left}
 /* Tabla principal */
 .llt-tbl{width:100%;font-size:12px;border-collapse:separate;border-spacing:0}
 .llt-tbl th{padding:7px 6px;font-size:10.5px;text-transform:uppercase;letter-spacing:.3px;background:var(--kpi-bg);color:var(--muted);font-weight:800;border-bottom:1px solid var(--line2);white-space:nowrap;text-align:center}
@@ -2094,6 +2098,9 @@ function clientGroups(orgId,periodKey){
   // As\u00ed, si un cliente pas\u00f3 de Carlos C. (Llanterama) a Celene S. (Autoel\u00e9ctrica),
   // aparece SOLO en Autoel\u00e9ctrica, con todas sus filas.
   let rows=DB.rows.filter(r=>{
+    // Excluir clientes internos (nosotros mismos)
+    const cliName=getCell(r,'CLIENTE',H);
+    if(typeof isExcludedClient==='function'&&isExcludedClient(cliName))return false;
     const code=String(getCell(r,'COD CLIENTE',H)||getCell(r,'CLIENTE',H)||'').trim();
     const curOrg=code?_currentOrgOf(code):null;
     if(curOrg)return curOrg===orgId;
@@ -3225,32 +3232,75 @@ function historyTable(rec,compact){
   const promNote=periods.some(p=>p.rank===curRank)?`<div class="rep-note" style="margin-top:8px;font-size:11.5px">\u2022 El <b>Prom/mes</b> no considera el mes en curso (mes incompleto); el Total del a\u00f1o s\u00ed lo incluye.</div>`:'';
   return `<div class="rd-tblwrap"><table class="hist-tbl hl-table ${compact?'hist-mini':''}"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>${promNote}`;
 }
-// Historial de venta a nivel EMPRESA (suma de todas las filas de la hoja principal).
-// Mismo diseño que historyTable del cliente.
+// Historial de venta a nivel EMPRESA — lee del DETALLE (detallell + detalleaut) para
+// capturar TODAS las facturas, no solo lo capturado en la hoja principal.
+// Mapea cada factura a su "línea" por clasificación.
+// Mapeo clasificación → línea. Las de llantas usan los MISMOS strings que LLT_CLASIFS
+// para garantizar que el total del historial empresa coincida 1:1 con el reporte Llantas.
+const EMP_LINE_CLASIFS={
+  PREM:['PREMIUM'],
+  AGM:['AGM'],
+  ESTANDAR:['ESTANDAR'],
+  VALUE:['VALUE'],
+  LUB:['7 LUBRICAN'],
+  MOTO:['8 MOTOBAT'],
+  FILTRO:['6 FILTROS'],
+  AUTO:['1 AUT','CHINA AUTO'], // igual que LLT_CLASIFS
+  CTA:['2 CAMTA'],              // igual que LLT_CLASIFS
+  CAMION:['3 CAMION']           // igual que LLT_CLASIFS
+};
+function empClasifToLine(desc,clas){
+  const k=keyName(clas||'');
+  if(!k)return null;
+  // Matching por substring normalizado (misma lógica que lltMatchClas, yvyMatchClas, etc.)
+  for(const [line,pats] of Object.entries(EMP_LINE_CLASIFS)){
+    for(const p of pats){
+      const pk=keyName(p);
+      if(k===pk||k.indexOf(pk)>=0||pk.indexOf(k)>=0)return line;
+    }
+  }
+  return null;
+}
 function historyTableEmpresa(){
-  const H=DB.H; if(!H||!DB.rows.length)return '<div class="empty-state">Sin historial.</div>';
+  if(!DETA_DB&&!DETA_DBAE){
+    // Si todavía no hay detalle cargado, lo pide y renderiza al terminar
+    const p1=DETA_DB?Promise.resolve():loadDetalle();
+    const p2=DETA_DBAE?Promise.resolve():loadDetalleAE();
+    Promise.all([p1,p2]).then(()=>{if(STATE.screen==='home')renderHome();});
+    return '<div class="empty-state">Cargando detalle de ventas…</div>';
+  }
+  const all=detaAll(); // Combina ambas razones, ya normalizadas por detaMapRow
+  // Agrupar por mes (año||mes) → sumas por línea
   const pmap=new Map();
-  DB.rows.forEach(r=>{
-    const ano=getCell(r,'AÑO',H)||getCell(r,'ANIO',H)||getCell(r,'ANO',H);
-    const mes=getCell(r,'MES',H);
-    if(!ano||!mes)return;
-    const key=norm(ano)+'||'+norm(mes);
-    if(!pmap.has(key))pmap.set(key,{rank:periodRank(ano,mes),label:((mes||'—')+' '+(ano||'')).trim(),rows:[]});
-    pmap.get(key).rows.push(r);
+  all.forEach(x=>{
+    const d=detaParseFecha(x.fecha); if(!d)return;
+    const y=d.getFullYear(), m=d.getMonth()+1;
+    const MESES=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+    const mesLbl=MESES[m-1];
+    const key=y+'||'+mesLbl;
+    if(!pmap.has(key))pmap.set(key,{rank:y*100+m,label:mesLbl+' '+y,sums:{}});
+    const p=pmap.get(key);
+    const line=empClasifToLine(x.desc,x.clas);
+    if(line){p.sums[line]=(p.sums[line]||0)+x.cant;}
   });
   const periods=[...pmap.values()].sort((a,b)=>a.rank-b.rank);
-  if(!periods.length)return '<div class="empty-state">Sin historial.</div>';
+  if(!periods.length)return '<div class="empty-state">Sin historial de ventas en el detalle.</div>';
   const now=new Date(); const curRank=now.getFullYear()*100+(now.getMonth()+1);
   const promPeriods=periods.filter(p=>p.rank!==curRank);
   const head=`<th class="l">Línea</th>`+periods.map(p=>`<th>${esc(p.label)}${p.rank===curRank?' •':''}</th>`).join('')+`<th>Total año</th><th>Prom/mes</th>`;
+  const getLineSum=(lineKey,p)=>{
+    // Para líneas padre (TOTAL, LLANTAS), suma sus componentes
+    if(lineKey==='TOTAL')return (p.sums['PREM']||0)+(p.sums['AGM']||0)+(p.sums['ESTANDAR']||0)+(p.sums['VALUE']||0);
+    if(lineKey==='LLANTAS')return (p.sums['AUTO']||0)+(p.sums['CTA']||0)+(p.sums['CAMION']||0);
+    return p.sums[lineKey]||0;
+  };
   const rowFor=(line,opts)=>{
     opts=opts||{};
     let tot=null,totProm=null;
     const cells=periods.map(p=>{
-      let s=null;
-      p.rows.forEach(r=>{const v=parseNum(getCell(r,line.real,H));if(v!=null){s=(s==null?0:s)+v;}});
-      if(s!=null){tot=(tot==null?0:tot)+s;if(p.rank!==curRank)totProm=(totProm==null?0:totProm)+s;}
-      return `<td>${s!=null?fmtNum(s):'·'}</td>`;
+      const s=getLineSum(line.key,p);
+      if(s>0){tot=(tot==null?0:tot)+s;if(p.rank!==curRank)totProm=(totProm==null?0:totProm)+s;}
+      return `<td>${s>0?fmtNum(s):'·'}</td>`;
     }).join('');
     const prom=(promPeriods.length&&totProm!=null)?Math.round(totProm/promPeriods.length):(promPeriods.length===0&&tot!=null?Math.round(tot/periods.length):null);
     const chev=opts.parent?G_CHEV:'';
@@ -3258,16 +3308,19 @@ function historyTableEmpresa(){
     const attr=opts.parent?` class="hist-parent" data-hlg="${opts.key}"`:(opts.sub?` class="hist-sub hs-${opts.pkey}"`:'');
     return `<tr${attr}><td class="l">${chev}<span class="lt-dot" style="background:${lineColor(line.key)}"></span>${esc(line.label)}${cnt}</td>${cells}<td class="r">${tot!=null?fmtNum(tot):'—'}</td><td class="prom">${prom!=null?fmtNum(prom):'—'}</td></tr>`;
   };
-  const body=histLines().map(line=>{
-    if(GROUP_CHILDREN.has(line.key))return '';
-    const kids=LINE_GROUPS[line.key];
+  // Mostrar solo líneas que sabemos mapear desde el detalle (acum + llantas + lub + moto + filtro)
+  const SHOW=['PREM','AGM','ESTANDAR','VALUE','TOTAL','LUB','MOTO','FILTRO','AUTO','CTA','CAMION','LLANTAS'];
+  const body=SHOW.map(k=>{
+    if(GROUP_CHILDREN.has(k))return '';
+    const line=LINES.find(l=>l.key===k); if(!line)return '';
+    const kids=LINE_GROUPS[k];
     if(kids){
-      const kidRows=kids.map(k=>{const kl=LINES.find(x=>x.key===k);return kl?rowFor(kl,{sub:true,pkey:line.key}):'';}).join('');
-      return rowFor(line,{parent:true,key:line.key,count:kids.length})+kidRows;
+      const kidRows=kids.map(ck=>{const kl=LINES.find(x=>x.key===ck);return kl?rowFor(kl,{sub:true,pkey:k}):'';}).join('');
+      return rowFor(line,{parent:true,key:k,count:kids.length})+kidRows;
     }
     return rowFor(line);
   }).join('');
-  const promNote=periods.some(p=>p.rank===curRank)?`<div class="rep-note" style="margin-top:8px;font-size:11.5px">• El <b>Prom/mes</b> no considera el mes en curso (mes incompleto); el Total del año sí lo incluye.</div>`:'';
+  const promNote=periods.some(p=>p.rank===curRank)?`<div class="rep-note" style="margin-top:8px;font-size:11.5px">• El <b>Prom/mes</b> no considera el mes en curso (mes incompleto); el Total del año sí lo incluye. • Datos tomados del <b>detalle de facturación</b> (ambas razones sociales).</div>`:'<div class="rep-note" style="margin-top:8px;font-size:11.5px">• Datos tomados del <b>detalle de facturación</b> (ambas razones sociales).</div>';
   return `<div class="rd-tblwrap"><table class="hist-tbl hl-table"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>${promNote}`;
 }
 
@@ -4854,11 +4907,20 @@ function detaMapRow(r,H,orgId){
   }
   return {codP,desc,codV,cant,imp,costo,util:imp-costo,cli,codC,clas,almacen,fac,fecha,y,org:orgId,vendedor};
 }
+// Clientes INTERNOS que NO cuentan como venta real (son nosotros mismos).
+// Se excluyen de TODAS las estadísticas: detalle, 80/20, YvY, VPV, Llantas, historial, etc.
+const EXCLUDED_CLIENTS=['LLANTERAMA HIDALGUENSE','VENTAS MOSTRADOR GARANTIAS','AUTOELECTRICA ROMA'];
+function isExcludedClient(cli){
+  if(!cli)return false;
+  const k=keyName(String(cli));
+  return EXCLUDED_CLIENTS.some(ex=>{const ek=keyName(ex);return k===ek||k.indexOf(ek)>=0||ek.indexOf(k)>=0;});
+}
 function detaAll(){
   const out=[];
   if(DETA_DB)DETA_DB.rows.forEach(r=>out.push(detaMapRow(r,DETA_DB.H,'llanterama')));
   if(DETA_DBAE)DETA_DBAE.rows.forEach(r=>out.push(detaMapRow(r,DETA_DBAE.H,'autoelectrica')));
-  return out;
+  // Filtrar clientes internos
+  return out.filter(x=>!isExcludedClient(x.cli));
 }
 function detaFiltered(){
   let list=detaAll();
@@ -5519,23 +5581,16 @@ function lltClienteAgg(vendor){
   return {arr,y1,y2};
 }
 function lltMedidaAgg(vendor){
-  // Agrupa por "medida" extraída de la descripción (patrón típico "P195/60R15", "265/70R17", etc.).
+  // Agrupa por DESCRIPCIÓN COMPLETA del producto (así cada marca/modelo es su propia fila).
   const {y1,y2}=lltYears();
   let rows=lltFilterClas(lltFilterOrg(lltAll())).filter(x=>x.y===y1||x.y===y2);
   if(vendor&&vendor!=='ALL')rows=rows.filter(x=>(x.vendedor||'S/I')===vendor);
-  const extractMedida=(desc)=>{
-    if(!desc)return null;
-    const s=String(desc).toUpperCase();
-    // patrones: 195/60R15, P195/60R15, LT265/70R17, 11R22.5
-    const m=s.match(/[LPT]?\d{2,3}\/?\d{0,2}R?\d{1,2}(\.\d)?/);
-    if(m)return m[0].replace(/^P/,'');
-    return null;
-  };
   const byM=new Map();
   rows.forEach(x=>{
-    const med=extractMedida(x.desc); if(!med)return;
-    if(!byM.has(med))byM.set(med,{medida:med,y1:0,y2:0});
-    const g=byM.get(med);
+    const desc=String(x.desc||'').trim(); if(!desc)return;
+    const key=desc.toUpperCase();
+    if(!byM.has(key))byM.set(key,{medida:desc,codP:x.codP||'',y1:0,y2:0});
+    const g=byM.get(key);
     if(x.y===y1)g.y1+=x.cant; else if(x.y===y2)g.y2+=x.cant;
   });
   const arr=[...byM.values()];
@@ -5641,9 +5696,14 @@ function renderLlantas(){
   if(an.medidasNuevas.length)diag.push(`🆕 <b>${an.medidasNuevas.length} medidas nuevas</b> aparecieron en ${y2}.`);
 
   // Tablas narrativas
-  const tblMedTop=an.medidasTop.length?`<table class="llt-mini"><thead><tr><th>Medida</th><th>${y1}</th><th>${y2}</th><th>Dif</th></tr></thead><tbody>${an.medidasTop.map(m=>{const dc=m.dif>0?'up':(m.dif<0?'down':'flat');return `<tr><td class="l mono">${esc(m.medida)}</td><td class="num muted">${m.y1||'—'}</td><td class="num strong">${m.y2||'—'}</td><td class="num ${dc}">${m.dif>0?'+':''}${m.dif}</td></tr>`;}).join('')}</tbody></table>`:'<div class="llt-empty">Sin datos.</div>';
-  const tblMedPerd=an.medidasPerdidas.length?`<table class="llt-mini"><thead><tr><th>Medida</th><th>${y1}</th></tr></thead><tbody>${an.medidasPerdidas.map(m=>`<tr><td class="l mono">${esc(m.medida)}</td><td class="num muted">${m.y1}</td></tr>`).join('')}</tbody></table>`:'<div class="llt-empty">Ninguna.</div>';
-  const tblMedNue=an.medidasNuevas.length?`<table class="llt-mini"><thead><tr><th>Medida</th><th>${y2}</th></tr></thead><tbody>${an.medidasNuevas.map(m=>`<tr><td class="l mono">${esc(m.medida)}</td><td class="num strong">${m.y2}</td></tr>`).join('')}</tbody></table>`:'<div class="llt-empty">Ninguna.</div>';
+  const medRow=(m,showCols)=>{
+    const codCell=`<td class="l mono muted">${esc(m.codP||'')}</td>`;
+    const descCell=`<td class="l llt-desc" title="${esc(m.medida)}">${esc(m.medida)}</td>`;
+    return codCell+descCell+showCols;
+  };
+  const tblMedTop=an.medidasTop.length?`<table class="llt-mini llt-mini-desc"><thead><tr><th class="l">Cód</th><th class="l">Descripción</th><th>${y1}</th><th>${y2}</th><th>Dif</th></tr></thead><tbody>${an.medidasTop.map(m=>{const dc=m.dif>0?'up':(m.dif<0?'down':'flat');return `<tr>${medRow(m,`<td class="num muted">${m.y1||'—'}</td><td class="num strong">${m.y2||'—'}</td><td class="num ${dc}">${m.dif>0?'+':''}${m.dif}</td>`)}</tr>`;}).join('')}</tbody></table>`:'<div class="llt-empty">Sin datos.</div>';
+  const tblMedPerd=an.medidasPerdidas.length?`<table class="llt-mini llt-mini-desc"><thead><tr><th class="l">Cód</th><th class="l">Descripción</th><th>${y1}</th></tr></thead><tbody>${an.medidasPerdidas.map(m=>`<tr>${medRow(m,`<td class="num muted">${m.y1}</td>`)}</tr>`).join('')}</tbody></table>`:'<div class="llt-empty">Ninguna.</div>';
+  const tblMedNue=an.medidasNuevas.length?`<table class="llt-mini llt-mini-desc"><thead><tr><th class="l">Cód</th><th class="l">Descripción</th><th>${y2}</th></tr></thead><tbody>${an.medidasNuevas.map(m=>`<tr>${medRow(m,`<td class="num strong">${m.y2}</td>`)}</tr>`).join('')}</tbody></table>`:'<div class="llt-empty">Ninguna.</div>';
   const tblClave=an.clave.slice(0,10).length?`<table class="llt-mini"><thead><tr><th>Cliente</th><th>Vend.</th><th>${y1}</th><th>${y2}</th><th>%</th></tr></thead><tbody>${an.clave.slice(0,10).map(c=>{const dc=c.pct>0?'up':(c.pct<0?'down':'flat');return `<tr><td class="l">${esc(c.name||'')}</td><td class="l muted">${esc(c.vendor||'')}</td><td class="num muted">${fmtNum(c.y1T)}</td><td class="num strong">${fmtNum(c.y2T)}</td><td class="num ${dc}">${c.pct>0?'+':''}${Math.round(c.pct)}%</td></tr>`;}).join('')}</tbody></table>`:'<div class="llt-empty">Sin clientes clave.</div>';
   const tblCrec=an.subieron.slice(0,10).length?`<table class="llt-mini"><thead><tr><th>Cliente</th><th>Vend.</th><th>${y1}</th><th>${y2}</th><th>%</th></tr></thead><tbody>${an.subieron.slice(0,10).map(c=>`<tr><td class="l">${esc(c.name||'')}</td><td class="l muted">${esc(c.vendor||'')}</td><td class="num muted">${fmtNum(c.y1T)}</td><td class="num strong">${fmtNum(c.y2T)}</td><td class="num up">+${Math.round(c.pct)}%</td></tr>`).join('')}</tbody></table>`:'<div class="llt-empty">Ninguno.</div>';
   const tblBaj=an.bajaron.slice(0,10).length?`<table class="llt-mini"><thead><tr><th>Cliente</th><th>Vend.</th><th>${y1}</th><th>${y2}</th><th>%</th></tr></thead><tbody>${an.bajaron.slice(0,10).map(c=>`<tr><td class="l">${esc(c.name||'')}</td><td class="l muted">${esc(c.vendor||'')}</td><td class="num muted">${fmtNum(c.y1T)}</td><td class="num strong">${fmtNum(c.y2T)}</td><td class="num down">${Math.round(c.pct)}%</td></tr>`).join('')}</tbody></table>`:'<div class="llt-empty">Ninguno.</div>';
