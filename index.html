@@ -4757,19 +4757,18 @@ function loadDetalleAE(){
   DETA_ERRAE='';
   DETA_PROMISEAE=(async()=>{
     try{
-      let text='';
-      if(APPS){text=await gsRun('getDetalleAE');}
-      else if(SAVE_URL&&SAVE_URL.indexOf('http')===0){
-        DETA_LOADPROG.ae=1;detaPaintLoader();
-        const r=await fetch(SAVE_URL,{method:'POST',body:JSON.stringify({action:'getDetalleAE'}),redirect:'follow'});
-        const j=await r.json();
-        if(!j||!j.ok)throw new Error((j&&j.error)||'No se pudo leer la pesta\u00f1a detalleaut');
-        text=j.csv;
+      if(APPS){
+        const text=await gsRun('getDetalleAE');
+        const grid=parseCSV(text||''); if(!grid.length)throw new Error('La pesta\u00f1a detalleaut est\u00e1 vac\u00eda');
+        const H=buildHeaderIndex(grid[0]);
+        const rows=grid.slice(1).filter(r=>{const cod=String(getCell(r,'Codigo',H)||'').trim(),cli=String(getCell(r,'Cliente',H)||'').trim(),fec=String(getCell(r,'Fecha',H)||'').trim(),cnt=String(getCell(r,'Cantidad',H)||'').trim();return !!(cod||cli||fec||cnt);});
+        DETA_DBAE={H,rows};DETA_LOADPROG.ae=2;detaPaintLoader();
+        console.log('[RDV] detalleaut cargado:',rows.length,'filas');
+      } else if(SAVE_URL&&SAVE_URL.indexOf('http')===0){
+        const res=await _loadDetallePaged('getDetalleAE','detalleaut','ae');
+        DETA_DBAE={H:res.H,rows:res.rows};DETA_LOADPROG.ae=2;detaPaintLoader();
+        console.log('[RDV] detalleaut FINAL:',res.rows.length,'filas de',res.total,'totales en Sheet');
       }
-      const grid=parseCSV(text||''); if(!grid.length)throw new Error('La pesta\u00f1a detalleaut est\u00e1 vac\u00eda');
-      const H=buildHeaderIndex(grid[0]);
-      const rows=grid.slice(1).filter(r=>String(getCell(r,'Codigo',H)||getCell(r,'CODIGO',H)||'').trim()!=='');
-      DETA_DBAE={H,rows};DETA_LOADPROG.ae=2;detaPaintLoader();
     }catch(e){DETA_ERRAE=e.message||String(e);DETA_DBAE=null;DETA_LOADPROG.ae=-1;detaPaintLoader();}
     finally{DETA_PROMISEAE=null;}
   })();
@@ -4840,24 +4839,56 @@ function detaCliVend(codC,cliName){
   if(nk&&DETA_NAME2VEND[nk])return DETA_NAME2VEND[nk];
   return null;
 }
+// Carga del detalle PAGINADA: la hoja puede tener >100k filas y el payload de Apps Script
+// tiene un l\u00edmite de ~50MB. Pedimos bloques de 30k filas hasta recibir done:true.
+async function _loadDetallePaged(action,tabName,progKey){
+  let allRows=[]; let H=null; let startRow=2; let totalReported=0; let safety=0;
+  while(true){
+    safety++; if(safety>50)throw new Error('Demasiadas p\u00e1ginas al leer '+tabName);
+    const body={action:action,startRow:startRow,pageSize:30000};
+    DETA_LOADPROG[progKey]=1; detaPaintLoader();
+    const r=await fetch(SAVE_URL,{method:'POST',body:JSON.stringify(body),redirect:'follow'});
+    const j=await r.json();
+    if(!j||!j.ok)throw new Error((j&&j.error)||('No se pudo leer la pesta\u00f1a '+tabName));
+    const grid=parseCSV(j.csv||''); if(!grid.length)break;
+    if(!H)H=buildHeaderIndex(grid[0]);
+    const rows=grid.slice(1).filter(r=>{
+      const cod=String(getCell(r,'Codigo',H)||getCell(r,'CODIGO',H)||'').trim();
+      const cli=String(getCell(r,'Cliente',H)||getCell(r,'CLIENTE',H)||'').trim();
+      const fec=String(getCell(r,'Fecha',H)||getCell(r,'FECHA',H)||'').trim();
+      const cnt=String(getCell(r,'Cantidad',H)||getCell(r,'CANTIDAD',H)||'').trim();
+      return !!(cod||cli||fec||cnt);
+    });
+    allRows=allRows.concat(rows);
+    totalReported=j.total||totalReported;
+    console.log('[RDV]',tabName,'bloque:',rows.length,'(acumulado',allRows.length,'de',totalReported,')');
+    if(j.done)break;
+    startRow=(j.end||startRow)+1;
+  }
+  return {H,rows:allRows,total:totalReported};
+}
 function loadDetalle(){
   if(DETA_DB)return Promise.resolve();
   if(DETA_PROMISE)return DETA_PROMISE;
   DETA_ERR='';
   DETA_PROMISE=(async()=>{
     try{
-      let text='';
-      if(APPS){text=await gsRun('getDetalle');}
-      else if(SAVE_URL&&SAVE_URL.indexOf('http')===0){
-        DETA_LOADPROG.ll=1;detaPaintLoader();const r=await fetch(SAVE_URL,{method:'POST',body:JSON.stringify({action:'getDetalle'}),redirect:'follow'});
-        const j=await r.json();
-        if(!j||!j.ok)throw new Error((j&&j.error)||'No se pudo leer la pesta\u00f1a detallell');
-        text=j.csv;
+      if(APPS){
+        // En Apps Script embebido no hay paginaci\u00f3n \u2014 leemos todo de una vez
+        const text=await gsRun('getDetalle');
+        const grid=parseCSV(text||''); if(!grid.length)throw new Error('La pesta\u00f1a detallell est\u00e1 vac\u00eda');
+        const H=buildHeaderIndex(grid[0]);
+        const rows=grid.slice(1).filter(r=>{
+          const cod=String(getCell(r,'Codigo',H)||'').trim(),cli=String(getCell(r,'Cliente',H)||'').trim(),fec=String(getCell(r,'Fecha',H)||'').trim(),cnt=String(getCell(r,'Cantidad',H)||'').trim();
+          return !!(cod||cli||fec||cnt);
+        });
+        DETA_DB={H,rows};DETA_LOADPROG.ll=2;detaPaintLoader();
+        console.log('[RDV] detallell cargado:',rows.length,'filas');
+      } else if(SAVE_URL&&SAVE_URL.indexOf('http')===0){
+        const res=await _loadDetallePaged('getDetalle','detallell','ll');
+        DETA_DB={H:res.H,rows:res.rows};DETA_LOADPROG.ll=2;detaPaintLoader();
+        console.log('[RDV] detallell FINAL:',res.rows.length,'filas de',res.total,'totales en Sheet');
       }
-      const grid=parseCSV(text||''); if(!grid.length)throw new Error('La pesta\u00f1a detallell est\u00e1 vac\u00eda');
-      const H=buildHeaderIndex(grid[0]);
-      const rows=grid.slice(1).filter(r=>String(getCell(r,'Codigo',H)||getCell(r,'CODIGO',H)||'').trim()!=='');
-      DETA_DB={H,rows};DETA_LOADPROG.ll=2;detaPaintLoader();
     }catch(e){DETA_ERR=e.message||String(e);DETA_DB=null;DETA_LOADPROG.ll=-1;detaPaintLoader();}
     finally{DETA_PROMISE=null;}
   })();
