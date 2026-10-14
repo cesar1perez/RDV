@@ -1042,6 +1042,10 @@ tr.deta-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--lin
 .llt-mini td.down{color:var(--low);font-weight:800}
 .llt-mini td.flat{color:var(--muted2)}
 .llt-empty{text-align:center;padding:12px;color:var(--muted2);font-style:italic;font-size:11px}
+.llt-sources{margin-top:8px;font-size:11.5px;color:var(--muted)}
+.llt-src{display:inline-block;margin:0 4px;padding:3px 10px;border-radius:12px;font-weight:800;font-family:'IBM Plex Mono'}
+.llt-src.ok{background:rgba(16,185,129,.15);color:#065f46;border:1px solid rgba(16,185,129,.3)}
+.llt-src.err{background:rgba(239,68,68,.15);color:#991b1b;border:1px solid rgba(239,68,68,.3)}
 .llt-tbl-suc td.suc-poza, .llt-tbl-suc td.stick-col.suc-poza{background:rgba(239,68,68,.10) !important;color:#991b1b !important;border-left:4px solid #ef4444 !important}
 .llt-tbl-suc td.suc-tul, .llt-tbl-suc td.stick-col.suc-tul{background:rgba(59,130,246,.12) !important;color:#1e40af !important;border-left:4px solid #3b82f6 !important}
 .llt-tbl-suc td.suc-aer, .llt-tbl-suc td.stick-col.suc-aer{background:rgba(6,182,212,.12) !important;color:#0e7490 !important;border-left:4px solid #06b6d4 !important}
@@ -4958,7 +4962,7 @@ function detaMapRow(r,H,orgId){
     if(codV){
       const codNorm=String(codV).trim().replace(/^0+/,'').padStart(3,'0');
       const almNorm=String(almacen||'').trim().replace(/^0+/,'');
-      const orgLbl=orgId==='autoelectrica'?'AE':'LL';
+      const orgLbl=orgId==='autoelectrica'?'AE':(orgId==='poza'?'PZ':'LL');
       vendedor='Cod '+codNorm+(almNorm?(' alm '+almNorm):'')+' · '+orgLbl;
     } else {
       vendedor='S/I';
@@ -5584,7 +5588,7 @@ function _lltMapRowRaw(r,H,orgId){
     if(codV){
       const codNorm=String(codV).trim().replace(/^0+/,'').padStart(3,'0');
       const almNorm=String(almacen||'').trim().replace(/^0+/,'');
-      const orgLbl=orgId==='autoelectrica'?'AE':'LL';
+      const orgLbl=orgId==='autoelectrica'?'AE':(orgId==='poza'?'PZ':'LL');
       vendedor='Cod '+codNorm+(almNorm?(' alm '+almNorm):'')+' · '+orgLbl;
     } else {
       vendedor='S/I';
@@ -6140,6 +6144,11 @@ function renderLlantas(){
     <div class="llt-eyebrow">🚛 Reporte especial de llantas</div>
     <h2 class="llt-title">Venta de llantas · <b>${y1}</b> vs <b>${y2}</b></h2>
     <div class="llt-sub">Agregado por vendedor según el <b>Cód Vend 1</b> de cada factura (independiente del cliente). Dispersión por tipo (Auto, Camioneta, China Auto, Camión). Análisis de medidas y clientes. Totales coinciden 1:1 con filtros de Google Sheets.</div>
+    <div class="llt-sources">Fuentes cargadas:
+      <span class="llt-src ${DETA_DB?'ok':'err'}">LL (${DETA_DB?DETA_DB.rows.length.toLocaleString('es-MX'):'0'} filas)</span>
+      <span class="llt-src ${DETA_DBAE?'ok':'err'}">AE (${DETA_DBAE?DETA_DBAE.rows.length.toLocaleString('es-MX'):'0'} filas)</span>
+      <span class="llt-src ${DETA_DBPZ?'ok':'err'}">PZ (${DETA_DBPZ?DETA_DBPZ.rows.length.toLocaleString('es-MX'):'0'} filas)</span>
+    </div>
   </div>
   <div class="llt-kpis">
     <div class="llt-kpi"><div class="k-l">Piezas ${y1}</div><div class="k-v">${fmtNum(totY1)}</div><div class="k-s">año completo</div></div>
