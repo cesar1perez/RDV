@@ -5589,6 +5589,7 @@ function lltAll(){
   const out=[];
   if(DETA_DB)DETA_DB.rows.forEach(r=>out.push(_lltMapRowRaw(r,DETA_DB.H,'llanterama')));
   if(DETA_DBAE)DETA_DBAE.rows.forEach(r=>out.push(_lltMapRowRaw(r,DETA_DBAE.H,'autoelectrica')));
+  if(DETA_DBPZ)DETA_DBPZ.rows.forEach(r=>out.push(_lltMapRowRaw(r,DETA_DBPZ.H,'poza')));
   // Excluir clientes internos (nosotros mismos) y filtrar solo clasificaciones de llanta
   return out.filter(x=>!isExcludedClient(x.cli) && lltMatchClas(x.clas));
 }
@@ -5939,12 +5940,13 @@ function lltDiagResumen(){
 
 function renderLlantas(){
   const body=document.getElementById('repBody');
-  if(!DETA_DB||!DETA_DBAE){
-    body.innerHTML=`<div class="deta-loading"><div class="deta-load-title">Cargando reporte de llantas…</div><div class="deta-load-sub">Se necesita el detalle de ambas razones sociales.</div><div id="detaLoader"></div></div>`;
+  if(!DETA_DB||!DETA_DBAE||!DETA_DBPZ){
+    body.innerHTML=`<div class="deta-loading"><div class="deta-load-title">Cargando reporte de llantas…</div><div class="deta-load-sub">Se necesita el detalle de las TRES razones sociales (Tulancingo, Autoeléctrica, Poza Rica).</div><div id="detaLoader"></div></div>`;
     detaPaintLoader();
     const p1=DETA_DB?Promise.resolve():loadDetalle();
     const p2=DETA_DBAE?Promise.resolve():loadDetalleAE();
-    Promise.all([p1,p2]).then(()=>{if(REPORT==='llt')renderLlantas();});
+    const p3=DETA_DBPZ?Promise.resolve():loadDetallePoza();
+    Promise.all([p1,p2,p3]).then(()=>{if(REPORT==='llt')renderLlantas();});
     return;
   }
   const {arr:vendors,y1,y2}=lltVendorAgg();
@@ -5960,7 +5962,7 @@ function renderLlantas(){
   const totCls=totDif>0?'up':(totDif<0?'down':'flat');
 
   // Toolbar
-  const orgOptions=`<option value="ALL" ${LLT.org==='ALL'?'selected':''}>Ambas organizaciones</option>${CONFIG.orgs.map(o=>`<option value="${o.id}" ${LLT.org===o.id?'selected':''}>${esc(o.label)}</option>`).join('')}`;
+  const orgOptions=`<option value="ALL" ${LLT.org==='ALL'?'selected':''}>Todas las razones sociales</option>${CONFIG.orgs.map(o=>`<option value="${o.id}" ${LLT.org===o.id?'selected':''}>${esc(o.label)}</option>`).join('')}<option value="poza" ${LLT.org==='poza'?'selected':''}>Llanterama Poza Rica</option>`;
   const vendorOptions=`<option value="ALL">Todos los vendedores</option>`+vendors.map(v=>`<option value="${esc(v.vendor)}" ${LLT.vendor===v.vendor?'selected':''}>${esc(v.vendor)}</option>`).join('');
   const clasifChips=LLT_CLASIFS.map(c=>`<label class="llt-chip ${LLT.clasif.has(c)?'on':''}"><input type="checkbox" data-lltclas="${esc(c)}" ${LLT.clasif.has(c)?'checked':''}><span>${esc(c)}</span></label>`).join('');
 
