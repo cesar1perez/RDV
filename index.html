@@ -4818,20 +4818,56 @@ function detaPaintLoader(){
 // Mapa de códigos de vendedor por razón social (fallback cuando el cliente no está en la hoja principal)
 const VENDOR_CODE_MAP={
   llanterama:{ // Cod Vend 1 → nombre
-    '023':'Enrique R.','003':'Carlos C.','006':'Miguel L','012':'Rub\u00e9n L.'
+    '023':'Enrique R.','003':'Carlos C.','006':'Miguel L','012':'Rub\u00e9n L.',
+    '001':'VENTA PISO LLANTERAMA',
+    '004':'MARCO HDEZ',
+    '005':'CUENTAS NACIONALES - LLANTERAMA',
+    '007':'ALFREDO TAPIA',
+    '008':'CUENTAS NACIONALES - LLANTERAMA',
+    '010':'CUENTAS NACIONALES - LLANTERAMA',
+    '014':'CUENTAS NACIONALES - LLANTERAMA',
+    '018':'CUENTAS NACIONALES - LLANTERAMA',
+    '020':'VENTA PISO R\u00cdO DE LAS AVENIDAS'
   },
-  autoelectrica:{ // Cod Vend 1 → nombre (con reglas especiales por almacén para 003)
+  autoelectrica:{ // 001 y 003 se resuelven por almacén en resolveVendorByCode
     '022':'Celene S.','023':'Jose L.','021':'Celene S.'
+  },
+  poza:{ // Llanterama Poza Rica — mismo código con distintos almacenes = mismo vendedor
+    '001':'VENTA PISO POZA RICA',
+    '002':'JORGE VICENCIO',
+    '005':'VENTA PISO \u00c1LAMO',
+    '006':'GARANTIAS POZA RICA',
+    '007':'YURIDIA A.',
+    '011':'VENTA PISO TUXPAN',
+    '012':'ROMAN RAMSES CASTILLO',
+    '015':'VENTA PISO TUXPAN',
+    '029':'VENTA PISO PETROMEX',
+    '030':'CESAR MANUEL LIMA BALTZAR',
+    '032':'VENTA PISO CERRO AZUL',
+    '033':'VENTA PISO NARANJOS',
+    '034':'VENTA PISO PAPANTLA',
+    '036':'VENTA PISO OUTLET',
+    '038':'DANIEL LIRA AZUARA',
+    '039':'REDES SOCIALES',
+    '041':'JOSUE JIMAREZ ROCHA',
+    '042':'ISRAEL ABISAID CRUZ GOMEZ'
   }
 };
 function resolveVendorByCode(codVend,almacen,orgId){
   const cv=String(codVend||'').trim().replace(/^0+/,'').padStart(3,'0'); // normaliza a 3 dígitos
   if(!cv)return null;
-  if(orgId==='autoelectrica'&&cv==='003'){
+  if(orgId==='autoelectrica'){
     const alm=String(almacen||'').trim().replace(/^0+/,'').padStart(3,'0');
-    if(alm==='001')return 'Colosio-Mayoreo';
-    if(alm==='003')return 'Oscar F.';
-    return null; // 003 sin almacén reconocido → no asigna
+    if(cv==='003'){
+      if(alm==='001')return 'Colosio-Mayoreo';
+      if(alm==='003')return 'Oscar F.';
+      return null;
+    }
+    if(cv==='001'){
+      if(alm==='003')return 'VENTA PISO SAHAG\u00daN';
+      if(alm==='005')return 'VENTA PISO TIZAYUCA';
+      return null;
+    }
   }
   const map=VENDOR_CODE_MAP[orgId]||{};
   return map[cv]||null;
