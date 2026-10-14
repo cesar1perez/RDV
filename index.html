@@ -4743,6 +4743,7 @@ function showWelcome(){ROLE=null;UNLOCKED.clear();setRoleUI();showScreen('welcom
 /* ===== DETALLE DE VENTAS (hoja detallell, solo Llanterama Tulancingo) ===== */
 let DETA_DB=null, DETA_PROMISE=null, DETA_ERR='';
 let DETA_DBAE=null, DETA_PROMISEAE=null, DETA_ERRAE='';
+let DETA_DBPZ=null, DETA_PROMISEPZ=null, DETA_ERRPZ='';
 let DETA_CLI2VEND=null;
 let DETA_NAME2VEND=null;
 let DETA_LOADPROG={ll:0,ae:0};
@@ -4770,6 +4771,29 @@ function loadDetalleAE(){
     finally{DETA_PROMISEAE=null;}
   })();
   return DETA_PROMISEAE;
+}
+function loadDetallePoza(){
+  if(DETA_DBPZ)return Promise.resolve();
+  if(DETA_PROMISEPZ)return DETA_PROMISEPZ;
+  DETA_ERRPZ='';
+  DETA_PROMISEPZ=(async()=>{
+    try{
+      if(APPS){
+        const text=await gsRun('getDetallePoza');
+        const grid=parseCSV(text||''); if(!grid.length)throw new Error('La pestaña detallepoza está vacía');
+        const H=buildHeaderIndex(grid[0]);
+        const rows=grid.slice(1).filter(r=>{const cod=String(getCell(r,'Codigo',H)||'').trim(),cli=String(getCell(r,'Cliente',H)||'').trim(),fec=String(getCell(r,'Fecha',H)||'').trim(),cnt=String(getCell(r,'Cantidad',H)||'').trim();return !!(cod||cli||fec||cnt);});
+        DETA_DBPZ={H,rows};
+        console.log('[RDV] detallepoza cargado:',rows.length,'filas');
+      } else if(SAVE_URL&&SAVE_URL.indexOf('http')===0){
+        const res=await _loadDetallePaged('getDetallePoza','detallepoza','pz');
+        DETA_DBPZ={H:res.H,rows:res.rows};
+        console.log('[RDV] detallepoza FINAL:',res.rows.length,'filas de',res.total,'totales en Sheet');
+      }
+    }catch(e){DETA_ERRPZ=e.message||String(e);DETA_DBPZ=null;}
+    finally{DETA_PROMISEPZ=null;}
+  })();
+  return DETA_PROMISEPZ;
 }
 function detaPaintLoader(){
   const box=document.getElementById('detaLoader'); if(!box)return;
@@ -5692,6 +5716,119 @@ function lltAnalysis(vendor){
   return {cli:cli.arr,med:med.arr,nuevos,perdidos,subieron,bajaron,estables,clave,medidasTop,medidasPerdidas,medidasNuevas,y1:cli.y1,y2:cli.y2};
 }
 
+// Devuelve TODAS las filas de llantas de las TRES razones sociales (incluye Poza Rica).
+// Usa _lltMapRowRaw (vendedor por Cod Vend 1), filtra clientes internos y clasif de llanta.
+function lltAllTresRazones(){
+  const out=[];
+  if(DETA_DB)DETA_DB.rows.forEach(r=>out.push(_lltMapRowRaw(r,DETA_DB.H,'llanterama')));
+  if(DETA_DBAE)DETA_DBAE.rows.forEach(r=>out.push(_lltMapRowRaw(r,DETA_DBAE.H,'autoelectrica')));
+  if(DETA_DBPZ)DETA_DBPZ.rows.forEach(r=>out.push(_lltMapRowRaw(r,DETA_DBPZ.H,'poza')));
+  return out.filter(x=>!isExcludedClient(x.cli) && lltMatchClas(x.clas));
+}
+// Agrega totales mensuales 2025 vs 2026 por razón social (o combinado).
+// Devuelve {y1M[12], y2M[12], y1T, y2T}.
+function _lltAgregaTotales(rows,y1,y2){
+  const y1M=new Array(12).fill(0), y2M=new Array(12).fill(0);
+  rows.forEach(x=>{
+    const d=detaParseFecha(x.fecha); if(!d)return;
+    const mo=d.getMonth();
+    if(x.y===y1)y1M[mo]+=x.cant; else if(x.y===y2)y2M[mo]+=x.cant;
+  });
+  const y1T=y1M.reduce((s,v)=>s+v,0);
+  const _curM=new Date().getMonth();
+  let y2T=0; for(let i=0;i<=_curM;i++)y2T+=y2M[i]||0;
+  return {y1M,y2M,y1T,y2T};
+}
+// Genera UN archivo xls (abierto por Excel) con totales de llantas por mes 25 vs 26
+// y 4 secciones: TOTAL + Tulancingo + Autoeléctrica + Poza Rica. Cada tabla cortada
+// verticalmente en Ene-Jun y Jul-Dic+Totales.
+async function lltExportTotalesExcel(){
+  // Asegurar que Poza esté cargado
+  if(!DETA_DBPZ){await loadDetallePoza();}
+  const all=lltAllTresRazones();
+  const ys=[...new Set(all.map(x=>x.y).filter(Boolean))].sort();
+  const y2=ys[ys.length-1]||new Date().getFullYear();
+  const y1=ys[ys.length-2]||(y2-1);
+  const MMONTH=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+
+  const seccion=(titulo,rows,color)=>{
+    const t=_lltAgregaTotales(rows,y1,y2);
+    const dif=t.y2T-t.y1T;
+    const pct=t.y1T>0?Math.round(dif/t.y1T*100):(t.y2T>0?100:0);
+    // Primera mitad: Ene-Jun
+    const monthsA=MMONTH.slice(0,6);
+    const monthsB=MMONTH.slice(6,12);
+    const num=(v,strong)=>`<td style="text-align:right;font-family:Consolas,monospace;padding:4px 8px;border:1px solid #cfd8e8;${strong?'font-weight:bold':''}">${v||'—'}</td>`;
+    const difN=(v)=>{const c=v>0?'#10b981':(v<0?'#ef4444':'#64748b');return `<td style="text-align:right;font-family:Consolas,monospace;padding:4px 8px;border:1px solid #cfd8e8;font-weight:bold;color:${c}">${v>0?'+':''}${v||0}</td>`;};
+    let tablaA='<table style="border-collapse:collapse;margin:6px 0;font-size:11px"><tr>';
+    tablaA+=`<th style="background:${color};color:#fff;padding:6px 10px;border:1px solid ${color};text-align:left;font-weight:800">Año</th>`;
+    monthsA.forEach(m=>{tablaA+=`<th style="background:#0c1f44;color:#facc15;padding:6px 10px;border:1px solid #0c1f44;text-align:center;font-weight:800">${m}</th>`;});
+    tablaA+=`<th style="background:${color};color:#fff;padding:6px 10px;border:1px solid ${color};text-align:center;font-weight:800">SEMESTRE 1</th></tr>`;
+    tablaA+=`<tr><td style="background:#f4f7fc;padding:4px 8px;border:1px solid #cfd8e8;font-weight:800;color:#4a5a7a">${y1}</td>`;
+    let s1A=0; monthsA.forEach((_,i)=>{tablaA+=num(t.y1M[i]);s1A+=t.y1M[i]||0;}); tablaA+=num(s1A,true)+'</tr>';
+    tablaA+=`<tr><td style="background:#f4f7fc;padding:4px 8px;border:1px solid #cfd8e8;font-weight:800;color:#0c1f44">${y2}</td>`;
+    let s2A=0; monthsA.forEach((_,i)=>{tablaA+=num(t.y2M[i],true);s2A+=t.y2M[i]||0;}); tablaA+=num(s2A,true)+'</tr>';
+    tablaA+=`<tr><td style="background:#fffbeb;padding:4px 8px;border:1px solid #cfd8e8;font-weight:800;color:#92400e">Dif</td>`;
+    monthsA.forEach((_,i)=>{const d=(t.y2M[i]||0)-(t.y1M[i]||0);tablaA+=difN(d);});
+    tablaA+=difN(s2A-s1A)+'</tr></table>';
+    // Segunda mitad: Jul-Dic + TOTALES
+    let tablaB='<table style="border-collapse:collapse;margin:6px 0;font-size:11px"><tr>';
+    tablaB+=`<th style="background:${color};color:#fff;padding:6px 10px;border:1px solid ${color};text-align:left;font-weight:800">Año</th>`;
+    monthsB.forEach(m=>{tablaB+=`<th style="background:#0c1f44;color:#facc15;padding:6px 10px;border:1px solid #0c1f44;text-align:center;font-weight:800">${m}</th>`;});
+    tablaB+=`<th style="background:${color};color:#fff;padding:6px 10px;border:1px solid ${color};text-align:center;font-weight:800">SEMESTRE 2</th>`;
+    tablaB+=`<th style="background:#facc15;color:#0c1f44;padding:6px 10px;border:1px solid #facc15;text-align:center;font-weight:900">TOTAL AÑO</th></tr>`;
+    tablaB+=`<tr><td style="background:#f4f7fc;padding:4px 8px;border:1px solid #cfd8e8;font-weight:800;color:#4a5a7a">${y1}</td>`;
+    let s1B=0; monthsB.forEach((_,i)=>{tablaB+=num(t.y1M[i+6]);s1B+=t.y1M[i+6]||0;}); tablaB+=num(s1B,true)+num(t.y1T,true)+'</tr>';
+    tablaB+=`<tr><td style="background:#f4f7fc;padding:4px 8px;border:1px solid #cfd8e8;font-weight:800;color:#0c1f44">${y2}</td>`;
+    let s2B=0; monthsB.forEach((_,i)=>{tablaB+=num(t.y2M[i+6],true);s2B+=t.y2M[i+6]||0;}); tablaB+=num(s2B,true)+num(t.y2T,true)+'</tr>';
+    tablaB+=`<tr><td style="background:#fffbeb;padding:4px 8px;border:1px solid #cfd8e8;font-weight:800;color:#92400e">Dif</td>`;
+    monthsB.forEach((_,i)=>{const d=(t.y2M[i+6]||0)-(t.y1M[i+6]||0);tablaB+=difN(d);});
+    tablaB+=difN(s2B-s1B)+difN(dif)+'</tr></table>';
+    const kpiStyle='padding:4px 10px;background:#f4f7fc;border:1px solid #cfd8e8;font-size:11px';
+    return `
+    <div style="margin:16px 0 24px 0">
+      <h2 style="background:${color};color:#fff;padding:8px 14px;margin:0 0 4px;font-family:Arial;font-size:14px;font-weight:900;border-radius:3px">${titulo}</h2>
+      <div style="margin:6px 0 10px;font-size:11px;color:#4a5a7a">
+        <span style="${kpiStyle}">Total ${y1}: <b style="color:#0c1f44">${t.y1T.toLocaleString('es-MX')}</b></span>
+        <span style="${kpiStyle}">Total ${y2} (hasta ${MMONTH[new Date().getMonth()]}): <b style="color:#0c1f44">${t.y2T.toLocaleString('es-MX')}</b></span>
+        <span style="${kpiStyle}">Diferencia: <b style="color:${dif>=0?'#10b981':'#ef4444'}">${dif>0?'+':''}${dif.toLocaleString('es-MX')} (${pct>0?'+':''}${pct}%)</b></span>
+      </div>
+      ${tablaA}
+      ${tablaB}
+    </div>`;
+  };
+
+  const totalComb=all;
+  const tul=all.filter(x=>x.org==='llanterama');
+  const aer=all.filter(x=>x.org==='autoelectrica');
+  const poz=all.filter(x=>x.org==='poza');
+  const now=new Date();
+  const fecha=now.toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'});
+
+  const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+  <head><meta charset="utf-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Llantas ${y1}-${y2}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head>
+  <body style="font-family:Arial,sans-serif;padding:14px">
+    <div style="background:linear-gradient(135deg,#0c1f44,#132c5e);color:#fff;padding:14px 20px;border-radius:4px">
+      <div style="color:#facc15;font-size:10px;letter-spacing:2px;font-weight:900">GRUPO LLANTERAMA · REPORTE DE LLANTAS</div>
+      <h1 style="font-size:20px;margin:4px 0 2px;color:#fff">Totales de llantas ${y1} vs ${y2}</h1>
+      <div style="font-size:11px;color:#c9d6ec">Clasificaciones: 1 AUTO · 2 CAMTA · CHINA AUTO · 3 CAMION &nbsp;·&nbsp; Generado el ${fecha}</div>
+    </div>
+    ${seccion('TOTAL · Grupo Llanterama + Autoeléctrica + Poza Rica',totalComb,'#0c1f44')}
+    ${seccion('LLANTERAMA TULANCINGO',tul,'#1e40af')}
+    ${seccion('AUTOELÉCTRICA ROMA',aer,'#0e7490')}
+    ${seccion('LLANTERAMA POZA RICA',poz,'#9f1239')}
+    <div style="margin-top:14px;font-size:9.5px;color:#8090ad;font-style:italic">* El Prom/mes no considera el mes en curso (incompleto). ${y1} usa 12 meses completos; ${y2} hasta ${MMONTH[new Date().getMonth()]} ${y2}.<br/>* Vendedor identificado por Cod Vend 1 directo de cada factura. Clientes internos (LLANTERAMA HIDALGUENSE, VENTAS MOSTRADOR GARANTIAS, AUTOELECTRICA ROMA) excluidos.</div>
+  </body></html>`;
+
+  // Descargar como .xls (Excel abre bien HTML con esta extensión)
+  const blob=new Blob(['﻿'+html],{type:'application/vnd.ms-excel'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='reporte_llantas_'+y1+'_vs_'+y2+'_'+new Date().toISOString().slice(0,10)+'.xls';
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},200);
+}
+
 // Descarga CSV de auditoría: TODAS las filas que el reporte Llantas está contando,
 // con el vendedor asignado por Cod Vend 1. Para abrir en Excel y filtrar sin problemas.
 function lltExportCSV(){
@@ -5917,7 +6054,8 @@ function renderLlantas(){
     <div class="ctrl"><label>Organización</label><select class="inp" id="lltOrg">${orgOptions}</select></div>
     <div class="ctrl" style="min-width:260px"><label>Vendedor (análisis)</label><select class="inp" id="lltVend">${vendorOptions}</select></div>
     <div class="llt-clas-chips"><label class="chip-lbl">Clasificación:</label>${clasifChips}</div>
-    <button class="btn ghost" onclick="lltExportCSV()" title="Descarga Excel con todas las filas que el reporte cuenta — para auditar con filtros libres">📅 Descargar CSV auditoría</button>
+    <button class="btn ghost" onclick="lltExportTotalesExcel()" title="Descarga Excel con totales por razón social (Total + Tulancingo + Autoeléctrica + Poza Rica)">📊 Excel por razón social</button>
+    <button class="btn ghost" onclick="lltExportCSV()" title="Descarga Excel con todas las filas que el reporte cuenta — para auditar con filtros libres">📅 CSV auditoría</button>
     <button class="btn ghost" onclick="document.getElementById('lltDiagBox').classList.toggle('open')" title="Ver desglose RAW por vendedor y año">🤖 Diagnóstico</button>
   </div>
   <div id="lltDiagBox" class="llt-diag-pop">
