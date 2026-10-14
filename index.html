@@ -1042,6 +1042,13 @@ tr.deta-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--lin
 .llt-mini td.down{color:var(--low);font-weight:800}
 .llt-mini td.flat{color:var(--muted2)}
 .llt-empty{text-align:center;padding:12px;color:var(--muted2);font-style:italic;font-size:11px}
+.llt-tbl-suc td.suc-poza, .llt-tbl-suc td.stick-col.suc-poza{background:rgba(239,68,68,.10) !important;color:#991b1b !important;border-left:4px solid #ef4444 !important}
+.llt-tbl-suc td.suc-tul, .llt-tbl-suc td.stick-col.suc-tul{background:rgba(59,130,246,.12) !important;color:#1e40af !important;border-left:4px solid #3b82f6 !important}
+.llt-tbl-suc td.suc-aer, .llt-tbl-suc td.stick-col.suc-aer{background:rgba(6,182,212,.12) !important;color:#0e7490 !important;border-left:4px solid #06b6d4 !important}
+.llt-tbl-suc th.suc-hd{background:linear-gradient(135deg,var(--navy),var(--navy2)) !important;color:var(--accent) !important;font-size:11.5px}
+.llt-tbl-suc th.llt-month-hd{border-left:3px solid var(--accent) !important;border-right:3px solid var(--accent) !important}
+.llt-tbl-suc .total-anio{background:linear-gradient(135deg,var(--accent),#ffdf6b) !important;color:var(--navy) !important;font-weight:900 !important;border-left:3px solid var(--navy) !important}
+.llt-tbl-suc tr.llt-totrow td.total-anio{background:var(--navy) !important;color:var(--accent) !important}
 .llt-drill{cursor:pointer;transition:.12s}
 .llt-drill:hover{background:rgba(255,210,30,.15) !important;color:var(--accent) !important}
 :root[data-theme="light"] .llt-drill:hover{color:var(--accent-ink) !important}
@@ -5607,6 +5614,48 @@ function lltFilterClas(rows){
   if(!LLT.clasif.size)return rows;
   return rows.filter(x=>LLT.clasif.has(x.clas));
 }
+// Agrega totales por SUCURSAL (Poza, Tulancingo, Autoeléctrica) + TOTAL general.
+// Los totales anuales (y1T, y2T) se CAPAN al MES ANTERIOR al actual, para comparación justa
+// (ej: si hoy es octubre, suma solo Ene-Septiembre de ambos años).
+// Los valores mensuales se mantienen reales para cada mes.
+function lltSucursalAgg(){
+  const {y1,y2}=lltYears();
+  // IMPORTANTE: ignoramos filtro LLT.org aquí porque esta tabla ES la vista por sucursal.
+  const rows=lltFilterClas(lltAll()).filter(x=>x.y===y1||x.y===y2);
+  // Cap al mes anterior: si hoy es octubre (mes 9), capCol=8 (septiembre).
+  const curM=new Date().getMonth();
+  const capMo=curM-1; // mes anterior al actual (inclusive)
+  const SUC_IDS=[
+    {id:'poza',label:'Poza Rica'},
+    {id:'llanterama',label:'Tulancingo'},
+    {id:'autoelectrica',label:'Autoeléctrica'}
+  ];
+  const byS={}; SUC_IDS.forEach(s=>byS[s.id]={id:s.id,label:s.label,y1M:new Array(12).fill(0),y2M:new Array(12).fill(0),y1T:0,y2T:0});
+  rows.forEach(x=>{
+    if(!byS[x.org])return;
+    const d=detaParseFecha(x.fecha); if(!d)return;
+    const mo=d.getMonth();
+    if(x.y===y1)byS[x.org].y1M[mo]+=x.cant;
+    else if(x.y===y2)byS[x.org].y2M[mo]+=x.cant;
+  });
+  // Totales capados al mes anterior
+  Object.values(byS).forEach(g=>{
+    let s1=0,s2=0;
+    for(let i=0;i<=capMo;i++){s1+=g.y1M[i]||0;s2+=g.y2M[i]||0;}
+    g.y1T=s1;g.y2T=s2;g.dif=s2-s1;g.pct=s1>0?((s2-s1)/s1*100):(s2>0?100:0);
+  });
+  const arr=SUC_IDS.map(s=>byS[s.id]);
+  // Total general (suma de las 3 sucursales)
+  const total={id:'TOTAL',label:'TOTAL',y1M:new Array(12).fill(0),y2M:new Array(12).fill(0),y1T:0,y2T:0,isTotal:true};
+  for(let i=0;i<12;i++){
+    total.y1M[i]=arr.reduce((s,g)=>s+(g.y1M[i]||0),0);
+    total.y2M[i]=arr.reduce((s,g)=>s+(g.y2M[i]||0),0);
+  }
+  let ts1=0,ts2=0;
+  for(let i=0;i<=capMo;i++){ts1+=total.y1M[i]||0;ts2+=total.y2M[i]||0;}
+  total.y1T=ts1;total.y2T=ts2;total.dif=ts2-ts1;total.pct=ts1>0?((ts2-ts1)/ts1*100):(ts2>0?100:0);
+  return {arr,total,y1,y2,capMo};
+}
 function lltVendorAgg(){
   // Agrega por vendedor (meses 1..12), capa meses al mes actual del y2.
   const {y1,y2}=lltYears();
@@ -5711,9 +5760,9 @@ function lltAnalysis(vendor){
   const bajaron=activos.filter(c=>c.pct<=-20).sort((a,b)=>a.pct-b.pct);
   const estables=activos.filter(c=>c.pct>-20&&c.pct<20);
   const clave=cli.arr.filter(c=>c.isKey);
-  const medidasTop=med.arr.slice().sort((a,b)=>b.y2-a.y2).slice(0,8);
-  const medidasPerdidas=med.arr.filter(m=>m.y2===0&&m.y1>0).sort((a,b)=>b.y1-a.y1).slice(0,8);
-  const medidasNuevas=med.arr.filter(m=>m.y1===0&&m.y2>0).sort((a,b)=>b.y2-a.y2).slice(0,8);
+  const medidasTop=med.arr.slice().sort((a,b)=>b.y2-a.y2).slice(0,10);
+  const medidasPerdidas=med.arr.filter(m=>m.y2===0&&m.y1>0).sort((a,b)=>b.y1-a.y1).slice(0,10);
+  const medidasNuevas=med.arr.filter(m=>m.y1===0&&m.y2>0).sort((a,b)=>b.y2-a.y2).slice(0,10);
   return {cli:cli.arr,med:med.arr,nuevos,perdidos,subieron,bajaron,estables,clave,medidasTop,medidasPerdidas,medidasNuevas,y1:cli.y1,y2:cli.y2};
 }
 
@@ -5938,6 +5987,55 @@ function lltDiagResumen(){
   return html;
 }
 
+// Tabla principal por SUCURSAL partida en dos bloques (Ene-Jun y Jul-Dic + TOTAL AÑO).
+// Totales anuales capados al mes anterior (comparación justa 2025 vs 2026).
+function renderLlantasSucursalTablas(){
+  const agg=lltSucursalAgg();
+  const {y1,y2,capMo}=agg;
+  const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const MESES_C=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+  const sucFill={poza:'suc-poza',llanterama:'suc-tul',autoelectrica:'suc-aer'};
+  const bloque=(monthsIdx,showTotalAnio)=>{
+    const nMonths=monthsIdx.length;
+    // Header: meses mergeados
+    let headTop=`<th rowspan="2" class="l suc-hd">Sucursal</th>`;
+    monthsIdx.forEach(m=>{headTop+=`<th colspan="3" class="llt-mhead llt-month-hd">${MESES_C[m]}</th>`;});
+    if(showTotalAnio)headTop+=`<th colspan="3" class="llt-mhead tot">TOTAL AÑO</th>`;
+    let headSub=''; monthsIdx.forEach(_=>{headSub+=`<th>${y1}</th><th>${y2}</th><th>Dif</th>`;});
+    if(showTotalAnio)headSub+=`<th>${y1}</th><th>${y2}</th><th>Dif</th>`;
+    const rowFor=(g)=>{
+      let cells='';
+      monthsIdx.forEach(mi=>{
+        const a=g.y1M[mi]||0,b=g.y2M[mi]||0,d=b-a;
+        const dc=d>0?'up':(d<0?'down':'flat');
+        cells+=`<td class="num muted llt-drill" data-lltdrill="ALL|${mi}">${a}</td><td class="num llt-drill" data-lltdrill="ALL|${mi}">${b}</td><td class="num ${dc} llt-drill" data-lltdrill="ALL|${mi}">${d>0?'+':''}${d}</td>`;
+      });
+      if(showTotalAnio){
+        const dc=g.dif>0?'up':(g.dif<0?'down':'flat');
+        cells+=`<td class="num muted strong total-anio">${fmtNum(g.y1T)}</td><td class="num strong total-anio">${fmtNum(g.y2T)}</td><td class="num strong ${dc} total-anio">${g.dif>0?'+':''}${fmtNum(g.dif)}</td>`;
+      }
+      const cls=g.isTotal?'llt-totrow':'';
+      const fillCls=g.isTotal?'':(sucFill[g.id]||'');
+      return `<tr class="${cls}"><td class="l stick-col ${fillCls}"><b>${esc(g.label)}</b></td>${cells}</tr>`;
+    };
+    const bodyRows=agg.arr.map(rowFor).join('')+rowFor(agg.total);
+    return `<div class="rd-wrap"><div class="rd-tblwrap"><table class="rep-tbl hl-table llt-tbl llt-tbl-suc">
+      <thead><tr>${headTop}</tr><tr>${headSub}</tr></thead>
+      <tbody>${bodyRows}</tbody>
+    </table></div></div>`;
+  };
+  const capLbl=MESES[capMo]||'ago';
+  return `
+  <section class="llt-sec">
+    <div class="llt-sec-hd">📊 Totales por sucursal · ${y1} vs ${y2}</div>
+    <div class="rep-note" style="margin-bottom:10px;color:var(--muted)">Totales anuales (columna <b>TOTAL AÑO</b>) comparan solo <b>Enero a ${capLbl.toLowerCase()}</b> de ambos años para que la comparación sea justa (${y2} aún no termina). Los valores mensuales individuales son reales. Clic en cualquier celda de mes para ver desglose por cliente.</div>
+    <div style="margin-bottom:14px"><b>Primer semestre:</b></div>
+    ${bloque([0,1,2,3,4,5],false)}
+    <div style="margin:18px 0 6px"><b>Segundo semestre + TOTAL AÑO:</b></div>
+    ${bloque([6,7,8,9,10,11],true)}
+  </section>`;
+}
+
 function renderLlantas(){
   const body=document.getElementById('repBody');
   if(!DETA_DB||!DETA_DBAE||!DETA_DBPZ){
@@ -6064,6 +6162,8 @@ function renderLlantas(){
     <div class="llt-diag-pop-hd">Resumen de filas que el tablero está contando (por vendedor y año)</div>
     ${lltDiagResumen()}
   </div>
+
+  ${renderLlantasSucursalTablas()}
 
   <section class="llt-sec">
     <div class="llt-sec-hd">📊 Venta por vendedor · mes a mes</div>
