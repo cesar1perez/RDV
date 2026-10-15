@@ -600,6 +600,12 @@ textarea.ficha-edit-inp{min-height:60px;font-family:inherit;line-height:1.4}
 .rep-bar .btn[data-rep="acuJul26"].act{background:linear-gradient(135deg,#1f7fe0,#5aa7f0);border-color:transparent;color:#fff;box-shadow:0 4px 14px -4px rgba(31,127,224,.5)}
 :root[data-theme="light"] .rep-bar .btn[data-rep="acuJul26"]{color:#1462a8}
 :root[data-theme="light"] .rep-bar .btn[data-rep="acuJul26"].act{color:#fff}
+/* Tab tenue del Reporte general de Llantas — verde teal suave */
+.rep-bar .btn[data-rep="llt"]{border-color:rgba(45,212,191,.45);background:rgba(45,212,191,.08);color:#5eead4;font-weight:700}
+.rep-bar .btn[data-rep="llt"]:hover{background:rgba(45,212,191,.15);border-color:#2dd4bf}
+.rep-bar .btn[data-rep="llt"].act{background:linear-gradient(135deg,#0d9488,#2dd4bf);border-color:transparent;color:#fff;box-shadow:0 4px 14px -4px rgba(13,148,136,.5)}
+:root[data-theme="light"] .rep-bar .btn[data-rep="llt"]{color:#0f766e;background:rgba(13,148,136,.08);border-color:rgba(13,148,136,.35)}
+:root[data-theme="light"] .rep-bar .btn[data-rep="llt"].act{color:#fff}
 /* Badge histórico */
 .acu-hist-badge{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(58,166,255,.16),rgba(58,166,255,.08));border:1px solid rgba(58,166,255,.35);color:var(--cyan);padding:8px 16px;border-radius:20px;font-weight:800;font-size:11.5px;letter-spacing:.4px;text-transform:uppercase;margin-bottom:16px}
 :root[data-theme="light"] .acu-hist-badge{color:#1462a8;background:linear-gradient(135deg,rgba(31,127,224,.10),rgba(31,127,224,.04));border-color:rgba(31,127,224,.35)}
@@ -3425,7 +3431,7 @@ const REP_TABS=[
   ['deta','Detalle de ventas \u00b7 productos y clientes'],
   ['yvy','A\u00f1o vs A\u00f1o \u00b7 comparativo mensual por cliente'],
   ['vpv','Desempe\u00f1o por vendedor \u00b7 25 vs 26 por l\u00ednea'],
-  ['llt','Llantas \u00b7 reporte especial'],
+  ['llt','Reporte general de Llantas'],
   ['acuJul26','Recuperaci\u00f3n Acumulador Julio \u00b7 concluida'],
   ['act1','Act. 1 \u00b7 Carpeta de ruta'],
   ['act2','Act. 2-3 \u00b7 Reporte de visitas'],
@@ -6109,9 +6115,9 @@ function renderLlantasSucursalTablas(){
     // Header: meses mergeados
     let headTop=`<th rowspan="2" class="l suc-hd">Sucursal</th>`;
     monthsIdx.forEach(m=>{headTop+=`<th colspan="3" class="llt-mhead llt-month-hd">${MESES_C[m]}</th>`;});
-    if(showTotalAnio)headTop+=`<th colspan="3" class="llt-mhead tot">TOTAL AÑO</th>`;
+    if(showTotalAnio)headTop+=`<th colspan="4" class="llt-mhead tot">TOTAL AÑO</th>`;
     let headSub=''; monthsIdx.forEach(_=>{headSub+=`<th>${y1}</th><th>${y2}</th><th>Dif</th>`;});
-    if(showTotalAnio)headSub+=`<th>${y1}</th><th>${y2}</th><th>Dif</th>`;
+    if(showTotalAnio)headSub+=`<th>${y1}</th><th>${y2}</th><th>Dif</th><th>% Crec.</th>`;
     const rowFor=(g)=>{
       let cells='';
       monthsIdx.forEach(mi=>{
@@ -6121,7 +6127,8 @@ function renderLlantasSucursalTablas(){
       });
       if(showTotalAnio){
         const dc=g.dif>0?'up':(g.dif<0?'down':'flat');
-        cells+=`<td class="num muted strong total-anio">${fmtNum(g.y1T)}</td><td class="num strong total-anio">${fmtNum(g.y2T)}</td><td class="num strong ${dc} total-anio">${g.dif>0?'+':''}${fmtNum(g.dif)}</td>`;
+        const pctG=g.y1T>0?Math.round(g.dif/g.y1T*100):(g.y2T>0?100:0);
+        cells+=`<td class="num muted strong total-anio">${fmtNum(g.y1T)}</td><td class="num strong total-anio">${fmtNum(g.y2T)}</td><td class="num strong ${dc} total-anio">${g.dif>0?'+':''}${fmtNum(g.dif)}</td><td class="num strong ${dc} total-anio">${pctG>0?'+':''}${pctG}%</td>`;
       }
       const cls=g.isTotal?'llt-totrow':'';
       const fillCls=g.isTotal?'':(sucFill[g.id]||'');
@@ -6361,7 +6368,7 @@ function renderLlantas(){
 
   body.innerHTML=`
   <div class="llt-head">
-    <div class="llt-eyebrow">🚛 Reporte especial de llantas</div>
+    <div class="llt-eyebrow">🚛 Reporte general de Llantas</div>
     <h2 class="llt-title">Venta de llantas · <b>${y1}</b> vs <b>${y2}</b></h2>
     <div class="llt-sub">Agregado por vendedor según el <b>Cód Vend 1</b> de cada factura (independiente del cliente). Dispersión por tipo (Auto, Camioneta, China Auto, Camión). Análisis de medidas y clientes. Totales coinciden 1:1 con filtros de Google Sheets.</div>
     <div class="llt-sources">Fuentes cargadas:
@@ -6374,10 +6381,7 @@ function renderLlantas(){
     <div class="llt-kpi"><div class="k-l">Piezas ${y1}</div><div class="k-v">${fmtNum(totY1)}</div><div class="k-s">año completo</div></div>
     <div class="llt-kpi ${totCls}"><div class="k-l">Piezas ${y2}</div><div class="k-v">${fmtNum(totY2)}</div><div class="k-s">hasta ${MMONTH[_curM]} ${y2}</div></div>
     <div class="llt-kpi ${totDif>=0?'up':'down'}"><div class="k-l">Diferencia</div><div class="k-v">${totDif>0?'+':''}${fmtNum(totDif)}</div><div class="k-s">unidades</div></div>
-    <div class="llt-kpi"><div class="k-l">Vendedores</div><div class="k-v">${vendors.length}</div><div class="k-s">con venta de llantas</div></div>
   </div>
-
-  <div class="llt-clas-grid">${clasifCards}</div>
 
   <div class="rd-controls" style="margin-top:16px">
     <div class="ctrl"><label>Organización</label><select class="inp" id="lltOrg">${orgOptions}</select></div>
@@ -6393,32 +6397,6 @@ function renderLlantas(){
   </div>
 
   ${renderLlantasSucursalTablas()}
-
-  <section class="llt-sec">
-    <div class="llt-sec-hd" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
-      <span>📊 Venta por vendedor · mes a mes</span>
-      <button class="btn ghost" onclick="lltExportVendedoresExcel()" title="Exportar la tabla por vendedor (respeta los filtros activos) a Excel">📥 Excel por vendedor</button>
-    </div>
-    <div class="llt-vend-filters">
-      <div class="ctrl"><label>Tienda</label><select class="inp" id="lltVendTienda">${vendTiendaSel}</select></div>
-      <div class="ctrl" style="flex:1;min-width:260px">
-        <label>Vendedores (clic para filtrar · ${nSel>0?nSel+' seleccionado'+(nSel!==1?'s':''):'todos'})</label>
-        <div class="llt-vend-multi">${vendMultiChips||'<span class="muted">Sin vendedores en esta tienda</span>'}</div>
-        ${nSel>0?`<button class="btn ghost" style="margin-top:6px;font-size:11px;padding:4px 10px" onclick="LLT.vendSel=new Set();renderLlantas()">Limpiar selección</button>`:''}
-      </div>
-    </div>
-    <div class="rd-wrap"><div class="rd-tblwrap"><table class="rep-tbl hl-table llt-tbl">
-      <thead>
-        <tr><th class="l stick-col sortable ${on('name')}" data-lltvsort="name" rowspan="2">Vendedor${ar('name')}</th>${monthHeads}</tr>
-        <tr>${subHeads}</tr>
-      </thead>
-      <tbody>
-        <tr class="llt-totrow"><td class="l stick-col"><b>TOTAL</b></td>${totRow}</tr>
-        ${vendorRows||'<tr><td colspan="99" class="empty-state">Sin vendedores con los filtros actuales.</td></tr>'}
-      </tbody>
-    </table></div></div>
-    <div class="rep-note" style="margin-top:10px;color:var(--muted);font-size:11.5px">💡 Los indicadores de abajo (clientes clave, perdidos, nuevos, medidas, etc.) también responden a estos filtros.</div>
-  </section>
 
   <section class="llt-sec llt-diag">
     <div class="llt-sec-hd">🔎 Diagnóstico ${LLT.vendor==='ALL'?'global':'de '+esc(LLT.vendor)}</div>
@@ -6444,6 +6422,32 @@ function renderLlantas(){
     <section class="llt-sec"><div class="llt-sec-hd">🔍 Medidas que dejaron de venderse</div>${tblMedPerd}</section>
     <section class="llt-sec"><div class="llt-sec-hd">🆕 Medidas nuevas</div>${tblMedNue}</section>
   </div>
+
+  <section class="llt-sec">
+    <div class="llt-sec-hd" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <span>📊 Venta por vendedor · mes a mes</span>
+      <button class="btn ghost" onclick="lltExportVendedoresExcel()" title="Exportar la tabla por vendedor (respeta los filtros activos) a Excel">📥 Excel por vendedor</button>
+    </div>
+    <div class="llt-vend-filters">
+      <div class="ctrl"><label>Tienda</label><select class="inp" id="lltVendTienda">${vendTiendaSel}</select></div>
+      <div class="ctrl" style="flex:1;min-width:260px">
+        <label>Vendedores (clic para filtrar · ${nSel>0?nSel+' seleccionado'+(nSel!==1?'s':''):'todos'})</label>
+        <div class="llt-vend-multi">${vendMultiChips||'<span class="muted">Sin vendedores en esta tienda</span>'}</div>
+        ${nSel>0?`<button class="btn ghost" style="margin-top:6px;font-size:11px;padding:4px 10px" onclick="LLT.vendSel=new Set();renderLlantas()">Limpiar selección</button>`:''}
+      </div>
+    </div>
+    <div class="rd-wrap"><div class="rd-tblwrap"><table class="rep-tbl hl-table llt-tbl">
+      <thead>
+        <tr><th class="l stick-col sortable ${on('name')}" data-lltvsort="name" rowspan="2">Vendedor${ar('name')}</th>${monthHeads}</tr>
+        <tr>${subHeads}</tr>
+      </thead>
+      <tbody>
+        <tr class="llt-totrow"><td class="l stick-col"><b>TOTAL</b></td>${totRow}</tr>
+        ${vendorRows||'<tr><td colspan="99" class="empty-state">Sin vendedores con los filtros actuales.</td></tr>'}
+      </tbody>
+    </table></div></div>
+    <div class="rep-note" style="margin-top:10px;color:var(--muted);font-size:11.5px">💡 Los indicadores de arriba también responden a estos filtros.</div>
+  </section>
   `;
 }
 
