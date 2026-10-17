@@ -4919,7 +4919,7 @@ const VENDOR_CODE_MAP={
     '032':'VENTA PISO CERRO AZUL',
     '033':'VENTA PISO NARANJOS',
     '034':'VENTA PISO PAPANTLA',
-    '036':'VENTA PISO OUTLET',
+    '036':'VENTA PISO NARANJOS', // Antes "VENTA PISO OUTLET", conciliado — es el mismo punto de venta
     '038':'DANIEL LIRA AZUARA',
     '039':'REDES SOCIALES',
     '041':'JOSUE JIMAREZ ROCHA',
@@ -4943,7 +4943,10 @@ function resolveVendorByCode(codVend,almacen,orgId){
     }
   }
   const map=VENDOR_CODE_MAP[orgId]||{};
-  return map[cv]||null;
+  let v=map[cv]||null;
+  // Conciliación: "VENTA PISO OUTLET" y "VENTA PISO NARANJOS" son el mismo punto de venta.
+  if(v==='VENTA PISO OUTLET')v='VENTA PISO NARANJOS';
+  return v;
 }
 function detaCliVend(codC,cliName){
   const norm=(x)=>String(x||'').trim().replace(/^0+/,'').toUpperCase();
@@ -6204,8 +6207,7 @@ const LLT_ESTRATEG=[
     // Pablo se agregará cuando llegue su código
   ]},
   {label:'POZA RICA · puntos de venta', color:'#f97316', items:[
-    {name:'VENTA PISO OUTLET'},
-    {name:'VENTA PISO NARANJOS'},
+    {name:'VENTA PISO NARANJOS'}, // consolidado con el antes "VENTA PISO OUTLET"
     {name:'VENTA PISO CERRO AZUL'}
   ]}
 ];
@@ -6365,6 +6367,124 @@ function lltExportEstrategicosExcel(){
   a.download='vendedores_estrategicos_'+y1+'_vs_'+y2+'_'+new Date().toISOString().slice(0,10)+'.xls';
   document.body.appendChild(a); a.click();
   setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},200);
+}
+
+// --- Tabla "Venta por vendedor . mes a mes" (TODOS los vendedores, agrupados por tienda) ---
+function lltVendedoresPorTiendaAgg(){
+  const {arr:vendors,y1,y2}=lltVendorAgg();
+  const vendOrg={};
+  lltAll().forEach(x=>{
+    const v=x.vendedor||'S/I';
+    if(!vendOrg[v])vendOrg[v]={llanterama:0,autoelectrica:0,poza:0};
+    if(vendOrg[v][x.org]!=null)vendOrg[v][x.org]+=x.cant||0;
+  });
+  const pickOrg=(v)=>{
+    const o=vendOrg[v]||{};
+    const best=Object.entries(o).sort((a,b)=>b[1]-a[1])[0];
+    return best?best[0]:'llanterama';
+  };
+  const groups={
+    llanterama:{label:'TULANCINGO (Grupo Llanterama)',color:'#3b82f6',grpKey:'tul',rows:[]},
+    autoelectrica:{label:'AUTOELÉCTRICA',color:'#06b6d4',grpKey:'ae',rows:[]},
+    poza:{label:'POZA RICA',color:'#ef4444',grpKey:'poza',rows:[]}
+  };
+  const curM=new Date().getMonth();
+  const capMo=Math.max(0,curM-1);
+  vendors.forEach(v=>{
+    const org=pickOrg(v.vendor);
+    let s1=0,s2=0; for(let i=0;i<=capMo;i++){s1+=v.y1M[i]||0;s2+=v.y2M[i]||0;}
+    const dif=s2-s1;
+    const pct=s1>0?Math.round(dif/s1*100):(s2>0?100:0);
+    (groups[org]||groups.llanterama).rows.push({vendor:v.vendor,y1M:v.y1M,y2M:v.y2M,y1T:s1,y2T:s2,dif,pct});
+  });
+  Object.values(groups).forEach(g=>{g.rows.sort((a,b)=>b.y2T-a.y2T);});
+  return {groups:[groups.llanterama,groups.autoelectrica,groups.poza],y1,y2,capMo};
+}
+function renderLlantasVendedoresMesTablas(){
+  const agg=lltVendedoresPorTiendaAgg();
+  const {groups,y1,y2,capMo}=agg;
+  const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const MESES_C=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+  const bloque=(monthsIdx,showTotalAnio)=>{
+    let headTop=`<th rowspan="2" class="l suc-hd">Vendedor</th>`;
+    monthsIdx.forEach(m=>{headTop+=`<th colspan="3" class="llt-mhead llt-month-hd">${MESES_C[m]}</th>`;});
+    if(showTotalAnio)headTop+=`<th colspan="4" class="llt-mhead tot">TOTAL AÑO</th>`;
+    let headSub=''; monthsIdx.forEach(_=>{headSub+=`<th>${y1}</th><th>${y2}</th><th>Dif</th>`;});
+    if(showTotalAnio)headSub+=`<th>${y1}</th><th>${y2}</th><th>Dif</th><th>% Crec.</th>`;
+    const rowFor=(r,groupColor,grpKey)=>{
+      let cells='';
+      const dv=esc(r.vendor);
+      monthsIdx.forEach(mi=>{
+        const a=r.y1M[mi]||0,b=r.y2M[mi]||0,d=b-a;
+        const dc=d>0?'up':(d<0?'down':'flat');
+        cells+=`<td class="num muted llt-drill" data-lltdrill="${dv}|${mi}">${a}</td><td class="num llt-drill" data-lltdrill="${dv}|${mi}">${b}</td><td class="num ${dc} llt-drill" data-lltdrill="${dv}|${mi}">${d>0?'+':''}${d}</td>`;
+      });
+      if(showTotalAnio){
+        const dc=r.dif>0?'up':(r.dif<0?'down':'flat');
+        cells+=`<td class="num muted strong total-anio">${fmtNum(r.y1T)}</td><td class="num strong total-anio">${fmtNum(r.y2T)}</td><td class="num strong ${dc} total-anio">${r.dif>0?'+':''}${fmtNum(r.dif)}</td><td class="num strong ${dc} total-anio">${r.pct>0?'+':''}${r.pct}%</td>`;
+      }
+      return `<tr class="llt-estrat-row" data-grp="${grpKey}"><td class="l stick-col" style="border-left:3px solid ${groupColor}"><b>${esc(r.vendor)}</b></td>${cells}</tr>`;
+    };
+    const subRow=(g)=>{
+      let cells='';
+      monthsIdx.forEach(mi=>{
+        const a=g.rows.reduce((s,r)=>s+(r.y1M[mi]||0),0);
+        const b=g.rows.reduce((s,r)=>s+(r.y2M[mi]||0),0);
+        const d=b-a; const dc=d>0?'up':(d<0?'down':'flat');
+        cells+=`<td class="num muted">${a||'—'}</td><td class="num">${b||'—'}</td><td class="num ${dc}">${d>0?'+':''}${d||0}</td>`;
+      });
+      if(showTotalAnio){
+        const y1T=g.rows.reduce((s,r)=>s+r.y1T,0),y2T=g.rows.reduce((s,r)=>s+r.y2T,0),dif=y2T-y1T;
+        const pct=y1T>0?Math.round(dif/y1T*100):(y2T>0?100:0);
+        const dc=dif>0?'up':(dif<0?'down':'flat');
+        cells+=`<td class="num muted strong total-anio">${fmtNum(y1T)}</td><td class="num strong total-anio">${fmtNum(y2T)}</td><td class="num strong ${dc} total-anio">${dif>0?'+':''}${fmtNum(dif)}</td><td class="num strong ${dc} total-anio">${pct>0?'+':''}${pct}%</td>`;
+      }
+      return `<tr class="llt-totrow"><td class="l stick-col"><b>Subtotal ${esc(g.label)}</b></td>${cells}</tr>`;
+    };
+    const grandRow=()=>{
+      const all=groups.flatMap(g=>g.rows);
+      let cells='';
+      monthsIdx.forEach(mi=>{
+        const a=all.reduce((s,r)=>s+(r.y1M[mi]||0),0);
+        const b=all.reduce((s,r)=>s+(r.y2M[mi]||0),0);
+        const d=b-a; const dc=d>0?'up':(d<0?'down':'flat');
+        cells+=`<td class="num muted">${a||'—'}</td><td class="num">${b||'—'}</td><td class="num ${dc}">${d>0?'+':''}${d||0}</td>`;
+      });
+      if(showTotalAnio){
+        const y1T=all.reduce((s,r)=>s+r.y1T,0),y2T=all.reduce((s,r)=>s+r.y2T,0),dif=y2T-y1T;
+        const pct=y1T>0?Math.round(dif/y1T*100):(y2T>0?100:0);
+        const dc=dif>0?'up':(dif<0?'down':'flat');
+        cells+=`<td class="num muted strong total-anio">${fmtNum(y1T)}</td><td class="num strong total-anio">${fmtNum(y2T)}</td><td class="num strong ${dc} total-anio">${dif>0?'+':''}${fmtNum(dif)}</td><td class="num strong ${dc} total-anio">${pct>0?'+':''}${pct}%</td>`;
+      }
+      return `<tr class="llt-totrow"><td class="l stick-col"><b>TOTAL GENERAL</b></td>${cells}</tr>`;
+    };
+    let bodyRows='';
+    groups.forEach(g=>{
+      if(!g.rows.length)return;
+      const colSpan=1+monthsIdx.length*3+(showTotalAnio?4:0);
+      bodyRows+=`<tr class="llt-estrat-grp" data-grp="${g.grpKey}" style="--gc:${g.color}"><td colspan="${colSpan}" class="l"><span class="llt-grp-dot"></span><b>${esc(g.label)}</b> · ${g.rows.length} vendedores</td></tr>`;
+      g.rows.forEach(r=>{bodyRows+=rowFor(r,g.color,g.grpKey);});
+      bodyRows+=subRow(g);
+    });
+    bodyRows+=grandRow();
+    return `<div class="rd-wrap"><div class="rd-tblwrap"><table class="rep-tbl hl-table llt-tbl llt-tbl-suc llt-tbl-estrat">
+      <thead><tr>${headTop}</tr><tr>${headSub}</tr></thead>
+      <tbody>${bodyRows}</tbody>
+    </table></div></div>`;
+  };
+  const capLbl=MESES[capMo]||'ago';
+  const totalVends=groups.reduce((s,g)=>s+g.rows.length,0);
+  return `
+  <section class="llt-sec">
+    <div class="llt-sec-hd" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <span>👥 Venta por vendedor · mes a mes · ${y1} vs ${y2}</span>
+    </div>
+    <div class="rep-note" style="margin-bottom:10px;color:var(--muted)">Todos los vendedores agrupados por tienda (<b>${totalVends} en total</b>). Totales anuales comparan solo <b>Enero a ${capLbl.toLowerCase()}</b> para que la comparación sea justa. <b>Clic en cualquier celda de mes</b> para ver desglose por cliente.</div>
+    <div style="margin-bottom:14px"><b>Primer semestre:</b></div>
+    ${bloque([0,1,2,3,4,5],false)}
+    <div style="margin:18px 0 6px"><b>Segundo semestre + TOTAL AÑO:</b></div>
+    ${bloque([6,7,8,9,10,11],true)}
+  </section>`;
 }
 
 function renderLlantasSucursalTablas(){
@@ -6698,6 +6818,8 @@ function renderLlantas(){
 
   ${renderLlantasSucursalTablas()}
 
+  ${renderLlantasEstrategicosTablas()}
+
   <section class="llt-sec llt-diag">
     <div class="llt-sec-hd">🔎 Diagnóstico ${LLT.vendor==='ALL'?'global':'de '+esc(LLT.vendor)}</div>
     <div class="llt-diag-box">${diag.map(t=>`<p>${t}</p>`).join('')}</div>
@@ -6723,7 +6845,7 @@ function renderLlantas(){
     <section class="llt-sec"><div class="llt-sec-hd">🆕 Medidas nuevas</div>${tblMedNue}</section>
   </div>
 
-  ${renderLlantasEstrategicosTablas()}
+  ${renderLlantasVendedoresMesTablas()}
   `;
 }
 
