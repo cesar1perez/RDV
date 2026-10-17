@@ -1266,8 +1266,9 @@ tr.yvy-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--line
 .deta-load-st.run{color:var(--accent);border-color:var(--accent);animation:fu-pulse 1.4s ease-in-out infinite}
 .deta-load-st.ok{color:var(--good);border-color:var(--good)}
 .deta-load-st.bad{color:var(--low);border-color:var(--low)}
-.deta-load-bar{height:8px;background:var(--bg2);border-radius:6px;overflow:hidden;margin-top:14px}
-.deta-load-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--amber),var(--cyan));transition:width .3s ease}
+.deta-load-bar{height:12px;background:var(--bg2);border-radius:8px;overflow:hidden;margin-top:14px;position:relative}
+.deta-load-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--amber),var(--cyan));transition:width .35s cubic-bezier(.4,0,.2,1);box-shadow:0 0 10px rgba(255,210,30,.4)}
+.deta-load-pct{text-align:center;font-family:'IBM Plex Mono';font-size:11.5px;font-weight:700;color:var(--muted);margin-top:6px;letter-spacing:.3px}
 .deta-orgs{display:flex;gap:6px;flex-wrap:wrap}
 .muted2{color:var(--muted2)}
 /* botones activos en toolbar del detalle */
@@ -4791,7 +4792,9 @@ let DETA_DBAE=null, DETA_PROMISEAE=null, DETA_ERRAE='';
 let DETA_DBPZ=null, DETA_PROMISEPZ=null, DETA_ERRPZ='';
 let DETA_CLI2VEND=null;
 let DETA_NAME2VEND=null;
-let DETA_LOADPROG={ll:0,ae:0};
+let DETA_LOADPROG={ll:0,ae:0,pz:0};
+// Progreso REAL por fuente: {loaded, total, blocks, blockIdx, blockTotal}
+let DETA_PROG={ll:{loaded:0,total:0,bi:0,bt:0},ae:{loaded:0,total:0,bi:0,bt:0},pz:{loaded:0,total:0,bi:0,bt:0}};
 let DETA={year:'ALL',org:'ALL',clasif:new Set(),vendor:new Set(),view:'products',search:'',sort:'imp',dir:-1,expanded:new Set()};
 const DETA_VIEWS=[['products','Por producto'],['clients','Por cliente'],['rankProd','Ranking productos'],['rankCli','Ranking clientes por utilidad']];
 function loadDetalleAE(){
@@ -4833,21 +4836,36 @@ function loadDetallePoza(){
       } else if(SAVE_URL&&SAVE_URL.indexOf('http')===0){
         const res=await _loadDetallePaged('getDetallePoza','detallepoza','pz');
         DETA_DBPZ={H:res.H,rows:res.rows};
+        DETA_LOADPROG.pz=2; detaPaintLoader();
         console.log('[RDV] detallepoza FINAL:',res.rows.length,'filas de',res.total,'totales en Sheet');
       }
-    }catch(e){DETA_ERRPZ=e.message||String(e);DETA_DBPZ=null;}
+    }catch(e){DETA_ERRPZ=e.message||String(e);DETA_DBPZ=null;DETA_LOADPROG.pz=-1;detaPaintLoader();}
     finally{DETA_PROMISEPZ=null;}
   })();
   return DETA_PROMISEPZ;
 }
 function detaPaintLoader(){
   const box=document.getElementById('detaLoader'); if(!box)return;
-  const stTxt=(n)=>n===2?'\u2713 listo':(n===-1?'\u2717 error':(n===1?'cargando\u2026':'esperando'));
+  const stTxt=(n,prog)=>{
+    if(n===2)return '\u2713 listo ('+(prog?prog.loaded.toLocaleString('es-MX'):'0')+' filas)';
+    if(n===-1)return '\u2717 error';
+    if(n===1){
+      if(prog&&prog.total>0){const p=Math.round(prog.loaded/prog.total*100);return 'cargando\u2026 '+prog.loaded.toLocaleString('es-MX')+'/'+prog.total.toLocaleString('es-MX')+' ('+p+'%) \u00b7 bloque '+prog.bi+' de '+prog.bt;}
+      return 'conectando\u2026';
+    }
+    return 'esperando';
+  };
   const stCls=(n)=>n===2?'ok':(n===-1?'bad':(n===1?'run':'wait'));
+  // % real: suma loaded/total de todas las fuentes
+  const pTot=Math.max(1,(DETA_PROG.ll.total||1)+(DETA_PROG.ae.total||1)+(DETA_PROG.pz.total||1));
+  const pLoad=(DETA_PROG.ll.loaded||0)+(DETA_PROG.ae.loaded||0)+(DETA_PROG.pz.loaded||0);
+  const pct=Math.round(pLoad/pTot*100);
+  const bar=`<div class="deta-load-bar"><i style="width:${pct}%"></i></div><div class="deta-load-pct">${pct}% \u00b7 ${pLoad.toLocaleString('es-MX')} de ${pTot.toLocaleString('es-MX')} filas</div>`;
   box.innerHTML=`
-    <div class="deta-load-row"><span class="deta-load-lbl">Llanterama Tulancingo</span><span class="deta-load-st ${stCls(DETA_LOADPROG.ll)}">${stTxt(DETA_LOADPROG.ll)}</span></div>
-    <div class="deta-load-row"><span class="deta-load-lbl">Autoel\u00e9ctrica Roma</span><span class="deta-load-st ${stCls(DETA_LOADPROG.ae)}">${stTxt(DETA_LOADPROG.ae)}</span></div>
-    <div class="deta-load-bar"><i style="width:${Math.round(((Math.max(0,DETA_LOADPROG.ll)+Math.max(0,DETA_LOADPROG.ae))/4)*100)}%"></i></div>`;
+    <div class="deta-load-row"><span class="deta-load-lbl">\ud83c\udfea Llanterama Tulancingo</span><span class="deta-load-st ${stCls(DETA_LOADPROG.ll)}">${stTxt(DETA_LOADPROG.ll,DETA_PROG.ll)}</span></div>
+    <div class="deta-load-row"><span class="deta-load-lbl">\u26a1 Autoel\u00e9ctrica Roma</span><span class="deta-load-st ${stCls(DETA_LOADPROG.ae)}">${stTxt(DETA_LOADPROG.ae,DETA_PROG.ae)}</span></div>
+    <div class="deta-load-row"><span class="deta-load-lbl">\ud83c\udfea Llanterama Poza Rica</span><span class="deta-load-st ${stCls(DETA_LOADPROG.pz)}">${stTxt(DETA_LOADPROG.pz,DETA_PROG.pz)}</span></div>
+    ${bar}`;
 }
 // Mapa de códigos de vendedor por razón social (fallback cuando el cliente no está en la hoja principal)
 const VENDOR_CODE_MAP={
@@ -4944,11 +4962,15 @@ function detaCliVend(codC,cliName){
 // Carga del detalle PAGINADA: la hoja puede tener >100k filas y el payload de Apps Script
 // tiene un l\u00edmite de ~50MB. Pedimos bloques de 30k filas hasta recibir done:true.
 async function _loadDetallePaged(action,tabName,progKey){
-  let allRows=[]; let H=null; let startRow=2; let totalReported=0; let safety=0;
+  let allRows=[]; let H=null; let startRow=2; let totalReported=0; let safety=0; let bi=0;
+  DETA_PROG[progKey]={loaded:0,total:0,bi:0,bt:0};
+  DETA_LOADPROG[progKey]=1; detaPaintLoader();
   while(true){
     safety++; if(safety>50)throw new Error('Demasiadas p\u00e1ginas al leer '+tabName);
+    bi++;
+    DETA_PROG[progKey].bi=bi;
+    detaPaintLoader();
     const body={action:action,startRow:startRow,pageSize:30000};
-    DETA_LOADPROG[progKey]=1; detaPaintLoader();
     const r=await fetch(SAVE_URL,{method:'POST',body:JSON.stringify(body),redirect:'follow'});
     const j=await r.json();
     if(!j||!j.ok)throw new Error((j&&j.error)||('No se pudo leer la pesta\u00f1a '+tabName));
@@ -4963,10 +4985,17 @@ async function _loadDetallePaged(action,tabName,progKey){
     });
     allRows=allRows.concat(rows);
     totalReported=j.total||totalReported;
+    // Actualizar progreso real
+    DETA_PROG[progKey].loaded=Math.min(j.end||allRows.length,totalReported);
+    DETA_PROG[progKey].total=totalReported;
+    DETA_PROG[progKey].bt=Math.max(bi,Math.ceil(totalReported/30000));
+    detaPaintLoader();
     console.log('[RDV]',tabName,'bloque:',rows.length,'(acumulado',allRows.length,'de',totalReported,')');
     if(j.done)break;
     startRow=(j.end||startRow)+1;
   }
+  DETA_PROG[progKey].loaded=totalReported;
+  detaPaintLoader();
   return {H,rows:allRows,total:totalReported};
 }
 function loadDetalle(){
@@ -5810,6 +5839,24 @@ function lltClienteAgg(vendor,tienda,vendSet){
   let acc=0;arr.forEach(g=>{const wasBelow=acc<total*0.8;if(g.y2T>0){acc+=g.y2T;g.isKey=wasBelow;}else g.isKey=false;});
   return {arr,y1,y2};
 }
+// Normaliza una descripción de llanta para unir variantes equivalentes entre sucursales.
+// Quita: "P " inicial (prefijo americano), "LLANTA" al principio, espacios múltiples,
+// acentos, puntuación suelta. Esto permite que "P195/60R15 FIRESTONE" y "195/60R15 FIRESTONE"
+// se agrupen en la misma fila, aunque la descripción visible mantiene la más completa.
+function lltNormDesc(desc){
+  if(!desc)return '';
+  let s=String(desc).toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  // Quitar "LLANTA" o "LLTA" al inicio
+  s=s.replace(/^(LLANTA|LLTA)\s+/,'');
+  // Quitar "P " inicial (prefijo P-metric americano, ej "P195/60R15")
+  s=s.replace(/^P(\d)/,'$1');
+  // Normalizar separadores: "/", "R", "-" (dejar como están para preservar medida)
+  // Quitar puntuación y símbolos sueltos excepto / . R
+  s=s.replace(/[.,;:_()"'`]/g,' ');
+  // Colapsar espacios
+  s=s.replace(/\s+/g,' ').trim();
+  return s;
+}
 function lltMedidaAgg(vendor,tienda,vendSet){
   const {y1,y2}=lltYears();
   let rows=lltFilterClas(lltFilterOrg(lltAll())).filter(x=>x.y===y1||x.y===y2);
@@ -5819,13 +5866,22 @@ function lltMedidaAgg(vendor,tienda,vendSet){
   const byM=new Map();
   rows.forEach(x=>{
     const desc=String(x.desc||'').trim(); if(!desc)return;
-    const key=desc.toUpperCase();
-    if(!byM.has(key))byM.set(key,{medida:desc,codP:x.codP||'',y1:0,y2:0});
+    // Agrupar por descripción normalizada
+    const key=lltNormDesc(desc);
+    if(!key)return;
+    if(!byM.has(key)){
+      byM.set(key,{medida:desc,codP:x.codP||'',y1:0,y2:0,_variants:new Set([desc])});
+    } else {
+      const g=byM.get(key);
+      g._variants.add(desc);
+      // Mantener la descripción más larga/completa como representativa
+      if(desc.length>g.medida.length)g.medida=desc;
+    }
     const g=byM.get(key);
     if(x.y===y1)g.y1+=x.cant; else if(x.y===y2)g.y2+=x.cant;
   });
   const arr=[...byM.values()];
-  arr.forEach(g=>{g.dif=g.y2-g.y1;g.pct=g.y1>0?((g.y2-g.y1)/g.y1*100):(g.y2>0?100:0);});
+  arr.forEach(g=>{g.dif=g.y2-g.y1;g.pct=g.y1>0?((g.y2-g.y1)/g.y1*100):(g.y2>0?100:0);g.nVariants=g._variants.size;delete g._variants;});
   return {arr,y1,y2};
 }
 function lltAnalysis(vendor,tienda,vendSet){
@@ -6112,6 +6168,172 @@ function lltDiagResumen(){
 
 // Tabla principal por SUCURSAL partida en dos bloques (Ene-Jun y Jul-Dic + TOTAL AÑO).
 // Totales anuales capados al mes anterior (comparación justa 2025 vs 2026).
+// Lista de vendedores estratégicos (coincide con los nombres que vienen de VENDOR_CODE_MAP tras resolveVendorByCode)
+const LLT_ESTRATEG=[
+  {label:'TULANCINGO · vendedores', color:'#3b82f6', items:[
+    {name:'MARCO HDEZ'},
+    {name:'Enrique R.'}
+  ]},
+  {label:'AUTOELÉCTRICA · vendedores', color:'#06b6d4', items:[
+    {name:'Jose L.'}
+  ]},
+  {label:'POZA RICA · vendedores', color:'#ef4444', items:[
+    {name:'YURIDIA A.'},
+    {name:'JORGE VICENCIO'}
+    // Pablo se agregará cuando llegue su código
+  ]},
+  {label:'POZA RICA · puntos de venta', color:'#ef4444', items:[
+    {name:'VENTA PISO OUTLET'},
+    {name:'VENTA PISO NARANJOS'},
+    {name:'VENTA PISO CERRO AZUL'}
+  ]}
+];
+function lltEstrategicosAgg(){
+  // Agrega por vendedor usando lltVendorAgg y toma solo los estratégicos.
+  const {arr:vendors,y1,y2}=lltVendorAgg();
+  // Index por nombre normalizado para match tolerante
+  const byName=new Map();
+  vendors.forEach(v=>{byName.set(keyName(v.vendor),v);});
+  const curM=new Date().getMonth();
+  const capMo=Math.max(0,curM-1); // mes anterior (comparación justa)
+  const groups=LLT_ESTRATEG.map(g=>({
+    ...g,
+    rows:g.items.map(it=>{
+      const v=byName.get(keyName(it.name));
+      if(v){
+        // Recalcular totales capados al mes anterior
+        let s1=0,s2=0;
+        for(let i=0;i<=capMo;i++){s1+=v.y1M[i]||0;s2+=v.y2M[i]||0;}
+        return {vendor:v.vendor,y1M:v.y1M,y2M:v.y2M,y1T:s1,y2T:s2,dif:s2-s1,pct:s1>0?Math.round((s2-s1)/s1*100):(s2>0?100:0)};
+      }
+      // Sin datos aún
+      return {vendor:it.name,y1M:new Array(12).fill(0),y2M:new Array(12).fill(0),y1T:0,y2T:0,dif:0,pct:0,nodata:true};
+    })
+  }));
+  return {groups,y1,y2,capMo};
+}
+function renderLlantasEstrategicosTablas(){
+  const agg=lltEstrategicosAgg();
+  const {groups,y1,y2,capMo}=agg;
+  const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const MESES_C=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+  // Fila por vendedor estratégico — mismo estilo que renderLlantasSucursalTablas
+  const bloque=(monthsIdx,showTotalAnio)=>{
+    let headTop=`<th rowspan="2" class="l suc-hd">Vendedor</th>`;
+    monthsIdx.forEach(m=>{headTop+=`<th colspan="3" class="llt-mhead llt-month-hd">${MESES_C[m]}</th>`;});
+    if(showTotalAnio)headTop+=`<th colspan="4" class="llt-mhead tot">TOTAL AÑO</th>`;
+    let headSub=''; monthsIdx.forEach(_=>{headSub+=`<th>${y1}</th><th>${y2}</th><th>Dif</th>`;});
+    if(showTotalAnio)headSub+=`<th>${y1}</th><th>${y2}</th><th>Dif</th><th>% Crec.</th>`;
+    const rowFor=(r,groupColor)=>{
+      let cells='';
+      monthsIdx.forEach(mi=>{
+        const a=r.y1M[mi]||0,b=r.y2M[mi]||0,d=b-a;
+        const dc=d>0?'up':(d<0?'down':'flat');
+        cells+=`<td class="num muted">${a}</td><td class="num">${b}</td><td class="num ${dc}">${d>0?'+':''}${d}</td>`;
+      });
+      if(showTotalAnio){
+        const dc=r.dif>0?'up':(r.dif<0?'down':'flat');
+        cells+=`<td class="num muted strong total-anio">${fmtNum(r.y1T)}</td><td class="num strong total-anio">${fmtNum(r.y2T)}</td><td class="num strong ${dc} total-anio">${r.dif>0?'+':''}${fmtNum(r.dif)}</td><td class="num strong ${dc} total-anio">${r.pct>0?'+':''}${r.pct}%</td>`;
+      }
+      const nodata=r.nodata?' llt-nodata':'';
+      return `<tr class="llt-estrat-row${nodata}"><td class="l stick-col" style="border-left:3px solid ${groupColor}"><b>${esc(r.vendor)}</b>${r.nodata?' <span class="llt-nodata-tag">sin datos</span>':''}</td>${cells}</tr>`;
+    };
+    // Totales por grupo + total general
+    const grandRow=()=>{
+      const allRows=groups.flatMap(g=>g.rows);
+      const y1T=allRows.reduce((s,r)=>s+r.y1T,0);
+      const y2T=allRows.reduce((s,r)=>s+r.y2T,0);
+      const dif=y2T-y1T;
+      const pct=y1T>0?Math.round(dif/y1T*100):(y2T>0?100:0);
+      const dc=dif>0?'up':(dif<0?'down':'flat');
+      let cells='';
+      monthsIdx.forEach(mi=>{
+        const a=allRows.reduce((s,r)=>s+(r.y1M[mi]||0),0);
+        const b=allRows.reduce((s,r)=>s+(r.y2M[mi]||0),0);
+        const d=b-a; const ddc=d>0?'up':(d<0?'down':'flat');
+        cells+=`<td class="num muted">${a||'—'}</td><td class="num">${b||'—'}</td><td class="num ${ddc}">${d>0?'+':''}${d||0}</td>`;
+      });
+      if(showTotalAnio){
+        cells+=`<td class="num muted strong total-anio">${fmtNum(y1T)}</td><td class="num strong total-anio">${fmtNum(y2T)}</td><td class="num strong ${dc} total-anio">${dif>0?'+':''}${fmtNum(dif)}</td><td class="num strong ${dc} total-anio">${pct>0?'+':''}${pct}%</td>`;
+      }
+      return `<tr class="llt-totrow"><td class="l stick-col"><b>TOTAL ESTRATÉGICOS</b></td>${cells}</tr>`;
+    };
+    let bodyRows='';
+    groups.forEach(g=>{
+      const colSpan=1+monthsIdx.length*3+(showTotalAnio?4:0);
+      bodyRows+=`<tr class="llt-estrat-grp" style="--gc:${g.color}"><td colspan="${colSpan}" class="l"><span class="llt-grp-dot"></span><b>${g.label}</b></td></tr>`;
+      g.rows.forEach(r=>{bodyRows+=rowFor(r,g.color);});
+    });
+    bodyRows+=grandRow();
+    return `<div class="rd-wrap"><div class="rd-tblwrap"><table class="rep-tbl hl-table llt-tbl llt-tbl-suc llt-tbl-estrat">
+      <thead><tr>${headTop}</tr><tr>${headSub}</tr></thead>
+      <tbody>${bodyRows}</tbody>
+    </table></div></div>`;
+  };
+  const capLbl=MESES[capMo]||'ago';
+  const totalVends=groups.reduce((s,g)=>s+g.rows.length,0);
+  return `
+  <section class="llt-sec">
+    <div class="llt-sec-hd" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <span>⭐ Vendedores estratégicos · ${y1} vs ${y2}</span>
+      <button class="btn ghost" onclick="lltExportEstrategicosExcel()" title="Exportar la tabla de vendedores estratégicos a Excel">📥 Excel estratégicos</button>
+    </div>
+    <div class="rep-note" style="margin-bottom:10px;color:var(--muted)">Vista enfocada en <b>${totalVends} vendedores/puntos de venta estratégicos</b>. Totales anuales (<b>TOTAL AÑO</b>) comparan solo <b>Enero a ${capLbl.toLowerCase()}</b> para que la comparación sea justa (${y2} aún no termina).</div>
+    <div style="margin-bottom:14px"><b>Primer semestre:</b></div>
+    ${bloque([0,1,2,3,4,5],false)}
+    <div style="margin:18px 0 6px"><b>Segundo semestre + TOTAL AÑO:</b></div>
+    ${bloque([6,7,8,9,10,11],true)}
+  </section>`;
+}
+// Export Excel de vendedores estratégicos (reutiliza estructura simple)
+function lltExportEstrategicosExcel(){
+  const agg=lltEstrategicosAgg();
+  const {groups,y1,y2,capMo}=agg;
+  const MESES=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+  const NAVY='0C1F44',GOLD='FACC15';
+  const num=(v,s)=>`<td style="text-align:right;font-family:Consolas;padding:4px 8px;border:1px solid #cfd8e8;${s?'font-weight:bold':''}">${v||'—'}</td>`;
+  const difN=(v)=>{const c=v>0?'#10b981':(v<0?'#ef4444':'#64748b');return `<td style="text-align:right;font-family:Consolas;padding:4px 8px;border:1px solid #cfd8e8;font-weight:bold;color:${c}">${v>0?'+':''}${v||0}</td>`;};
+  const bloqueHtml=(monthsIdx,title,showTot)=>{
+    let hdr='<tr><th rowspan="2" style="background:'+NAVY+';color:'+GOLD+';padding:6px;border:1px solid '+NAVY+';text-align:left">Vendedor</th>';
+    monthsIdx.forEach(m=>{hdr+='<th colspan="3" style="background:'+NAVY+';color:'+GOLD+';padding:6px;border:1px solid '+NAVY+';text-align:center">'+MESES[m]+'</th>';});
+    if(showTot)hdr+='<th colspan="4" style="background:'+GOLD+';color:'+NAVY+';padding:6px;border:1px solid '+GOLD+';text-align:center">TOTAL AÑO</th>';
+    hdr+='</tr><tr>';
+    monthsIdx.forEach(_=>{hdr+='<th style="background:#f4f7fc;padding:4px;border:1px solid #cfd8e8;font-size:10px">'+y1+'</th><th style="background:#f4f7fc;padding:4px;border:1px solid #cfd8e8;font-size:10px">'+y2+'</th><th style="background:#f4f7fc;padding:4px;border:1px solid #cfd8e8;font-size:10px">Dif</th>';});
+    if(showTot)hdr+='<th style="background:#fff8dc;padding:4px;border:1px solid #cfd8e8;font-size:10px">'+y1+'</th><th style="background:#fff8dc;padding:4px;border:1px solid #cfd8e8;font-size:10px">'+y2+'</th><th style="background:#fff8dc;padding:4px;border:1px solid #cfd8e8;font-size:10px">Dif</th><th style="background:#fff8dc;padding:4px;border:1px solid #cfd8e8;font-size:10px">%Crec</th>';
+    hdr+='</tr>';
+    let body='';
+    groups.forEach(g=>{
+      const span=1+monthsIdx.length*3+(showTot?4:0);
+      body+='<tr><td colspan="'+span+'" style="background:'+g.color.replace('#','')+';background:linear-gradient(90deg,'+g.color+' 0,rgba(0,0,0,0) 100%);color:#fff;padding:6px 12px;font-weight:bold;border:1px solid '+NAVY+'">'+esc(g.label)+'</td></tr>';
+      g.rows.forEach(r=>{
+        let cells='<td style="padding:6px 10px;border:1px solid #cfd8e8;font-weight:bold;border-left:3px solid '+g.color+'">'+esc(r.vendor)+'</td>';
+        monthsIdx.forEach(mi=>{const a=r.y1M[mi]||0,b=r.y2M[mi]||0,d=b-a;cells+=num(a)+num(b,true)+difN(d);});
+        if(showTot){cells+=num(r.y1T)+num(r.y2T,true)+difN(r.dif)+difN(r.pct);}
+        body+='<tr>'+cells+'</tr>';
+      });
+    });
+    // Total
+    const all=groups.flatMap(g=>g.rows);
+    let tCells='<td style="padding:6px;border:1px solid '+NAVY+';background:'+NAVY+';color:'+GOLD+';font-weight:bold">TOTAL</td>';
+    monthsIdx.forEach(mi=>{const a=all.reduce((s,r)=>s+(r.y1M[mi]||0),0);const b=all.reduce((s,r)=>s+(r.y2M[mi]||0),0);const d=b-a;tCells+='<td style="padding:6px;border:1px solid '+NAVY+';background:'+NAVY+';color:'+GOLD+';text-align:right;font-family:Consolas;font-weight:bold">'+a+'</td><td style="padding:6px;border:1px solid '+NAVY+';background:'+NAVY+';color:'+GOLD+';text-align:right;font-family:Consolas;font-weight:bold">'+b+'</td><td style="padding:6px;border:1px solid '+NAVY+';background:'+NAVY+';color:'+GOLD+';text-align:right;font-family:Consolas;font-weight:bold">'+(d>0?'+':'')+d+'</td>';});
+    if(showTot){const tY1=all.reduce((s,r)=>s+r.y1T,0),tY2=all.reduce((s,r)=>s+r.y2T,0),tD=tY2-tY1,tP=tY1>0?Math.round(tD/tY1*100):(tY2>0?100:0);tCells+='<td style="padding:6px;border:1px solid '+NAVY+';background:'+GOLD+';color:'+NAVY+';text-align:right;font-family:Consolas;font-weight:bold">'+fmtNum(tY1)+'</td><td style="padding:6px;border:1px solid '+NAVY+';background:'+GOLD+';color:'+NAVY+';text-align:right;font-family:Consolas;font-weight:bold">'+fmtNum(tY2)+'</td><td style="padding:6px;border:1px solid '+NAVY+';background:'+GOLD+';color:'+NAVY+';text-align:right;font-family:Consolas;font-weight:bold">'+(tD>0?'+':'')+fmtNum(tD)+'</td><td style="padding:6px;border:1px solid '+NAVY+';background:'+GOLD+';color:'+NAVY+';text-align:right;font-family:Consolas;font-weight:bold">'+(tP>0?'+':'')+tP+'%</td>';}
+    body+='<tr>'+tCells+'</tr>';
+    return '<h3 style="color:'+NAVY+';font-size:13px;margin:16px 0 6px">'+title+'</h3><table style="border-collapse:collapse;font-size:11px">'+hdr+body+'</table>';
+  };
+  const now=new Date();
+  const html='<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="utf-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Vendedores Estratégicos</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body style="font-family:Arial;padding:14px">'
+    +'<div style="background:linear-gradient(135deg,'+NAVY+',#132c5e);color:#fff;padding:14px 20px;border-radius:4px;margin-bottom:12px"><div style="color:'+GOLD+';font-size:10px;letter-spacing:2px;font-weight:900">GRUPO LLANTERAMA · LLANTAS</div><h1 style="font-size:18px;margin:4px 0;color:#fff">⭐ Vendedores estratégicos · '+y1+' vs '+y2+'</h1><div style="font-size:11px;color:#c9d6ec">Generado '+now.toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'})+'</div></div>'
+    +bloqueHtml([0,1,2,3,4,5],'Primer semestre',false)
+    +bloqueHtml([6,7,8,9,10,11],'Segundo semestre + TOTAL AÑO',true)
+    +'</body></html>';
+  const blob=new Blob(['﻿'+html],{type:'application/vnd.ms-excel'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='vendedores_estrategicos_'+y1+'_vs_'+y2+'_'+new Date().toISOString().slice(0,10)+'.xls';
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},200);
+}
+
 function renderLlantasSucursalTablas(){
   const agg=lltSucursalAgg();
   const {y1,y2,capMo}=agg;
@@ -6443,32 +6665,6 @@ function renderLlantas(){
 
   ${renderLlantasSucursalTablas()}
 
-  <section class="llt-sec">
-    <div class="llt-sec-hd" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
-      <span>📊 Venta por vendedor · mes a mes</span>
-      <button class="btn ghost" onclick="lltExportVendedoresExcel()" title="Exportar la tabla por vendedor (respeta los filtros activos) a Excel">📥 Excel por vendedor</button>
-    </div>
-    <div class="llt-vend-filters">
-      <div class="ctrl"><label>Tienda</label><select class="inp" id="lltVendTienda">${vendTiendaSel}</select></div>
-      <div class="ctrl" style="flex:1;min-width:260px">
-        <label>Vendedores (clic para filtrar · ${nSel>0?nSel+' seleccionado'+(nSel!==1?'s':''):'todos'})</label>
-        <div class="llt-vend-multi">${vendMultiChips||'<span class="muted">Sin vendedores en esta tienda</span>'}</div>
-        ${nSel>0?`<button class="btn ghost" style="margin-top:6px;font-size:11px;padding:4px 10px" onclick="LLT.vendSel=new Set();renderLlantas()">Limpiar selección</button>`:''}
-      </div>
-    </div>
-    <div class="rd-wrap"><div class="rd-tblwrap"><table class="rep-tbl hl-table llt-tbl">
-      <thead>
-        <tr><th class="l stick-col sortable ${on('name')}" data-lltvsort="name" rowspan="2">Vendedor${ar('name')}</th>${monthHeads}</tr>
-        <tr>${subHeads}</tr>
-      </thead>
-      <tbody>
-        <tr class="llt-totrow"><td class="l stick-col"><b>TOTAL</b></td>${totRow}</tr>
-        ${vendorRows||'<tr><td colspan="99" class="empty-state">Sin vendedores con los filtros actuales.</td></tr>'}
-      </tbody>
-    </table></div></div>
-    <div class="rep-note" style="margin-top:10px;color:var(--muted);font-size:11.5px">💡 Agrupado por sucursal (vendedores primero, puntos de venta al final). Al ordenar por una columna o aplicar filtros, se desactiva la agrupación. Los indicadores de abajo también responden a estos filtros.</div>
-  </section>
-
   <section class="llt-sec llt-diag">
     <div class="llt-sec-hd">🔎 Diagnóstico ${LLT.vendor==='ALL'?'global':'de '+esc(LLT.vendor)}</div>
     <div class="llt-diag-box">${diag.map(t=>`<p>${t}</p>`).join('')}</div>
@@ -6493,6 +6689,8 @@ function renderLlantas(){
     <section class="llt-sec"><div class="llt-sec-hd">🔍 Medidas que dejaron de venderse</div>${tblMedPerd}</section>
     <section class="llt-sec"><div class="llt-sec-hd">🆕 Medidas nuevas</div>${tblMedNue}</section>
   </div>
+
+  ${renderLlantasEstrategicosTablas()}
   `;
 }
 
