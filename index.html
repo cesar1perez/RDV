@@ -1034,6 +1034,14 @@ tr.deta-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--lin
 .llt-vend-chip.on{background:linear-gradient(135deg,var(--accent),#ffdf6b);color:var(--navy);border-color:transparent}
 :root[data-theme="light"] .llt-vend-chip.on{color:#0c1f44}
 .llt-vendtienda{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:9px;font-size:9.5px;font-weight:800;background:rgba(148,163,184,.2);color:var(--muted2);letter-spacing:.4px}
+/* Encabezados de grupo (sucursal) dentro de la tabla "Venta por vendedor" */
+.llt-tbl tr.llt-group-hdr td{background:linear-gradient(90deg,var(--gc) 0,color-mix(in srgb,var(--gc) 15%,transparent) 100%) !important;color:#fff !important;padding:10px 14px !important;border-top:3px solid var(--gc) !important;border-bottom:1px solid var(--gc) !important;text-align:left !important;font-size:12.5px}
+.llt-tbl tr.llt-group-hdr b{color:#fff;font-size:13px;letter-spacing:.3px}
+.llt-grp-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#fff;margin-right:8px;vertical-align:middle;box-shadow:0 0 0 3px rgba(255,255,255,.2)}
+.llt-grp-stats{margin-left:12px;font-size:11px;font-weight:600;opacity:.95;font-family:'IBM Plex Mono'}
+.llt-tbl tr.llt-subgrp td{background:rgba(148,163,184,.1) !important;color:var(--muted) !important;padding:5px 14px !important;text-align:left !important;font-size:10.5px;border-top:1px dashed var(--line2);text-transform:uppercase;letter-spacing:.6px;font-weight:800}
+.llt-subgrp-lbl{opacity:.8}
+:root[data-theme="light"] .llt-tbl tr.llt-group-hdr b{color:#fff}
 .llt-trend-btn{background:linear-gradient(135deg,rgba(58,166,255,.15),rgba(58,166,255,.05));border-color:rgba(58,166,255,.4);color:var(--cyan);font-weight:700}
 .llt-trend-btn:hover{background:rgba(58,166,255,.25);border-color:var(--cyan)}
 :root[data-theme="light"] .llt-trend-btn{color:#1462a8;border-color:#1462a8}
@@ -6288,7 +6296,9 @@ function renderLlantas(){
   }
   subHeads+=`<th class="sortable ${on('y1T')}" data-lltvsort="y1T">${y1}${ar('y1T')}</th><th class="sortable ${on('y2T')}" data-lltvsort="y2T">${y2}${ar('y2T')}</th><th class="sortable ${on('dif')}" data-lltvsort="dif">Dif${ar('dif')}</th>`;
 
-  const vendorRows=vSorted.map(v=>{
+  // Render de una fila vendedor
+  const colSpanTotal = 1 + (_curM+1)*3 + 3; // Vendedor + meses*3 + total*3
+  const vendorRowHtml=(v)=>{
     let cells='';
     for(let i=0;i<=_curM;i++){
       const a=v.y1M[i]||0,b=v.y2M[i]||0,d=b-a;
@@ -6297,9 +6307,44 @@ function renderLlantas(){
     }
     const tdc=v.dif>0?'up':(v.dif<0?'down':'flat');
     cells+=`<td class="num muted strong">${fmtNum(v.y1T)}</td><td class="num strong">${fmtNum(v.y2T)}</td><td class="num strong ${tdc}">${v.dif>0?'+':''}${fmtNum(v.dif)}</td>`;
-    const tiendaBadge=`<span class="llt-vendtienda" title="${esc(TIENDA_LBL[tiendaOf(v.vendor)]||'')}">${tiendaOf(v.vendor)==='poza'?'PZ':(tiendaOf(v.vendor)==='autoelectrica'?'AE':'LL')}</span>`;
-    return `<tr><td class="l stick-col"><b>${esc(v.vendor)}</b> ${tiendaBadge}</td>${cells}</tr>`;
-  }).join('');
+    return `<tr><td class="l stick-col"><b>${esc(v.vendor)}</b></td>${cells}</tr>`;
+  };
+  // Modo agrupado por sucursal — primero PERSONAS luego VENTA PISO. Default cuando no hay sort "manual".
+  // Sort manual (por mes/total/nombre) desactiva el agrupamiento y usa el orden pedido.
+  const isDefaultSort = (LLT.vendSort==='y2T');
+  const isPisoLike=(name)=>{
+    const n=String(name||'').toUpperCase();
+    return /VENTA\s*PISO|GARANTIAS|CUENTAS\s*NACIONALES|REDES\s*SOCIALES|COLOSIO/.test(n);
+  };
+  let vendorRows='';
+  if(isDefaultSort && LLT.vendTienda==='ALL' && LLT.vendSel.size===0){
+    // Agrupar por sucursal, personas primero, piso al final
+    const groups=[
+      {id:'llanterama',label:'🏪 Llanterama Tulancingo',color:'#3b82f6'},
+      {id:'autoelectrica',label:'⚡ Autoeléctrica Roma',color:'#06b6d4'},
+      {id:'poza',label:'🏪 Llanterama Poza Rica',color:'#ef4444'}
+    ];
+    groups.forEach(g=>{
+      const inG=vSorted.filter(v=>tiendaOf(v.vendor)===g.id);
+      if(!inG.length)return;
+      // Personas vs puntos de venta
+      const personas=inG.filter(v=>!isPisoLike(v.vendor)).sort((a,b)=>b.y2T-a.y2T);
+      const piso=inG.filter(v=>isPisoLike(v.vendor)).sort((a,b)=>b.y2T-a.y2T);
+      // Subtotal de la sucursal
+      const sY1=inG.reduce((s,v)=>s+v.y1T,0), sY2=inG.reduce((s,v)=>s+v.y2T,0), sD=sY2-sY1;
+      const sDc=sD>0?'up':(sD<0?'down':'flat');
+      const sPct=sY1>0?Math.round(sD/sY1*100):(sY2>0?100:0);
+      vendorRows+=`<tr class="llt-group-hdr" style="--gc:${g.color}"><td colspan="${colSpanTotal}" class="l stick-col-grp"><span class="llt-grp-dot"></span><b>${g.label}</b> <span class="llt-grp-stats">${inG.length} vendedor${inG.length!==1?'es':''} · ${y1}: ${fmtNum(sY1)} · ${y2}: ${fmtNum(sY2)} · ${sD>0?'+':''}${fmtNum(sD)} (${sPct>0?'+':''}${sPct}%)</span></td></tr>`;
+      personas.forEach(v=>{vendorRows+=vendorRowHtml(v);});
+      if(piso.length){
+        vendorRows+=`<tr class="llt-subgrp"><td colspan="${colSpanTotal}" class="l stick-col-grp"><span class="llt-subgrp-lbl">Puntos de venta (${piso.length})</span></td></tr>`;
+        piso.forEach(v=>{vendorRows+=vendorRowHtml(v);});
+      }
+    });
+  } else {
+    // Orden sortable manual o filtros activos — sin agrupar
+    vendorRows=vSorted.map(vendorRowHtml).join('');
+  }
 
   // Fila total (de los vendedores filtrados, no de todos)
   const subTotY1=vendorsF.reduce((s,v)=>s+v.y1T,0);
@@ -6398,6 +6443,32 @@ function renderLlantas(){
 
   ${renderLlantasSucursalTablas()}
 
+  <section class="llt-sec">
+    <div class="llt-sec-hd" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <span>📊 Venta por vendedor · mes a mes</span>
+      <button class="btn ghost" onclick="lltExportVendedoresExcel()" title="Exportar la tabla por vendedor (respeta los filtros activos) a Excel">📥 Excel por vendedor</button>
+    </div>
+    <div class="llt-vend-filters">
+      <div class="ctrl"><label>Tienda</label><select class="inp" id="lltVendTienda">${vendTiendaSel}</select></div>
+      <div class="ctrl" style="flex:1;min-width:260px">
+        <label>Vendedores (clic para filtrar · ${nSel>0?nSel+' seleccionado'+(nSel!==1?'s':''):'todos'})</label>
+        <div class="llt-vend-multi">${vendMultiChips||'<span class="muted">Sin vendedores en esta tienda</span>'}</div>
+        ${nSel>0?`<button class="btn ghost" style="margin-top:6px;font-size:11px;padding:4px 10px" onclick="LLT.vendSel=new Set();renderLlantas()">Limpiar selección</button>`:''}
+      </div>
+    </div>
+    <div class="rd-wrap"><div class="rd-tblwrap"><table class="rep-tbl hl-table llt-tbl">
+      <thead>
+        <tr><th class="l stick-col sortable ${on('name')}" data-lltvsort="name" rowspan="2">Vendedor${ar('name')}</th>${monthHeads}</tr>
+        <tr>${subHeads}</tr>
+      </thead>
+      <tbody>
+        <tr class="llt-totrow"><td class="l stick-col"><b>TOTAL</b></td>${totRow}</tr>
+        ${vendorRows||'<tr><td colspan="99" class="empty-state">Sin vendedores con los filtros actuales.</td></tr>'}
+      </tbody>
+    </table></div></div>
+    <div class="rep-note" style="margin-top:10px;color:var(--muted);font-size:11.5px">💡 Agrupado por sucursal (vendedores primero, puntos de venta al final). Al ordenar por una columna o aplicar filtros, se desactiva la agrupación. Los indicadores de abajo también responden a estos filtros.</div>
+  </section>
+
   <section class="llt-sec llt-diag">
     <div class="llt-sec-hd">🔎 Diagnóstico ${LLT.vendor==='ALL'?'global':'de '+esc(LLT.vendor)}</div>
     <div class="llt-diag-box">${diag.map(t=>`<p>${t}</p>`).join('')}</div>
@@ -6422,32 +6493,6 @@ function renderLlantas(){
     <section class="llt-sec"><div class="llt-sec-hd">🔍 Medidas que dejaron de venderse</div>${tblMedPerd}</section>
     <section class="llt-sec"><div class="llt-sec-hd">🆕 Medidas nuevas</div>${tblMedNue}</section>
   </div>
-
-  <section class="llt-sec">
-    <div class="llt-sec-hd" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
-      <span>📊 Venta por vendedor · mes a mes</span>
-      <button class="btn ghost" onclick="lltExportVendedoresExcel()" title="Exportar la tabla por vendedor (respeta los filtros activos) a Excel">📥 Excel por vendedor</button>
-    </div>
-    <div class="llt-vend-filters">
-      <div class="ctrl"><label>Tienda</label><select class="inp" id="lltVendTienda">${vendTiendaSel}</select></div>
-      <div class="ctrl" style="flex:1;min-width:260px">
-        <label>Vendedores (clic para filtrar · ${nSel>0?nSel+' seleccionado'+(nSel!==1?'s':''):'todos'})</label>
-        <div class="llt-vend-multi">${vendMultiChips||'<span class="muted">Sin vendedores en esta tienda</span>'}</div>
-        ${nSel>0?`<button class="btn ghost" style="margin-top:6px;font-size:11px;padding:4px 10px" onclick="LLT.vendSel=new Set();renderLlantas()">Limpiar selección</button>`:''}
-      </div>
-    </div>
-    <div class="rd-wrap"><div class="rd-tblwrap"><table class="rep-tbl hl-table llt-tbl">
-      <thead>
-        <tr><th class="l stick-col sortable ${on('name')}" data-lltvsort="name" rowspan="2">Vendedor${ar('name')}</th>${monthHeads}</tr>
-        <tr>${subHeads}</tr>
-      </thead>
-      <tbody>
-        <tr class="llt-totrow"><td class="l stick-col"><b>TOTAL</b></td>${totRow}</tr>
-        ${vendorRows||'<tr><td colspan="99" class="empty-state">Sin vendedores con los filtros actuales.</td></tr>'}
-      </tbody>
-    </table></div></div>
-    <div class="rep-note" style="margin-top:10px;color:var(--muted);font-size:11.5px">💡 Los indicadores de arriba también responden a estos filtros.</div>
-  </section>
   `;
 }
 
