@@ -1108,6 +1108,15 @@ tr.deta-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--lin
 :root[data-theme="dark"] .llt-estrat-row[data-grp="poza-pv"] td.stick-col{color:#fdba74 !important;background:rgba(249,115,22,.18) !important}
 .llt-nodata td{opacity:.55}
 .llt-nodata-tag{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:10px;background:var(--bg2);color:var(--muted);font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border:1px solid var(--line2)}
+/* Overlay "procesando" para evitar la sensación de freeze */
+.llt-render-overlay{position:fixed;top:16px;right:16px;z-index:9999;animation:lltOvFade .2s ease-out}
+.llt-render-card{background:var(--kpi-bg);border:1px solid var(--line2);border-left:4px solid var(--amber);border-radius:10px;padding:12px 16px;display:flex;gap:12px;align-items:center;box-shadow:0 8px 24px rgba(0,0,0,.18);min-width:260px}
+.llt-render-spin{width:22px;height:22px;border:3px solid var(--line2);border-top-color:var(--amber);border-radius:50%;animation:lltOvSpin .8s linear infinite;flex-shrink:0}
+.llt-render-card b{color:var(--txt);font-size:12.5px;display:block;letter-spacing:.3px}
+.llt-render-sub{color:var(--muted);font-size:10.5px;margin-top:2px}
+@keyframes lltOvSpin{to{transform:rotate(360deg)}}
+@keyframes lltOvFade{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+#repBody.llt-processing{opacity:.55;pointer-events:none;filter:blur(.5px);transition:opacity .15s}
 .llt-drill{cursor:pointer;transition:.12s}
 .llt-drill:hover{background:rgba(255,210,30,.15) !important;color:var(--accent) !important}
 :root[data-theme="light"] .llt-drill:hover{color:var(--accent-ink) !important}
@@ -6208,7 +6217,8 @@ const LLT_ESTRATEG=[
   ]},
   {label:'POZA RICA · puntos de venta', color:'#f97316', items:[
     {name:'VENTA PISO NARANJOS'}, // consolidado con el antes "VENTA PISO OUTLET"
-    {name:'VENTA PISO CERRO AZUL'}
+    {name:'VENTA PISO CERRO AZUL'},
+    {name:'VENTA PISO ALAMO'}
   ]}
 ];
 function lltEstrategicosAgg(){
@@ -6608,6 +6618,19 @@ function lltOpenTrend(){
   bd.classList.add('open');
 }
 
+function _lltShowRenderOverlay(){
+  if(document.getElementById('lltRenderOverlay'))return;
+  const ov=document.createElement('div');
+  ov.id='lltRenderOverlay';
+  ov.className='llt-render-overlay';
+  ov.innerHTML='<div class="llt-render-card"><div class="llt-render-spin"></div><div><b>Actualizando reporte</b><div class="llt-render-sub">Procesando ventas de llantas…</div></div></div>';
+  document.body.appendChild(ov);
+  const b=document.getElementById('repBody'); if(b)b.classList.add('llt-processing');
+}
+function _lltHideRenderOverlay(){
+  const o=document.getElementById('lltRenderOverlay'); if(o)o.remove();
+  const b=document.getElementById('repBody'); if(b)b.classList.remove('llt-processing');
+}
 function renderLlantas(){
   const body=document.getElementById('repBody');
   if(!DETA_DB||!DETA_DBAE||!DETA_DBPZ){
@@ -6617,6 +6640,18 @@ function renderLlantas(){
     const p2=DETA_DBAE?Promise.resolve():loadDetalleAE();
     const p3=DETA_DBPZ?Promise.resolve():loadDetallePoza();
     Promise.all([p1,p2,p3]).then(()=>{if(REPORT==='llt')renderLlantas();});
+    return;
+  }
+  // UX: ceder al navegador para pintar el overlay ANTES del render pesado,
+  // así el usuario ve "Actualizando reporte..." en vez de pensar que se colgó.
+  if(!window._LLT_YIELDING){
+    window._LLT_YIELDING=true;
+    _lltShowRenderOverlay();
+    // Dos frames + microtask para asegurar que el overlay se pintó
+    requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(()=>{
+      window._LLT_YIELDING=false;
+      try{ renderLlantas(); } finally { _lltHideRenderOverlay(); }
+    },30)));
     return;
   }
   const {arr:vendors,y1,y2}=lltVendorAgg();
