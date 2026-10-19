@@ -7529,7 +7529,12 @@ async function init(){
     grid.innerHTML=`<div class="state" style="grid-column:1/-1"><h3>No se pudieron cargar los datos</h3><p>Si lo ves en una vista previa, <b>descarga el archivo y \u00e1brelo en tu navegador</b>. Verifica tambi\u00e9n que la hoja siga publicada como CSV.</p><div class="err-detail">${esc(LOAD_ERR)}</div><button class="btn" style="margin-top:16px" onclick="init()">Reintentar</button></div>`;
     return;
   }
-  initCutoff(); buildPeriodSelector(); setRoleUI(); paintDataTS(); paintPace(); if(ROLE)goHome(); else showWelcome();
+  initCutoff(); buildPeriodSelector(); setRoleUI(); paintDataTS(); paintPace();
+  // Si el usuario ya navegó mientras cargaban los datos (ej. clic en "Libre acceso" → llantas),
+  // respeta la pantalla actual en vez de forzar goHome/showWelcome y sacarlo del reporte.
+  if(STATE.screen && STATE.screen!=='welcome'){ /* ya navegó, no tocar */ }
+  else if(ROLE==='directivo'||ROLE==='vendedor') goHome();
+  else showWelcome();
 }
 init();
 </script>
