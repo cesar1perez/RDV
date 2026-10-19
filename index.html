@@ -6649,8 +6649,7 @@ function renderLlantas(){
     _lltShowRenderOverlay();
     // Dos frames + microtask para asegurar que el overlay se pintó
     requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(()=>{
-      window._LLT_YIELDING=false;
-      try{ renderLlantas(); } finally { _lltHideRenderOverlay(); }
+      try{ renderLlantas(); } finally { window._LLT_YIELDING=false; _lltHideRenderOverlay(); }
     },30)));
     return;
   }
