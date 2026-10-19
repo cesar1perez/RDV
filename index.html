@@ -1117,6 +1117,9 @@ tr.deta-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--lin
 @keyframes lltOvSpin{to{transform:rotate(360deg)}}
 @keyframes lltOvFade{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
 #repBody.llt-processing{opacity:.55;pointer-events:none;filter:blur(.5px);transition:opacity .15s}
+/* Fila-encabezado repetida dentro del tbody antes de cada grupo */
+.llt-tbl-suc tr.llt-rephd-top th{background:linear-gradient(135deg,var(--navy),var(--navy2)) !important;color:var(--accent) !important;font-size:11px;padding:5px 4px;border-top:3px double var(--accent) !important}
+.llt-tbl-suc tr.llt-rephd-sub th{background:var(--bg2) !important;color:var(--muted) !important;font-size:10px;padding:3px 4px;font-weight:700;letter-spacing:.3px}
 .llt-drill{cursor:pointer;transition:.12s}
 .llt-drill:hover{background:rgba(255,210,30,.15) !important;color:var(--accent) !important}
 :root[data-theme="light"] .llt-drill:hover{color:var(--accent-ink) !important}
@@ -1636,7 +1639,8 @@ tr.chk-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--line
 .wl-title{font-family:'Archivo';font-weight:900;font-size:clamp(30px,6vw,52px);letter-spacing:-1px;line-height:1.02}
 .wl-title .amp{color:var(--cyan)}
 .wl-sub{color:var(--muted);font-size:15px;margin-top:12px;max-width:680px;margin-left:auto;margin-right:auto}
-.wl-access{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:34px auto 0;max-width:680px}
+.wl-access{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin:34px auto 0;max-width:1020px}
+@media(max-width:900px){.wl-access{grid-template-columns:1fr 1fr;max-width:680px}}
 .wl-card{border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(160deg,var(--panel),var(--bg2));padding:26px;cursor:pointer;transition:.3s;text-align:left;position:relative;overflow:hidden}
 .wl-card:hover{transform:translateY(-5px);border-color:var(--c)}
 .wl-card .ic{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;background:rgba(255,255,255,.05);border:1px solid var(--line2);margin-bottom:14px;color:var(--c)}
@@ -1645,6 +1649,12 @@ tr.chk-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--line
 .wl-card p{font-size:13px;color:var(--muted);margin-top:6px}
 .wl-card .go{margin-top:16px;font-weight:800;font-size:13px;color:var(--c);display:flex;align-items:center;gap:7px}
 .wl-card .go svg{width:16px;height:16px}
+.wl-card .wl-badge{position:absolute;top:12px;right:12px;background:rgba(16,185,129,.12);color:#047857;font-size:9.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;padding:3px 8px;border-radius:10px;border:1px solid rgba(16,185,129,.25)}
+:root[data-theme="dark"] .wl-card .wl-badge{color:#6ee7b7;background:rgba(16,185,129,.18)}
+.llt-pub-backbar{position:sticky;top:0;z-index:50;background:var(--panel);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.llt-pub-backbar .btn{font-size:12px}
+.llt-pub-backbar .lp-tag{display:inline-flex;gap:7px;align-items:center;font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.4px;text-transform:uppercase}
+.llt-pub-backbar .lp-tag svg{width:14px;height:14px;color:#10b981}
 .wl-priv{margin-top:34px;border:1px solid var(--line);border-radius:var(--radius);background:rgba(255,255,255,.02);padding:22px 24px;text-align:left}
 .wl-priv h4{font-family:'Archivo';font-weight:800;font-size:12px;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent);margin-bottom:10px;display:flex;align-items:center;gap:9px}
 .wl-priv h4 svg{width:16px;height:16px}
@@ -1776,6 +1786,13 @@ tr.chk-det td{background:rgba(255,210,30,.04);border-bottom:2px solid var(--line
           <h3 class="display">Acceso vendedores</h3>
           <p>Cada vendedor consulta únicamente su propia cartera con su contraseña personal.</p>
           <div class="go">Entrar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        </div>
+        <div class="wl-card" id="accLlt" style="--c:#10b981">
+          <div class="wl-badge">Libre acceso</div>
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.2"/><path d="M12 3v4.8M12 16.2V21M3 12h4.8M16.2 12H21M5.6 5.6l3.4 3.4M15 15l3.4 3.4M18.4 5.6L15 9M9 15l-3.4 3.4"/></svg></div>
+          <h3 class="display">Reporte general de llantas</h3>
+          <p>Venta de llantas 2025 vs 2026 por sucursal, vendedor y cliente. Las 3 razones sociales en un solo lugar.</p>
+          <div class="go">Abrir reporte <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
         </div>
       </div>
       <div class="wl-priv">
@@ -4946,6 +4963,7 @@ function resolveVendorByCode(codVend,almacen,orgId){
       return null;
     }
     if(cv==='001'){
+      if(alm==='001')return 'VENTA PISO COLOSIO';
       if(alm==='003')return 'VENTA PISO SAHAG\u00daN';
       if(alm==='005')return 'VENTA PISO TIZAYUCA';
       return null;
@@ -6401,6 +6419,7 @@ function lltVendedoresPorTiendaAgg(){
   const curM=new Date().getMonth();
   const capMo=Math.max(0,curM-1);
   vendors.forEach(v=>{
+    if(v.vendor==='S/I'||!v.vendor)return; // excluir vendedores no identificados
     const org=pickOrg(v.vendor);
     let s1=0,s2=0; for(let i=0;i<=capMo;i++){s1+=v.y1M[i]||0;s2+=v.y2M[i]||0;}
     const dif=s2-s1;
@@ -6468,13 +6487,19 @@ function renderLlantasVendedoresMesTablas(){
       }
       return `<tr class="llt-totrow"><td class="l stick-col"><b>TOTAL GENERAL</b></td>${cells}</tr>`;
     };
+    // Fila-encabezado repetible (ancho igual al thead porque es la misma tabla)
+    const repHdr=`<tr class="llt-rephd-top">${headTop}</tr><tr class="llt-rephd-sub">${headSub}</tr>`;
     let bodyRows='';
+    let firstPrinted=false;
     groups.forEach(g=>{
       if(!g.rows.length)return;
       const colSpan=1+monthsIdx.length*3+(showTotalAnio?4:0);
+      // Repetir encabezado antes de cada grupo (salvo el primero, que ya está en el thead)
+      if(firstPrinted) bodyRows+=repHdr;
       bodyRows+=`<tr class="llt-estrat-grp" data-grp="${g.grpKey}" style="--gc:${g.color}"><td colspan="${colSpan}" class="l"><span class="llt-grp-dot"></span><b>${esc(g.label)}</b> · ${g.rows.length} vendedores</td></tr>`;
       g.rows.forEach(r=>{bodyRows+=rowFor(r,g.color,g.grpKey);});
       bodyRows+=subRow(g);
+      firstPrinted=true;
     });
     bodyRows+=grandRow();
     return `<div class="rd-wrap"><div class="rd-tblwrap"><table class="rep-tbl hl-table llt-tbl llt-tbl-suc llt-tbl-estrat">
@@ -7409,6 +7434,33 @@ document.getElementById('zoomIn').addEventListener('click',()=>{const cur=parseF
 document.getElementById('zoomOut').addEventListener('click',()=>{const cur=parseFloat(document.body.style.zoom||'1');applyZoom(Math.round((cur-0.1)*10)/10);});
 document.getElementById('accDir').addEventListener('click',()=>openAuth('Acceso directivos','Ingresa la contrase\u00f1a directiva para ver todo.',v=>v===passKey(DIRECTIVO_PASS),()=>{ROLE='directivo';afterLogin();}));
 document.getElementById('accVen').addEventListener('click',()=>{ROLE='vendedor';afterLogin();});
+// Libre acceso — Reporte general de llantas (sin password)
+function goLlantasPublic(){
+  ROLE='libre';
+  REPORT='llt';
+  UNLOCKED.clear();
+  setRoleUI();
+  showScreen('rep');
+  const rb=document.getElementById('repBar'); if(rb)rb.style.display='none';
+  const bb=document.querySelector('#screen-rep > .back-btn'); if(bb)bb.style.display='none';
+  // Barra superior "Volver al inicio" solo en modo libre
+  const bodyEl=document.getElementById('repBody');
+  if(bodyEl&&!document.getElementById('lltPubBar')){
+    const bar=document.createElement('div');
+    bar.id='lltPubBar';
+    bar.className='llt-pub-backbar';
+    bar.innerHTML='<button class="btn ghost" onclick="goBackFromPublicLlt()">← Volver al inicio</button><span class="lp-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.2"/></svg>Libre acceso · Reporte general de llantas</span>';
+    bodyEl.parentNode.insertBefore(bar,bodyEl);
+  }
+  renderLlantas();
+}
+function goBackFromPublicLlt(){
+  const bar=document.getElementById('lltPubBar'); if(bar)bar.remove();
+  const rb=document.getElementById('repBar'); if(rb)rb.style.display='';
+  const bb=document.querySelector('#screen-rep > .back-btn'); if(bb)bb.style.display='';
+  showWelcome();
+}
+document.getElementById('accLlt').addEventListener('click',goLlantasPublic);
 // accStrat removido de la portada — sigue accesible desde Reportes → "Recuperación Acumulador Julio · concluida"
 document.getElementById('stratBack').addEventListener('click',()=>{if(ROLE)goHome();else showWelcome();});
 document.getElementById('logoutBtn').addEventListener('click',logout);
