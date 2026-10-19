@@ -7530,9 +7530,9 @@ async function init(){
     return;
   }
   initCutoff(); buildPeriodSelector(); setRoleUI(); paintDataTS(); paintPace();
-  // Si el usuario ya navegó mientras cargaban los datos (ej. clic en "Libre acceso" → llantas),
-  // respeta la pantalla actual en vez de forzar goHome/showWelcome y sacarlo del reporte.
-  if(STATE.screen && STATE.screen!=='welcome'){ /* ya navegó, no tocar */ }
+  // Solo proteger el modo "libre acceso" (reporte de llantas público) para que no lo saque al home;
+  // directivos y vendedores sí re-renderizan al terminar la carga para que la data llegue completa.
+  if(ROLE==='libre' && STATE.screen==='rep'){ /* libre acceso a llantas, no tocar */ }
   else if(ROLE==='directivo'||ROLE==='vendedor') goHome();
   else showWelcome();
 }
